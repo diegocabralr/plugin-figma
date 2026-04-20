@@ -25,10 +25,9 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
 
 /* animations */
 @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-@keyframes breathe{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.94);opacity:.7}}
-@keyframes ringFade{0%,100%{opacity:.18}50%{opacity:.06}}
-@keyframes numPop{0%,100%{transform:scale(1)}40%{transform:scale(1.1)}}
 @keyframes shimPulse{0%,100%{opacity:1}50%{opacity:.5}}
+/* barra de progresso — easing spring para sensação de peso */
+@keyframes barEnter{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
 
 /* skeleton */
 .skel{background:var(--r2);border-radius:3px;animation:shimPulse 1.4s ease-in-out infinite}
@@ -48,30 +47,43 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
 .btn-scan{width:100%;height:38px;background:var(--ink);color:#fff;border:none;border-radius:var(--rad);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:opacity .15s}
 .btn-scan:hover{opacity:.8}
 
-/* loading — círculo respirante (igual ao scan) */
-#view-loading{padding:32px 16px 24px;display:flex;flex-direction:column;align-items:center;gap:0}
-.orb-wrap{position:relative;width:72px;height:72px;margin-bottom:20px}
-.orb-ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--ink);animation:ringFade 2.4s ease-in-out infinite}
-.orb-dot{position:absolute;inset:10px;border-radius:50%;background:var(--ink);animation:breathe 2.4s ease-in-out infinite}
-.orb-count{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--ink);line-height:1;text-align:center;margin-bottom:4px}
-.orb-count.pop{animation:numPop .18s ease}
-.orb-unit{font-family:var(--mono);font-size:9px;color:var(--i4);letter-spacing:.08em;text-transform:uppercase;text-align:center;margin-bottom:20px}
-.orb-page{font-family:var(--mono);font-size:10px;color:var(--i3);text-align:center;min-height:15px;margin-bottom:14px;width:100%}
-.orb-page.in{animation:fadeUp .22s cubic-bezier(.22,1,.36,1) forwards}
-.orb-log{width:100%;height:44px;overflow:hidden;position:relative}
-.orb-log::before{content:'';position:absolute;top:0;left:0;right:0;height:16px;background:linear-gradient(to bottom,var(--surf),transparent);z-index:1;pointer-events:none}
-.orb-log-inner{display:flex;flex-direction:column-reverse;gap:2px}
-.orb-le{font-family:var(--mono);font-size:9px;color:var(--i4);animation:fadeUp .15s ease;white-space:nowrap}
-.orb-le.f{color:var(--i3)}
+/* splash — abertura nativa do plugin */
+#view-splash{padding:40px 16px 36px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.splash-name{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.splash-bar-wrap{width:100%;display:flex;flex-direction:column;gap:5px}
+.splash-bar-lbl{font-family:var(--mono);font-size:9px;color:var(--i4);letter-spacing:.05em}
+.splash-track{height:2px;background:var(--r2);border-radius:1px;overflow:hidden}
+.splash-fill{height:100%;background:var(--ink);border-radius:1px;width:0%;transition:width .4s cubic-bezier(.22,1,.36,1)}
 
-/* progress — mesmo círculo do loading */
-#view-progress{padding:32px 16px 0;display:none;flex-direction:column;align-items:center;gap:0}
-.prog-bar-wrap{width:100%;margin-bottom:16px}
+/* loading — somente barra */
+#view-loading{padding:28px 16px 20px;display:flex;flex-direction:column;gap:0}
+.ld-status{font-family:var(--mono);font-size:10px;color:var(--i3);margin-bottom:18px;min-height:15px}
+.ld-status.in{animation:fadeUp .22s cubic-bezier(.22,1,.36,1) forwards}
+.ld-count{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--ink);line-height:1;margin-bottom:3px}
+.ld-count.pop{transition:transform .12s cubic-bezier(.22,1,.36,1);transform:scale(1.06)}
+.ld-unit{font-family:var(--mono);font-size:9px;color:var(--i4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
+.ld-bar-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.ld-bar-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--i4)}
+.ld-bar-frac{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--ink)}
+.ld-track{height:2px;background:var(--rule);border-radius:1px;overflow:hidden;margin-bottom:14px}
+.ld-fill{height:100%;background:var(--ink);border-radius:1px;width:0%;transition:width .5s cubic-bezier(.22,1,.36,1)}
+.ld-log{height:44px;overflow:hidden;position:relative}
+.ld-log::before{content:'';position:absolute;top:0;left:0;right:0;height:14px;background:linear-gradient(to bottom,var(--surf),transparent);z-index:1;pointer-events:none}
+.ld-log-inner{display:flex;flex-direction:column-reverse;gap:2px}
+.ld-le{font-family:var(--mono);font-size:9px;color:var(--i4);animation:fadeUp .15s ease;white-space:nowrap}
+.ld-le.f{color:var(--i3)}
+
+/* progress — barra limpa, sem círculo */
+#view-progress{padding:28px 16px 0;display:none;flex-direction:column;gap:0}
+.prog-lbl{font-family:var(--mono);font-size:10px;color:var(--i3);margin-bottom:18px}
+.prog-count{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--ink);line-height:1;margin-bottom:3px;transition:transform .1s cubic-bezier(.22,1,.36,1)}
+.prog-count.pop{transform:scale(1.06)}
+.prog-unit{font-family:var(--mono);font-size:9px;color:var(--i4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
 .prog-bar-meta{display:flex;justify-content:space-between;margin-bottom:5px}
 .prog-bar-pct{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--ink)}
 .prog-bar-frac{font-family:var(--mono);font-size:9px;color:var(--i4)}
 .prog-track{height:2px;background:var(--rule);border-radius:1px;overflow:hidden}
-.prog-fill{height:100%;background:var(--ink);border-radius:1px;width:0%;transition:width .3s cubic-bezier(.4,0,.2,1)}
+.prog-fill{height:100%;background:var(--ink);border-radius:1px;width:0%;transition:width .3s cubic-bezier(.22,1,.36,1)}
 
 /* summary */
 .summary{padding:10px 16px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -182,16 +194,26 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
   <button class="btn-scan" onclick="startScan()" type="button">Escanear página</button>
 </div>
 
-<!-- loading -->
-<div id="view-loading" style="display:none">
-  <div class="orb-wrap">
-    <div class="orb-ring"></div>
-    <div class="orb-dot"></div>
+<!-- splash — abertura nativa -->
+<div id="view-splash" style="display:none">
+  <span class="splash-name">Optimize Toolkit</span>
+  <div class="splash-bar-wrap">
+    <span class="splash-bar-lbl" id="splash-lbl">Iniciando…</span>
+    <div class="splash-track"><div class="splash-fill" id="splash-fill"></div></div>
   </div>
-  <div class="orb-count" id="ld-num">0</div>
-  <div class="orb-unit" id="ld-unit">instâncias encontradas</div>
-  <div class="orb-page" id="ld-name">—</div>
-  <div class="orb-log"><div class="orb-log-inner" id="ld-log"></div></div>
+</div>
+
+<!-- loading — somente barra -->
+<div id="view-loading" style="display:none">
+  <div class="ld-status" id="ld-name">—</div>
+  <div class="ld-count" id="ld-num">0</div>
+  <div class="ld-unit" id="ld-unit">instâncias encontradas</div>
+  <div class="ld-bar-meta">
+    <span class="ld-bar-lbl">Escaneando</span>
+    <span class="ld-bar-frac" id="ld-frac">—</span>
+  </div>
+  <div class="ld-track"><div class="ld-fill" id="ld-fill"></div></div>
+  <div class="ld-log"><div class="ld-log-inner" id="ld-log"></div></div>
 </div>
 
 <!-- skeleton -->
@@ -226,15 +248,11 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
   </div>
 </div>
 
-<!-- progress — mesmo orb do loading -->
+<!-- progress — somente barra -->
 <div id="view-progress">
-  <div class="orb-wrap">
-    <div class="orb-ring"></div>
-    <div class="orb-dot"></div>
-  </div>
-  <div class="orb-count" id="prog-count">0</div>
-  <div class="orb-unit" id="prog-unit">processados</div>
-  <div class="orb-page" id="prog-page">—</div>
+  <div class="prog-lbl" id="prog-page">Processando…</div>
+  <div class="prog-count" id="prog-count">0</div>
+  <div class="prog-unit" id="prog-unit">processados</div>
   <div style="width:100%;margin-bottom:16px">
     <div class="prog-bar-meta">
       <span class="prog-bar-pct" id="prog-pct">0%</span>
@@ -283,7 +301,8 @@ var _memBaseline = 0;
 var _memCurrent  = 0;
 var _totalSaved  = 0;
 var _hiddenCount = 0;   // layers ocultas encontradas no último scan
-var VIEWS = ['view-idle','view-loading','view-skeleton','view-list','view-progress','view-result'];
+var VIEWS = ['view-splash','view-idle','view-loading','view-skeleton','view-list','view-progress','view-result'];
+var _cache = { comp: null, hidden: null }; // cache por aba — evita re-scan desnecessário
 
 function $(id){ return document.getElementById(id); }
 
@@ -291,6 +310,26 @@ function showOnly(id){
   VIEWS.forEach(function(v){ $(v).style.display='none'; });
   $(id).style.display = (id==='view-list') ? 'block' : 'flex';
   $('tabs').style.display = (id==='view-list') ? 'flex' : 'none';
+}
+/* splash de abertura — roda uma vez, anima a barra de 0→100% em ~1.2s */
+function showSplash(onReady){
+  showOnly('view-splash');
+  var fill = $('splash-fill');
+  var msgs = ['Carregando plugin…','Conectando ao documento…','Pronto.'];
+  var mi = 0;
+  var steps = [0, 40, 75, 100];
+  var si = 0;
+  function step(){
+    si++;
+    if(si < steps.length){
+      fill.style.width = steps[si] + '%';
+      $('splash-lbl').textContent = msgs[Math.min(mi++, msgs.length-1)];
+      setTimeout(step, si === steps.length-1 ? 200 : 350 + Math.random()*150);
+    } else {
+      setTimeout(onReady, 100);
+    }
+  }
+  setTimeout(step, 80);
 }
 function showList(){
   VIEWS.forEach(function(v){ $(v).style.display='none'; });
@@ -334,6 +373,7 @@ function addHistory(action, done, hiddenDone, memAfter, memBefore){
 
   var saved = memBefore > 0 && memAfter ? Math.max(0, memBefore - memAfter.pageKb) : 0;
   var sizeNow = memAfter ? fmtSize(memAfter.pageKb) : '—';
+  var savedPct = memBefore > 0 && saved > 0 ? Math.round(saved / memBefore * 100) : 0;
 
   var empty = $('hist-empty');
   if(empty) empty.style.display = 'none';
@@ -345,7 +385,10 @@ function addHistory(action, done, hiddenDone, memAfter, memBefore){
   var stats = '';
   if(done > 0)       stats += '<span class="hist-stat"><span>'+done+'</span> '+(action==='detach'?'detach':'layers removidas')+'</span>';
   if(hiddenDone > 0) stats += '<span class="hist-stat"><span>'+hiddenDone+'</span> layers ocultas</span>';
-  var savedTxt = saved > 0 ? '<div class="hist-saved">liberou <span>'+fmtSize(saved)+'</span> · página agora: <span>'+sizeNow+'</span></div>' : '<div class="hist-saved">página: <span>'+sizeNow+'</span></div>';
+  // mostra KB + percentual
+  var savedTxt = saved > 0
+    ? '<div class="hist-saved">liberou <span>'+fmtSize(saved)+'</span>'+(savedPct>0?' <span>(−'+savedPct+'%)</span>':'')+' · agora: <span>'+sizeNow+'</span></div>'
+    : '<div class="hist-saved">página: <span>'+sizeNow+'</span></div>';
 
   item.innerHTML =
     '<div class="hist-top"><span class="hist-badge">'+badge+'</span><span class="hist-time">'+time+'</span></div>'+
@@ -385,11 +428,11 @@ function startWd(){
   _wdLast=Date.now();_wdIdx=0;
   _wdT=setInterval(function(){
     if(Date.now()-_wdLast>2500){
-      var e=document.createElement('div'); e.className='orb-le f';
+      var e=document.createElement('div'); e.className='ld-le f';
       e.textContent='… '+_wdMsgs[_wdIdx++%_wdMsgs.length];
       var inner=$('ld-log'); inner.insertBefore(e,inner.firstChild);
       if(inner.children.length>5) inner.removeChild(inner.lastChild);
-      inner.querySelectorAll('.orb-le').forEach(function(el,i){ el.className=i===0?'orb-le f':'orb-le'; });
+      inner.querySelectorAll('.ld-le').forEach(function(el,i){ el.className=i===0?'ld-le f':'ld-le'; });
     }
   },2500);
 }
@@ -399,25 +442,53 @@ function touchWd(){ _wdLast=Date.now(); }
 /* ── loading progress ── */
 function updateLd(msg){
   var name=msg.pageName||'—', found=msg.foundSoFar||0, isHid=msg.scanType==='hidden';
+  var total=msg.totalPages||1, done=msg.pageIndex||0;
+
+  // status com fadeUp ao mudar
   var ne=$('ld-name');
-  if(ne.textContent!==name){ ne.className='orb-page'; void ne.offsetWidth; ne.textContent=name; ne.className='orb-page in'; }
+  var newTxt = done < total ? 'lendo '+name+'…' : name;
+  if(ne.textContent!==newTxt){
+    ne.className='ld-status'; void ne.offsetWidth;
+    ne.textContent=newTxt; ne.className='ld-status in';
+  }
+
+  // contador
   var ne2=$('ld-num'); ne2.textContent=found;
-  if(found!==_ldPrev&&found>0){ ne2.classList.remove('pop'); void ne2.offsetWidth; ne2.classList.add('pop'); setTimeout(function(){ ne2.classList.remove('pop'); },220); _ldPrev=found; }
+  if(found!==_ldPrev&&found>0){
+    ne2.classList.remove('pop'); void ne2.offsetWidth;
+    ne2.classList.add('pop');
+    setTimeout(function(){ ne2.classList.remove('pop'); },200);
+    _ldPrev=found;
+  }
   $('ld-unit').textContent=isHid?'layers ocultas encontradas':'instâncias encontradas';
-  if(msg.pageIndex>0){
-    var inner=$('ld-log'); var e=document.createElement('div'); e.className='orb-le f';
-    e.textContent='✓ '+name; inner.insertBefore(e,inner.firstChild);
+
+  // barra de progresso por página
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  $('ld-fill').style.width = pct+'%';
+  $('ld-frac').textContent = done+' / '+total;
+
+  // log
+  if(done>0){
+    var inner=$('ld-log'); var e=document.createElement('div'); e.className='ld-le f';
+    e.textContent='✓ '+name+(found>0?' — '+found+' encontrados':'');
+    inner.insertBefore(e,inner.firstChild);
     if(inner.children.length>5) inner.removeChild(inner.lastChild);
-    inner.querySelectorAll('.orb-le').forEach(function(el,i){ el.className=i===0?'orb-le f':'orb-le'; });
+    inner.querySelectorAll('.ld-le').forEach(function(el,i){ el.className=i===0?'ld-le f':'ld-le'; });
   }
 }
 
-/* ── mode ── */
+/* ── mode — usa cache se disponível ── */
 function setMode(m){
   if(mode===m) return;
   mode=m;
   $('tab-comp').className='tab'+(m==='comp'?' on':'');
   $('tab-hidden').className='tab'+(m==='hidden'?' on':'');
+  // se temos cache para esta aba, renderiza direto sem re-scan
+  if(_cache[m]){
+    renderList(_cache[m].items, m==='hidden');
+    return;
+  }
+  // sem cache: mostra skeleton e escaneia
   showSkeleton(function(){
     selectedIds={};_ldPrev=-1;
     parent.postMessage({ pluginMessage:{ type:m==='comp'?'scan':'scan_hidden', scope:'page' } }, '*');
@@ -429,6 +500,7 @@ function startScan(){
   showOnly('view-loading');
   _ldPrev=-1;
   $('ld-name').textContent='—';$('ld-num').textContent='0';$('ld-log').innerHTML='';
+  $('ld-fill').style.width='0%';$('ld-frac').textContent='—';
   $('ld-unit').textContent='instâncias encontradas';
   mode='comp';
   $('tab-comp').className='tab on';$('tab-hidden').className='tab';
@@ -436,7 +508,7 @@ function startScan(){
   parent.postMessage({ pluginMessage:{ type:'scan', scope:'page' } }, '*');
 }
 
-function goScan(){ startScan(); }
+function goScan(){ _cache.comp=null; _cache.hidden=null; startScan(); }
 function goIdle(){ showOnly('view-idle'); }
 
 /* ── render list ── */
@@ -522,6 +594,7 @@ window.onmessage=function(e){
     if(msg.mem) updateMem(msg.mem);
     if(_memBaseline===0 && msg.mem) _memBaseline=msg.mem.pageKb;
     updateHiddenBtn(msg.hiddenCount||0);
+    _cache.comp = { items: msg.items||[] };
     renderList(msg.items||[], false);
     return;
   }
@@ -545,6 +618,7 @@ window.onmessage=function(e){
       }
       return;
     }
+    _cache.hidden = { items: msg.items||[] };
     renderList(msg.items||[], true);
     return;
   }
@@ -574,8 +648,9 @@ window.onmessage=function(e){
   }
 };
 
-// init
+// init — splash de abertura, depois idle
 try{ $('hdr-pg').textContent = figma.currentPage.name; }catch(e){}
+showSplash(function(){ showOnly('view-idle'); });
 </script>
 </body>
 </html>
