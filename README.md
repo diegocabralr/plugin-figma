@@ -1,6 +1,6 @@
 # Optimize Toolkit
 
-Plugin para Figma que ajuda a limpar e enxugar arquivos antes de rodar testes de usabilidade e apresentações no Maze, Lookback ou qualquer outra ferramenta de prototipação.
+Plugin para Figma que ajuda a limpar e enxugar arquivos antes de rodar testes de usabilidade e conceito, seja no Maze ou diretamente no figma app
 
 ---
 
