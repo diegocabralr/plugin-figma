@@ -55,23 +55,42 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
 .splash-track{height:2px;background:var(--r2);border-radius:1px;overflow:hidden}
 .splash-fill{height:100%;background:var(--ink);border-radius:1px;width:0%;transition:width .4s cubic-bezier(.22,1,.36,1)}
 
-/* loading — somente barra */
-#view-loading{padding:28px 16px 20px;display:flex;flex-direction:column;gap:0}
-.ld-status{font-family:var(--mono);font-size:10px;color:var(--i3);margin-bottom:18px;min-height:15px}
-.ld-status.in{animation:fadeUp .22s cubic-bezier(.22,1,.36,1) forwards}
-.ld-count{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--ink);line-height:1;margin-bottom:3px}
-.ld-count.pop{transition:transform .12s cubic-bezier(.22,1,.36,1);transform:scale(1.06)}
-.ld-unit{font-family:var(--mono);font-size:9px;color:var(--i4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
-.ld-bar-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
-.ld-bar-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--i4)}
-.ld-bar-frac{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--ink)}
-.ld-track{height:2px;background:var(--rule);border-radius:1px;overflow:hidden;margin-bottom:14px}
-.ld-fill{height:100%;background:var(--ink);border-radius:1px;width:0%;transition:width .5s cubic-bezier(.22,1,.36,1)}
-.ld-log{height:44px;overflow:hidden;position:relative}
-.ld-log::before{content:'';position:absolute;top:0;left:0;right:0;height:14px;background:linear-gradient(to bottom,var(--surf),transparent);z-index:1;pointer-events:none}
-.ld-log-inner{display:flex;flex-direction:column-reverse;gap:2px}
-.ld-le{font-family:var(--mono);font-size:9px;color:var(--i4);animation:fadeUp .15s ease;white-space:nowrap}
-.ld-le.f{color:var(--i3)}
+/* ── loading progressivo ── */
+#view-loading{padding:32px 16px 24px;display:flex;flex-direction:column;gap:0;position:relative}
+
+/* fase: texto de status com crossfade */
+.ld-phase{font-family:var(--mono);font-size:10px;color:var(--i3);margin-bottom:22px;min-height:14px;position:relative}
+.ld-phase-txt{display:block;animation:fadeUp .3s cubic-bezier(.22,1,.36,1) forwards}
+
+/* contador principal */
+.ld-count{font-family:var(--mono);font-size:36px;font-weight:500;color:var(--ink);line-height:1;margin-bottom:4px;
+  transition:transform .18s cubic-bezier(.22,1,.36,1)}
+.ld-count.pop{transform:scale(1.08)}
+.ld-unit{font-family:var(--mono);font-size:9px;color:var(--i4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px;min-height:12px}
+
+/* barra principal — cresce suavemente */
+.ld-track{height:2px;background:var(--rule);border-radius:1px;overflow:hidden;margin-bottom:20px}
+.ld-fill{height:100%;background:var(--ink);border-radius:1px;width:0%;
+  transition:width .7s cubic-bezier(.22,1,.36,1)}
+
+/* log de etapas concluídas — feed de baixo para cima */
+.ld-log{display:flex;flex-direction:column;gap:5px;min-height:52px}
+.ld-step{display:flex;align-items:center;gap:8px;animation:stepIn .28s cubic-bezier(.22,1,.36,1) forwards;opacity:0}
+@keyframes stepIn{
+  from{opacity:0;transform:translateY(6px)}
+  to  {opacity:1;transform:translateY(0)}
+}
+.ld-step-dot{width:5px;height:5px;border-radius:50%;background:var(--i4);flex-shrink:0;transition:background .2s}
+.ld-step-dot.done{background:var(--ink)}
+.ld-step-txt{font-family:var(--mono);font-size:9px;color:var(--i4);transition:color .2s}
+.ld-step-txt.done{color:var(--i3)}
+.ld-step-time{font-family:var(--mono);font-size:8px;color:var(--i4);margin-left:auto}
+
+/* animação reticências inline */
+@keyframes dotPulse{0%,80%,100%{opacity:.15}40%{opacity:1}}
+.dots span{display:inline-block;animation:dotPulse 1.4s ease-in-out infinite}
+.dots span:nth-child(2){animation-delay:.16s}
+.dots span:nth-child(3){animation-delay:.32s}
 
 /* progress — barra limpa, sem círculo */
 #view-progress{padding:28px 16px 0;display:none;flex-direction:column;gap:0}
@@ -156,6 +175,100 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
 .hist-saved span{color:var(--ink);font-weight:500}
 .hist-empty{font-family:var(--mono);font-size:9px;color:var(--i4);text-align:center;padding:10px 0}
 
+/* ── imagens ── */
+.img-toolbar{padding:7px 16px;border-bottom:1px solid var(--r2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.quality-toggle{display:flex;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.qt-btn{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border:none;background:transparent;color:var(--i3);cursor:pointer;transition:all .12s}
+.qt-btn+.qt-btn{border-left:1px solid var(--rule)}
+.qt-btn.on{background:var(--ink);color:#fff}
+.quality-lbl{font-family:var(--mono);font-size:9px;color:var(--i4);letter-spacing:.04em}
+
+/* item de imagem */
+.ii{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--r2);cursor:pointer;transition:background .1s}
+.ii:hover{background:#f7f7f7}.ii.sel{background:#f2f2f2}.ii:last-child{border-bottom:none}
+.ii-cb{width:14px;height:14px;accent-color:var(--ink);flex-shrink:0;cursor:pointer}
+.ii-thumb{width:36px;height:28px;border-radius:3px;background:var(--r2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
+.ii-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.ii-thumb-ph{width:14px;height:14px;opacity:.3}
+.ii-info{flex:1;min-width:0}
+.ii-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ii-par{font-size:10px;color:var(--i3);margin-top:1px}
+.ii-meta{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.ii-kb{font-family:var(--mono);font-size:10px;font-weight:500}
+.ii-kb.heavy{color:var(--ink)}
+.ii-dim{font-family:var(--mono);font-size:9px;color:var(--i4)}
+/* barra de peso visual */
+.ii-weight{height:3px;border-radius:1px;margin-top:2px;transition:width .3s ease}
+
+/* ── score de prontidão ── */
+.score-bar{border-top:1px solid var(--r2);padding:10px 16px 12px;background:var(--surf);flex-shrink:0;cursor:pointer;transition:background .12s}
+.score-bar:hover{background:#f7f7f7}
+.score-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.score-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--i4)}
+.score-right{display:flex;align-items:center;gap:8px}
+.score-num{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink);letter-spacing:-.01em}
+.score-status{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:3px}
+.score-status.ready{background:#dcfce7;color:#15803d}
+.score-status.warn {background:#fef9c3;color:#a16207}
+.score-status.heavy{background:#ffedd5;color:#c2410c}
+.score-status.crit {background:#fee2e2;color:#b91c1c}
+.score-track{height:3px;background:var(--r2);border-radius:2px;overflow:hidden}
+.score-fill{height:100%;border-radius:2px;transition:width .5s cubic-bezier(.22,1,.36,1),background .4s}
+/* breakdown panel */
+.score-breakdown{overflow:hidden;max-height:0;transition:max-height .3s cubic-bezier(.22,1,.36,1)}
+.score-breakdown.open{max-height:260px}
+.score-bd-inner{padding:8px 0 4px}
+.bd-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--r2)}
+.bd-row:last-child{border-bottom:none}
+.bd-icon{width:16px;height:16px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px}
+.bd-icon.ok{background:#dcfce7;color:#15803d}
+.bd-icon.bad{background:#fee2e2;color:#b91c1c}
+.bd-icon.mid{background:#fef9c3;color:#a16207}
+.bd-lbl{flex:1;font-family:var(--mono);font-size:9px;color:var(--i3)}
+.bd-val{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--ink);text-align:right}
+.bd-pen{font-family:var(--mono);font-size:9px;color:var(--i4);text-align:right;min-width:28px}
+
+/* ── score compacto no topo ── */
+#score-top-bar{padding:8px 16px 9px;border-bottom:1px solid var(--rule);background:var(--surf);flex-shrink:0;cursor:pointer;transition:background .12s}
+#score-top-bar:hover{background:#f7f7f7}
+.stb-row{display:flex;align-items:center;gap:10px}
+.stb-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--i4);white-space:nowrap}
+.stb-track{flex:1;height:3px;background:var(--r2);border-radius:2px;overflow:hidden}
+.stb-fill{height:100%;border-radius:2px;transition:width .5s cubic-bezier(.22,1,.36,1),background .4s ease}
+.stb-num{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--ink);white-space:nowrap}
+.stb-badge{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:3px;white-space:nowrap}
+.stb-badge.ready{background:#dcfce7;color:#15803d}
+.stb-badge.warn {background:#fef9c3;color:#a16207}
+.stb-badge.heavy{background:#ffedd5;color:#c2410c}
+.stb-badge.crit {background:#fee2e2;color:#b91c1c}
+/* história de scores */
+.stb-hist{overflow:hidden;max-height:0;transition:max-height .3s cubic-bezier(.22,1,.36,1)}
+.stb-hist.open{max-height:200px}
+.stb-hist-inner{padding:6px 0 2px;display:flex;flex-direction:column;gap:3px}
+.stb-hist-row{display:flex;align-items:center;gap:8px;padding:2px 0}
+.stb-hist-time{font-family:var(--mono);font-size:8px;color:var(--i4);min-width:32px}
+.stb-hist-bar{flex:1;height:2px;background:var(--r2);border-radius:1px;overflow:hidden}
+.stb-hist-fill{height:100%;border-radius:1px}
+.stb-hist-val{font-family:var(--mono);font-size:8px;font-weight:500;color:var(--ink);min-width:24px;text-align:right}
+.stb-hist-lbl{font-family:var(--mono);font-size:8px;color:var(--i3)}
+
+/* ── breakdown (expandível, abaixo do score) ── */
+.score-breakdown-panel{overflow:hidden;max-height:0;transition:max-height .3s cubic-bezier(.22,1,.36,1);border-bottom:1px solid var(--r2)}
+.score-breakdown-panel.open{max-height:260px}
+.score-bd-wrap{padding:6px 16px 8px}
+
+/* ── fixed bottom bar — Novo scan sempre visível ── */
+#bottom-bar{position:sticky;bottom:0;padding:10px 16px;border-top:1px solid var(--rule);background:var(--surf);flex-shrink:0;display:none}
+#bottom-bar.visible{display:block}
+.btn-novo-scan{width:100%;height:34px;background:transparent;color:var(--i3);border:1px solid var(--rule);border-radius:var(--rad);font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.btn-novo-scan:hover{border-color:var(--ink);color:var(--ink)}
+
+/* ── animação reticências ── */
+@keyframes dotPulse{0%,100%{opacity:.2}50%{opacity:1}}
+.dots span{animation:dotPulse 1.2s ease-in-out infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+
 /* result */
 #view-result{display:none;padding:28px 16px 16px;flex-direction:column;align-items:center;gap:4px}
 .r-n{font-family:var(--mono);font-size:46px;font-weight:500;line-height:1;letter-spacing:-.02em}
@@ -176,10 +289,31 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
   <span class="hdr-pg" id="hdr-pg">—</span>
 </div>
 
-<!-- tabs (só na list) -->
+<!-- score de otimização — sempre visível acima das tabs -->
+<div id="score-top-bar" onclick="toggleScoreBreakdown()">
+  <div class="stb-row">
+    <span class="stb-lbl">Otimização</span>
+    <div class="stb-track"><div class="stb-fill" id="score-fill" style="width:0%"></div></div>
+    <span class="stb-num" id="score-num">—</span>
+    <span class="stb-badge" id="score-status">...</span>
+  </div>
+  <!-- história de scores (expande ao clicar) -->
+  <div class="stb-hist" id="score-hist-panel">
+    <div class="stb-hist-inner" id="score-hist-inner"></div>
+  </div>
+</div>
+<!-- breakdown expansível -->
+<div class="score-breakdown-panel" id="score-breakdown">
+  <div class="score-bd-wrap">
+    <div class="score-bd-inner" id="score-bd-inner"></div>
+  </div>
+</div>
+
+<!-- tabs — sempre visíveis quando em view de lista -->
 <div class="tabs" id="tabs" style="display:none">
   <button class="tab on" id="tab-comp"   onclick="setMode('comp')"   type="button">Componentes</button>
-  <button class="tab"    id="tab-hidden" onclick="setMode('hidden')" type="button">Layers ocultas</button>
+  <button class="tab"    id="tab-hidden" onclick="setMode('hidden')" type="button">Ocultas</button>
+  <button class="tab"    id="tab-img"    onclick="setMode('img')"    type="button">Imagens</button>
 </div>
 
 <!-- idle -->
@@ -191,7 +325,7 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
     <div class="idle-title">Pronto para escanear</div>
     <div class="idle-sub">Identifica instâncias de componentes<br>e layers ocultas na página atual</div>
   </div>
-  <button class="btn-scan" onclick="startScan()" type="button">Escanear página</button>
+  <button class="btn-scan" onclick="goScan()" type="button">Escanear página</button>
 </div>
 
 <!-- splash — abertura nativa -->
@@ -203,17 +337,13 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
   </div>
 </div>
 
-<!-- loading — somente barra -->
+<!-- loading progressivo -->
 <div id="view-loading" style="display:none">
-  <div class="ld-status" id="ld-name">—</div>
+  <div class="ld-phase"><span class="ld-phase-txt" id="ld-name">Iniciando scan<span class="dots"><span>.</span><span>.</span><span>.</span></span></span></div>
   <div class="ld-count" id="ld-num">0</div>
-  <div class="ld-unit" id="ld-unit">instâncias encontradas</div>
-  <div class="ld-bar-meta">
-    <span class="ld-bar-lbl">Escaneando</span>
-    <span class="ld-bar-frac" id="ld-frac">—</span>
-  </div>
+  <div class="ld-unit" id="ld-unit"><span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
   <div class="ld-track"><div class="ld-fill" id="ld-fill"></div></div>
-  <div class="ld-log"><div class="ld-log-inner" id="ld-log"></div></div>
+  <div class="ld-log" id="ld-log"></div>
 </div>
 
 <!-- skeleton -->
@@ -244,7 +374,35 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
   <div class="footer">
     <button class="btn-primary" id="btn-action" onclick="runAction()" type="button" disabled>Detach selecionados</button>
     <button class="btn-hidden-quick" id="btn-hidden-quick" onclick="runHiddenQuick()" type="button">Remover 0 layers ocultas</button>
-    <button class="btn-secondary" onclick="goScan()" type="button">↺ Novo scan</button>
+  </div>
+</div>
+
+<!-- imagens — view de lista -->
+<div id="view-img-list" style="display:none">
+  <div class="summary">
+    <div class="sum-left">
+      <span class="sum-n" id="img-count">0</span>
+      <span class="sum-lbl" id="img-label">imagens encontradas</span>
+    </div>
+    <span class="sum-sz" id="img-size">—</span>
+  </div>
+  <div class="img-toolbar">
+    <div style="display:flex;align-items:center;gap:6px">
+      <input type="checkbox" class="cb-all" id="img-cb-all" onchange="toggleAllImg(this.checked)"/>
+      <label class="sel-lbl" for="img-cb-all">Selecionar tudo</label>
+    </div>
+    <div class="quality-toggle">
+      <button class="qt-btn" id="qt-high" onclick="setQuality('high')" type="button">Alta</button>
+      <button class="qt-btn on" id="qt-mid"  onclick="setQuality('mid')"  type="button">Média</button>
+      <button class="qt-btn" id="qt-low"  onclick="setQuality('low')"  type="button">Baixa</button>
+    </div>
+  </div>
+  <div id="img-quality-hint" style="padding:5px 16px;border-bottom:1px solid var(--r2);font-family:var(--mono);font-size:8px;color:var(--i4);letter-spacing:.04em">
+    Qualidade média — JPEG 72% · bom para protótipos
+  </div>
+  <div class="item-list" id="img-list"></div>
+  <div class="footer">
+    <button class="btn-primary" id="btn-img-action" onclick="runImgAction()" type="button" disabled>Comprimir selecionadas</button>
   </div>
 </div>
 
@@ -270,9 +428,6 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
     <tr><td id="r-l1">Itens</td><td id="r-v1">—</td></tr>
     <tr><td>Nós na página</td><td id="r-nodes">—</td></tr>
   </table>
-  <div style="width:100%;display:flex;flex-direction:column;gap:6px">
-    <button class="btn-primary" onclick="goScan()" type="button">↺ Novo scan</button>
-  </div>
 </div>
 
 <!-- memory + histórico — sempre visíveis -->
@@ -284,6 +439,11 @@ body{font-family:var(--sans);font-size:13px;background:var(--surf);color:var(--i
   <div class="mem-track"><div class="mem-fill" id="mem-fill"></div></div>
   <div class="mem-sub" id="mem-file">arquivo: — total</div>
 </div>
+<!-- bottom-bar — Novo scan fixo -->
+<div id="bottom-bar">
+  <button class="btn-novo-scan" onclick="goScan()" type="button">↺ Novo scan</button>
+</div>
+
 <div class="hist">
   <div class="hist-hdr">
     <span class="hist-title">Histórico de modificações</span>
@@ -300,16 +460,182 @@ var _ldPrev = -1;
 var _memBaseline = 0;
 var _memCurrent  = 0;
 var _totalSaved  = 0;
-var _hiddenCount = 0;   // layers ocultas encontradas no último scan
-var VIEWS = ['view-splash','view-idle','view-loading','view-skeleton','view-list','view-progress','view-result'];
-var _cache = { comp: null, hidden: null }; // cache por aba — evita re-scan desnecessário
+var _hiddenCount = 0;
+var _scoreData   = null; // dados para o score
+var VIEWS = ['view-splash','view-idle','view-loading','view-skeleton','view-list','view-img-list','view-progress','view-result'];
+var _cache = { comp: null, hidden: null, img: null };
+
+
+/* ── utilitários globais ── */
+function fmtSize(kb){
+  if(kb>=1024) return (kb/1024).toFixed(1)+' MB';
+  return kb+' KB';
+}
+
+/* ── score de prontidão ─────────────────────────────── */
+var SYSTEM_FONTS = ['Inter','SF Pro','SF Compact','Roboto','Arial','Helvetica',
+  'Georgia','Times','Courier','Verdana','Tahoma','Trebuchet','.AppleSystemUIFont',
+  'San Francisco','System Font','Segoe UI','Ubuntu','Noto','Open Sans','Lato'];
+
+function calcScore(d) {
+  // d: { instances, hidden, images[], topFrames, totalNodes, customFonts, pageCount }
+  var score = 100;
+  var breakdown = [];
+
+  // 1. instâncias vinculadas
+  var inst = d.instances || 0;
+  var pInst = inst > 100 ? 35 : inst > 60 ? 28 : inst > 30 ? 20 : inst > 10 ? 12 : inst > 0 ? 5 : 0;
+  score -= pInst;
+  breakdown.push({ lbl:'Instâncias vinculadas', val: inst, pen: pInst,
+    hint: inst === 0 ? 'ok' : inst > 30 ? 'bad' : 'mid' });
+
+  // 2. layers ocultas
+  var hid = d.hidden || 0;
+  var pHid = hid > 50 ? 20 : hid > 20 ? 14 : hid > 5 ? 8 : hid > 0 ? 3 : 0;
+  score -= pHid;
+  breakdown.push({ lbl:'Layers ocultas', val: hid, pen: pHid,
+    hint: hid === 0 ? 'ok' : hid > 20 ? 'bad' : 'mid' });
+
+  // 3. imagens pesadas
+  var imgs = d.images || [];
+  var maxImgKb = imgs.length ? Math.max.apply(null, imgs.map(function(i){ return i.sizeKb||0; })) : 0;
+  var heavyImgs = imgs.filter(function(i){ return (i.sizeKb||0) > 100; }).length;
+  var pImg = maxImgKb > 1024 ? 25 : maxImgKb > 500 ? 18 : heavyImgs >= 3 ? 15 : heavyImgs >= 1 ? 8 : imgs.length > 0 ? 2 : 0;
+  score -= pImg;
+  var imgLabel = imgs.length === 0 ? 'Sem imagens' : maxImgKb > 500 ? fmtSize(maxImgKb)+' maior imagem' : imgs.length+' imagens';
+  breakdown.push({ lbl:'Imagens', val: imgLabel, pen: pImg,
+    hint: pImg === 0 ? 'ok' : pImg >= 18 ? 'bad' : 'mid' });
+
+  // 4. frames e nós
+  var frames = d.topFrames || 0;
+  var nodes  = d.totalNodes || 0;
+  var pFrames = (frames > 80 || nodes > 2000) ? 18 : (frames > 40 || nodes > 1000) ? 10 : (frames > 20 || nodes > 500) ? 5 : 0;
+  score -= pFrames;
+  breakdown.push({ lbl:'Frames / nós', val: frames+' frames · '+nodes+' nós', pen: pFrames,
+    hint: pFrames === 0 ? 'ok' : pFrames >= 18 ? 'bad' : 'mid' });
+
+  // 5. fontes customizadas
+  var fonts = d.customFonts || 0;
+  var pFonts = fonts >= 5 ? 12 : fonts >= 3 ? 7 : fonts >= 1 ? 3 : 0;
+  score -= pFonts;
+  breakdown.push({ lbl:'Fontes customizadas', val: fonts, pen: pFonts,
+    hint: pFonts === 0 ? 'ok' : pFonts >= 7 ? 'bad' : 'mid' });
+
+  // 6. páginas no arquivo
+  var pages = d.pageCount || 1;
+  var pPages = pages > 8 ? 30 : pages > 4 ? 20 : pages > 2 ? 12 : pages > 1 ? 5 : 0;
+  score -= pPages;
+  breakdown.push({ lbl:'Páginas no arquivo', val: pages, pen: pPages,
+    hint: pPages === 0 ? 'ok' : pPages >= 20 ? 'bad' : 'mid' });
+
+  return { score: Math.max(0, score), breakdown: breakdown };
+}
+
+function scoreStatus(s) {
+  if (s >= 85) return { cls:'ready', lbl:'Pronto', color:'#16a34a' };
+  if (s >= 65) return { cls:'warn',  lbl:'Otimizar', color:'#ca8a04' };
+  if (s >= 40) return { cls:'heavy', lbl:'Pesado',   color:'#ea580c' };
+  return             { cls:'crit',  lbl:'Crítico',  color:'#dc2626' };
+}
+
+var _scoreHistory = []; // histórico de scores — persiste entre trocas de aba
+var _lastScore = null;  // último score calculado
+
+function renderScore(data) {
+  _scoreData = data;
+  var result = calcScore(data);
+  var s = result.score;
+  var st = scoreStatus(s);
+
+  // só salva no histórico se o score mudou
+  if (_lastScore !== null && _lastScore !== s) {
+    var now = new Date();
+    var ts = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    _scoreHistory.unshift({ score: s, time: ts, label: st.lbl, color: st.color });
+    if (_scoreHistory.length > 5) _scoreHistory.pop();
+    renderScoreHistory();
+  }
+  _lastScore = s;
+
+  // atualiza top bar
+  $('score-num').textContent = s;
+  var badge = $('score-status');
+  badge.textContent = st.lbl;
+  badge.className = 'stb-badge ' + st.cls;
+  var fill = $('score-fill');
+  fill.style.width = s + '%';
+  fill.style.background = st.color;
+
+  // breakdown
+  var inner = $('score-bd-inner');
+  inner.innerHTML = '';
+  result.breakdown.forEach(function(row) {
+    var div = document.createElement('div');
+    div.className = 'bd-row';
+    var icon = row.hint === 'ok' ? '✓' : row.hint === 'bad' ? '✗' : '!';
+    var penStr = row.pen > 0 ? '−'+row.pen : '';
+    div.innerHTML =
+      '<div class="bd-icon '+row.hint+'">'+icon+'</div>'+
+      '<span class="bd-lbl">'+row.lbl+'</span>'+
+      '<span class="bd-val">'+row.val+'</span>'+
+      '<span class="bd-pen">'+penStr+'</span>';
+    inner.appendChild(div);
+  });
+}
+
+function renderScoreHistory() {
+  var inner = $('score-hist-inner');
+  if (!inner || !_scoreHistory.length) return;
+  inner.innerHTML = '';
+  _scoreHistory.forEach(function(h) {
+    var row = document.createElement('div');
+    row.className = 'stb-hist-row';
+    row.innerHTML =
+      '<span class="stb-hist-time">'+h.time+'</span>'+
+      '<div class="stb-hist-bar"><div class="stb-hist-fill" style="width:'+h.score+'%;background:'+h.color+'"></div></div>'+
+      '<span class="stb-hist-val">'+h.score+'</span>'+
+      '<span class="stb-hist-lbl">'+h.label+'</span>';
+    inner.appendChild(row);
+  });
+}
+
+function toggleScoreBreakdown() {
+  // abre/fecha o breakdown de dimensões
+  var bd = $('score-breakdown');
+  var hist = $('score-hist-panel');
+  bd.classList.toggle('open');
+  // se abre breakdown, fecha hist e vice-versa
+  if (bd.classList.contains('open')) {
+    if (hist) hist.classList.remove('open');
+  }
+}
+function toggleScoreHistory() {
+  var hist = $('score-hist-panel');
+  var bd = $('score-breakdown');
+  if (hist) hist.classList.toggle('open');
+  if (bd) bd.classList.remove('open');
+}
+
+/* estimativa rápida — só atualiza visual, preserva _lastScore e _scoreData */
+function quickScoreEstimate(pageCount) {
+  // Não zera _lastScore nem _scoreData para manter histórico entre scans
+  var badge = $('score-status');
+  if (badge) { badge.textContent = 'escaneando'; badge.className = 'stb-badge'; }
+  // mantém barra no último valor conhecido durante o scan
+}
 
 function $(id){ return document.getElementById(id); }
 
 function showOnly(id){
   VIEWS.forEach(function(v){ $(v).style.display='none'; });
-  $(id).style.display = (id==='view-list') ? 'block' : 'flex';
-  $('tabs').style.display = (id==='view-list') ? 'flex' : 'none';
+  var isList = (id==='view-list'||id==='view-img-list');
+  $(id).style.display = isList ? 'block' : 'flex';
+  // tabs visíveis sempre em views de lista
+  $('tabs').style.display = isList ? 'flex' : 'none';
+  // bottom-bar visível em listas e resultado
+  var showBottom = (isList || id==='view-result');
+  var bb = $('bottom-bar');
+  if (bb) bb.className = showBottom ? 'visible' : '';
 }
 /* splash de abertura — roda uma vez, anima a barra de 0→100% em ~1.2s */
 function showSplash(onReady){
@@ -335,6 +661,13 @@ function showList(){
   VIEWS.forEach(function(v){ $(v).style.display='none'; });
   $('view-list').style.display = 'block';
   $('tabs').style.display = 'flex';
+  var bb = $('bottom-bar'); if (bb) bb.className = 'visible';
+}
+function showImgList(){
+  VIEWS.forEach(function(v){ $(v).style.display='none'; });
+  $('view-img-list').style.display = 'block';
+  $('tabs').style.display = 'flex';
+  var bb = $('bottom-bar'); if (bb) bb.className = 'visible';
 }
 function showSkeleton(cb){
   VIEWS.forEach(function(v){ $(v).style.display='none'; });
@@ -344,10 +677,6 @@ function showSkeleton(cb){
 }
 
 /* ── memory bar + histórico ── */
-function fmtSize(kb){
-  if(kb>=1024) return (kb/1024).toFixed(1)+' MB';
-  return kb+' KB';
-}
 
 function updateMem(mem){
   if(!mem) return;
@@ -361,6 +690,13 @@ function updateMem(mem){
   var fill = $('mem-fill');
   fill.style.width = pct + '%';
   fill.className = 'mem-fill' + (pct < 90 ? ' ok' : '');
+
+  // atualiza score com dados de memória (páginas + nós)
+  if(_scoreData) {
+    _scoreData.totalNodes = mem.pageNodes || _scoreData.totalNodes;
+    _scoreData.pageCount  = mem.pageCount || _scoreData.pageCount;
+    renderScore(_scoreData);
+  }
 }
 
 function addHistory(action, done, hiddenDone, memAfter, memBefore){
@@ -381,9 +717,12 @@ function addHistory(action, done, hiddenDone, memAfter, memBefore){
   var item = document.createElement('div');
   item.className = 'hist-item';
 
-  var badge = action === 'detach' ? 'Detach' : action === 'hidden' ? 'Layers' : 'Limpeza';
+  var badge = action === 'detach' ? 'Detach' : action === 'hidden' ? 'Layers' : action === 'img' ? 'Imagens' : 'Limpeza';
   var stats = '';
-  if(done > 0)       stats += '<span class="hist-stat"><span>'+done+'</span> '+(action==='detach'?'detach':'layers removidas')+'</span>';
+  if(done > 0){
+    var statLbl = action==='detach'?'detach': action==='img'?'comprimidas':'layers removidas';
+    stats += '<span class="hist-stat"><span>'+done+'</span> '+statLbl+'</span>';
+  }
   if(hiddenDone > 0) stats += '<span class="hist-stat"><span>'+hiddenDone+'</span> layers ocultas</span>';
   // mostra KB + percentual
   var savedTxt = saved > 0
@@ -421,94 +760,229 @@ function runHiddenQuick(){
 }
 var _quickRemoveAll = false;
 
-/* ── watchdog ── */
-var _wdT=null,_wdLast=0,_wdIdx=0;
-var _wdMsgs=['Contando nós filhos…','Analisando hierarquia…','Processando layers…','Isso pode levar alguns segundos…','Lendo estrutura de grupos…','Quase lá…'];
-function startWd(){
-  _wdLast=Date.now();_wdIdx=0;
-  _wdT=setInterval(function(){
-    if(Date.now()-_wdLast>2500){
-      var e=document.createElement('div'); e.className='ld-le f';
-      e.textContent='… '+_wdMsgs[_wdIdx++%_wdMsgs.length];
-      var inner=$('ld-log'); inner.insertBefore(e,inner.firstChild);
-      if(inner.children.length>5) inner.removeChild(inner.lastChild);
-      inner.querySelectorAll('.ld-le').forEach(function(el,i){ el.className=i===0?'ld-le f':'ld-le'; });
-    }
-  },2500);
-}
-function stopWd(){ if(_wdT){ clearInterval(_wdT); _wdT=null; } }
-function touchWd(){ _wdLast=Date.now(); }
+/* ══════════════════════════════════════════════════════
+   LOADING PROGRESSIVO — sistema de fases autônomo
+   Funciona independente do scan_progress (que só emite
+   2 eventos). Cada fase tem timing e mensagem próprios.
+   ══════════════════════════════════════════════════════ */
 
-/* ── loading progress ── */
+var _ldPhaseTimer = null;   // timer das fases
+var _ldFoundReal  = 0;      // contagem real recebida do code.js
+var _ldScanType   = 'comp'; // tipo atual de scan
+var _ldDone       = false;  // scan concluiu?
+
+// Sequências de fases por tipo de scan
+var LD_PHASES = {
+  comp: [
+    { pct:  5, msg: 'Conectando ao documento',    delay: 0   },
+    { pct: 18, msg: 'Lendo estrutura da página',  delay: 380 },
+    { pct: 34, msg: 'Mapeando hierarquia',         delay: 700 },
+    { pct: 52, msg: 'Escaneando componentes',      delay: 1100},
+    { pct: 68, msg: 'Contando instâncias',         delay: 1600},
+    { pct: 80, msg: 'Verificando dependências',    delay: 2200},
+    { pct: 90, msg: 'Calculando score',            delay: 3000},
+    { pct: 95, msg: 'Finalizando',                 delay: 4000},
+  ],
+  hidden: [
+    { pct:  5, msg: 'Conectando ao documento',    delay: 0   },
+    { pct: 22, msg: 'Lendo estrutura da página',  delay: 350 },
+    { pct: 45, msg: 'Escaneando layers ocultas',  delay: 750 },
+    { pct: 70, msg: 'Percorrendo grupos',          delay: 1300},
+    { pct: 88, msg: 'Verificando visibilidade',   delay: 2100},
+    { pct: 95, msg: 'Finalizando',                delay: 3200},
+  ],
+  images: [
+    { pct:  5, msg: 'Conectando ao documento',    delay: 0   },
+    { pct: 15, msg: 'Lendo fills da página',       delay: 400 },
+    { pct: 35, msg: 'Detectando imagens',          delay: 900 },
+    { pct: 55, msg: 'Lendo bytes das imagens',     delay: 1500},
+    { pct: 72, msg: 'Gerando thumbnails',          delay: 2400},
+    { pct: 88, msg: 'Calculando tamanhos',         delay: 3500},
+    { pct: 95, msg: 'Finalizando',                 delay: 5000},
+  ]
+};
+
+// Mapa de label por tipo
+var LD_UNIT_LABEL = { comp:'instâncias', hidden:'layers ocultas', images:'imagens' };
+
+function _ldClearTimers(){
+  if(_ldPhaseTimer){ clearTimeout(_ldPhaseTimer); _ldPhaseTimer=null; }
+}
+
+function _ldSetPhase(msg, pct){
+  // atualiza texto de fase com fade
+  var el = $('ld-name');
+  if(!el) return;
+  // cria novo span com animação
+  var span = document.createElement('span');
+  span.className = 'ld-phase-txt';
+  span.innerHTML = msg + '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
+  el.innerHTML = '';
+  el.appendChild(span);
+  // barra avança para a porcentagem da fase
+  var fill = $('ld-fill');
+  if(fill) fill.style.width = Math.min(pct, 95) + '%';
+}
+
+function _ldAddStep(msg, isDone){
+  var log = $('ld-log');
+  if(!log) return;
+  // máx 4 steps visíveis
+  while(log.children.length >= 4) log.removeChild(log.firstChild);
+  var el = document.createElement('div');
+  el.className = 'ld-step';
+  var elapsed = '';
+  el.innerHTML =
+    '<div class="ld-step-dot'+(isDone?' done':'')+'"></div>'+
+    '<span class="ld-step-txt'+(isDone?' done':'')+'">'+msg+'</span>'+
+    '<span class="ld-step-time">'+elapsed+'</span>';
+  log.appendChild(el);
+}
+
+function startLoadingSequence(scanType){
+  _ldClearTimers();
+  _ldFoundReal = 0;
+  _ldDone = false;
+  _ldScanType = scanType || 'comp';
+
+  // reseta UI
+  var num = $('ld-num'); if(num) num.textContent = '0';
+  var unit = $('ld-unit'); if(unit) unit.innerHTML = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
+  var fill = $('ld-fill'); if(fill) fill.style.width = '0%';
+  var log = $('ld-log'); if(log) log.innerHTML = '';
+
+  var phases = LD_PHASES[_ldScanType] || LD_PHASES.comp;
+
+  phases.forEach(function(phase, i){
+    _ldPhaseTimer = setTimeout(function(){
+      if(_ldDone) return; // scan já concluiu, não continua animação falsa
+      _ldSetPhase(phase.msg, phase.pct);
+      _ldAddStep(phase.msg, false);
+    }, phase.delay);
+  });
+}
+
+function stopLoadingSequence(found){
+  _ldDone = true;
+  _ldClearTimers();
+  // barra vai a 100%
+  var fill = $('ld-fill'); if(fill) fill.style.width = '100%';
+  // fase final
+  var el = $('ld-name');
+  if(el){
+    var span = document.createElement('span');
+    span.className = 'ld-phase-txt';
+    span.textContent = 'Concluído';
+    el.innerHTML = ''; el.appendChild(span);
+  }
+  // contador final com pop
+  var num = $('ld-num');
+  if(num){
+    num.textContent = found;
+    num.classList.remove('pop'); void num.offsetWidth;
+    num.classList.add('pop');
+    setTimeout(function(){ num.classList.remove('pop'); }, 300);
+  }
+  // label sem dots
+  var unit = $('ld-unit');
+  var lbl = LD_UNIT_LABEL[_ldScanType] || 'itens';
+  if(unit) unit.textContent = found + ' ' + lbl + ' encontrados';
+  // marca último step como done
+  var log = $('ld-log');
+  if(log){
+    var steps = log.querySelectorAll('.ld-step-dot');
+    var txts  = log.querySelectorAll('.ld-step-txt');
+    if(steps.length) steps[steps.length-1].className = 'ld-step-dot done';
+    if(txts.length)  txts[txts.length-1].className  = 'ld-step-txt done';
+  }
+}
+
+/* updateLd — recebe scan_progress do code.js e atualiza contador em tempo real */
 function updateLd(msg){
-  var name=msg.pageName||'—', found=msg.foundSoFar||0, isHid=msg.scanType==='hidden';
-  var total=msg.totalPages||1, done=msg.pageIndex||0;
-
-  // status com fadeUp ao mudar
-  var ne=$('ld-name');
-  var newTxt = done < total ? 'lendo '+name+'…' : name;
-  if(ne.textContent!==newTxt){
-    ne.className='ld-status'; void ne.offsetWidth;
-    ne.textContent=newTxt; ne.className='ld-status in';
-  }
-
-  // contador
-  var ne2=$('ld-num'); ne2.textContent=found;
-  if(found!==_ldPrev&&found>0){
-    ne2.classList.remove('pop'); void ne2.offsetWidth;
-    ne2.classList.add('pop');
-    setTimeout(function(){ ne2.classList.remove('pop'); },200);
-    _ldPrev=found;
-  }
-  $('ld-unit').textContent=isHid?'layers ocultas encontradas':'instâncias encontradas';
-
-  // barra de progresso por página
-  var pct = total > 0 ? Math.round(done/total*100) : 0;
-  $('ld-fill').style.width = pct+'%';
-  $('ld-frac').textContent = done+' / '+total;
-
-  // log
-  if(done>0){
-    var inner=$('ld-log'); var e=document.createElement('div'); e.className='ld-le f';
-    e.textContent='✓ '+name+(found>0?' — '+found+' encontrados':'');
-    inner.insertBefore(e,inner.firstChild);
-    if(inner.children.length>5) inner.removeChild(inner.lastChild);
-    inner.querySelectorAll('.ld-le').forEach(function(el,i){ el.className=i===0?'ld-le f':'ld-le'; });
+  var found = msg.foundSoFar || 0;
+  _ldFoundReal = found;
+  // atualiza contador com animação de pop se mudou
+  if(found !== _ldPrev && found > 0){
+    var ne2 = $('ld-num');
+    if(ne2){
+      ne2.textContent = found;
+      ne2.classList.remove('pop'); void ne2.offsetWidth;
+      ne2.classList.add('pop');
+      setTimeout(function(){ ne2.classList.remove('pop'); }, 200);
+    }
+    _ldPrev = found;
+    // atualiza label com tipo
+    var unit = $('ld-unit');
+    var lbl = LD_UNIT_LABEL[msg.scanType] || 'itens';
+    if(unit) unit.innerHTML = found + ' ' + lbl + ' encontrados<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
   }
 }
+
+/* compat — startWd/stopWd/touchWd viram no-ops */
+function startWd(){ /* substituído por startLoadingSequence */ }
+function stopWd(){  /* substituído por stopLoadingSequence  */ }
+function touchWd(){ /* no-op */ }
 
 /* ── mode — usa cache se disponível ── */
 function setMode(m){
   if(mode===m) return;
   mode=m;
-  $('tab-comp').className='tab'+(m==='comp'?' on':'');
-  $('tab-hidden').className='tab'+(m==='hidden'?' on':'');
-  // se temos cache para esta aba, renderiza direto sem re-scan
+  var tc=$('tab-comp');   if(tc) tc.className='tab'+(m==='comp'?' on':'');
+  var th=$('tab-hidden'); if(th) th.className='tab'+(m==='hidden'?' on':'');
+  var ti=$('tab-img');    if(ti) ti.className='tab'+(m==='img'?' on':'');
+  // garantir tabs visíveis
+  $('tabs').style.display = 'flex';
+  // imagens: cache ou scan
+  if(m==='img'){
+    if(_cache.img){
+      renderImgList(_cache.img.items);
+      return;
+    }
+    showOnly('view-loading');
+    startLoadingSequence('images');
+    imgSelectedIds={};
+    parent.postMessage({ pluginMessage:{ type:'scan_images', scope:'page' } }, '*');
+    return;
+  }
+  // comp/hidden: cache ou scan
   if(_cache[m]){
     renderList(_cache[m].items, m==='hidden');
     return;
   }
-  // sem cache: mostra skeleton e escaneia
-  showSkeleton(function(){
-    selectedIds={};_ldPrev=-1;
-    parent.postMessage({ pluginMessage:{ type:m==='comp'?'scan':'scan_hidden', scope:'page' } }, '*');
-  });
+  showOnly('view-loading');
+  startLoadingSequence(m === 'hidden' ? 'hidden' : 'comp');
+  selectedIds={}; _ldPrev=-1;
+  parent.postMessage({ pluginMessage:{ type:m==='comp'?'scan':'scan_hidden', scope:'page' } }, '*');
 }
 
 /* ── scan ── */
 function startScan(){
   showOnly('view-loading');
   _ldPrev=-1;
-  $('ld-name').textContent='—';$('ld-num').textContent='0';$('ld-log').innerHTML='';
-  $('ld-fill').style.width='0%';$('ld-frac').textContent='—';
-  $('ld-unit').textContent='instâncias encontradas';
   mode='comp';
-  $('tab-comp').className='tab on';$('tab-hidden').className='tab';
-  stopWd();startWd();
+  // tabs podem estar ocultas — setar className com segurança
+  var tc=$('tab-comp');   if(tc) tc.className='tab on';
+  var th=$('tab-hidden'); if(th) th.className='tab';
+  var ti=$('tab-img');    if(ti) ti.className='tab';
+  startLoadingSequence('comp');
   parent.postMessage({ pluginMessage:{ type:'scan', scope:'page' } }, '*');
 }
 
-function goScan(){ _cache.comp=null; _cache.hidden=null; startScan(); }
+function goScan(){
+  // Salva snapshot do score no histórico antes de novo scan
+  if(_lastScore !== null){
+    var now = new Date();
+    var ts = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    var st = scoreStatus(_lastScore);
+    _scoreHistory.unshift({ score:_lastScore, time:ts, label:st.lbl, color:st.color });
+    if(_scoreHistory.length > 5) _scoreHistory.pop();
+    renderScoreHistory();
+  }
+  // Preserva dados de imagens/fontes entre scans
+  // (não zera _scoreData — scan_result vai atualizar só as dims que ele conhece)
+  _cache.comp=null; _cache.hidden=null; _cache.img=null;
+  startScan();
+}
 function goIdle(){ showOnly('view-idle'); }
 
 /* ── render list ── */
@@ -579,28 +1053,163 @@ function setProg(done,total){
   setTimeout(function(){ $('prog-count').classList.remove('pop'); },200);
 }
 
+
+/* ── imagens ─────────────────────────────────────────── */
+var imgAllItems = [], imgSelectedIds = {};
+var imgQuality = 'mid'; // 'high'=90% | 'mid'=72% | 'low'=45%
+var IMG_QUALITY_MAP = { high: 0.90, mid: 0.72, low: 0.45 };
+var IMG_QUALITY_HINT = {
+  high: 'Qualidade alta — JPEG 90% · mínima perda visual',
+  mid:  'Qualidade média — JPEG 72% · bom para protótipos',
+  low:  'Qualidade baixa — JPEG 45% · máxima compressão'
+};
+
+function setQuality(q){
+  imgQuality=q;
+  ['high','mid','low'].forEach(function(k){
+    $('qt-'+k).className='qt-btn'+(k===q?' on':'');
+  });
+  $('img-quality-hint').textContent=IMG_QUALITY_HINT[q];
+}
+
+function renderImgList(items){
+  imgAllItems=items;
+  var totalKb=items.reduce(function(a,b){ return a+(b.sizeKb||0); },0);
+  $('img-count').textContent=items.length;
+  $('img-label').textContent=items.length===1?'imagem encontrada':'imagens encontradas';
+  $('img-size').textContent=items.length?(totalKb>1024?(totalKb/1024).toFixed(1)+' MB':totalKb+' KB'):  '—';
+
+  var list=$('img-list'); list.innerHTML='';
+  if(!items.length){
+    list.innerHTML='<div class="empty"><div class="empty-t">Nenhuma imagem encontrada</div><div class="empty-s">Esta página não tem fills de imagem.</div></div>';
+    updateImgSel(); showImgList(); return;
+  }
+
+  var maxKb=items.length?Math.max.apply(null,items.map(function(i){ return i.sizeKb||1; })):1;
+
+  items.forEach(function(item){
+    var row=document.createElement('div'); row.className='ii'; row.dataset.id=item.id;
+    var pct=Math.max(4,Math.round((item.sizeKb/maxKb)*100));
+    var sizeKb=item.sizeKb||0;
+    var sizeStr=sizeKb>1024?(sizeKb/1024).toFixed(1)+' MB':sizeKb+' KB';
+    var heavy=sizeKb>200;
+    var dimStr=item.w&&item.h?(item.w+'×'+item.h):'—';
+
+    // thumb — se tiver dataUrl, usa; senão placeholder
+    var thumbHtml = item.dataUrl
+      ? '<img src="'+item.dataUrl+'" alt=""/>'
+      : '<svg class="ii-thumb-ph" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+
+    row.innerHTML=
+      '<input type="checkbox" class="ii-cb" data-id="'+item.id+'" onchange="toggleImgItem(\'' + item.id + '\',this.checked)" onclick="event.stopPropagation()"/>'+
+      '<div class="ii-thumb">'+thumbHtml+'</div>'+
+      '<div class="ii-info"><div class="ii-name" title="'+item.name+'">'+item.name+'</div><div class="ii-par">'+item.parent+'</div></div>'+
+      '<div class="ii-meta">'+
+        '<div class="ii-kb'+(heavy?' heavy':'')+'">'+sizeStr+'</div>'+
+        '<div class="ii-dim">'+dimStr+'</div>'+
+        '<div class="ii-weight" style="width:'+pct+'%;background:'+(heavy?'var(--ink)':'var(--i4)')+'"></div>'+
+      '</div>';
+
+    row.addEventListener('click',function(){ var cb=row.querySelector('.ii-cb'); cb.checked=!cb.checked; toggleImgItem(item.id,cb.checked); });
+    list.appendChild(row);
+  });
+  updateImgSel(); showImgList();
+}
+
+function toggleImgItem(id,checked){
+  if(checked) imgSelectedIds[id]=true; else delete imgSelectedIds[id];
+  var r=document.querySelector('[data-id="'+id+'"].ii'); if(r) r.className='ii'+(checked?' sel':'');
+  updateImgSel();
+}
+function toggleAllImg(checked){
+  imgSelectedIds={};
+  document.querySelectorAll('.ii-cb').forEach(function(cb){
+    cb.checked=checked; if(checked) imgSelectedIds[cb.dataset.id]=true;
+    var r=cb.closest('.ii'); if(r) r.className='ii'+(checked?' sel':'');
+  });
+  updateImgSel();
+}
+function updateImgSel(){
+  var sel=Object.keys(imgSelectedIds).length, tot=imgAllItems.length;
+  $('btn-img-action').disabled=sel===0;
+  $('btn-img-action').textContent=sel>0?('Comprimir '+sel+' / '+tot):'Comprimir selecionadas';
+  $('img-cb-all').checked=sel===tot&&tot>0;
+  $('img-cb-all').indeterminate=sel>0&&sel<tot;
+}
+
+function runImgAction(){
+  var ids=Object.keys(imgSelectedIds); if(!ids.length) return;
+  showOnly('view-progress');
+  $('prog-count').textContent='0';
+  $('prog-unit').textContent='imagens comprimidas';
+  $('prog-page').textContent='Comprimindo…';
+  $('prog-fill').style.width='0%'; $('prog-pct').textContent='0%';
+  $('prog-frac').textContent='0 / '+ids.length;
+  parent.postMessage({ pluginMessage:{ type:'compress_images', ids:ids, quality:IMG_QUALITY_MAP[imgQuality] } }, '*');
+}
+
 /* ── messages ── */
 window.onmessage=function(e){
   var msg=e.data.pluginMessage; if(!msg) return;
 
   if(msg.type==='scan_progress'){
-    touchWd();
     updateLd(msg);
     return;
   }
 
+  if(msg.type==='scan_images_result'){
+    stopLoadingSequence((msg.items||[]).length);
+    if(msg.mem) updateMem(msg.mem);
+    _cache.img = { items: msg.items||[] };
+    if(_scoreData) {
+      _scoreData.images = (msg.items||[]).map(function(i){ return { sizeKb: i.sizeKb||0 }; });
+      renderScore(_scoreData);
+    }
+    renderImgList(msg.items||[]);
+    return;
+  }
+
+  if(msg.type==='compress_progress'){
+    setProg(msg.done, msg.total);
+    return;
+  }
+
+  if(msg.type==='compress_done'){
+    var memBefore2 = _memCurrent;
+    if(msg.mem) updateMem(msg.mem);
+    addHistory('img', msg.done, 0, msg.mem, memBefore2);
+    _cache.img = null; // invalida cache de imagens
+    showOnly('view-result');
+    $('r-n').textContent = msg.done;
+    $('r-u').textContent = 'imagens comprimidas';
+    $('r-l1').textContent = 'Imagens comprimidas'; $('r-v1').textContent = msg.done;
+    $('r-nodes').textContent = msg.savedKb ? (msg.savedKb>1024?(msg.savedKb/1024).toFixed(1)+' MB':msg.savedKb+' KB')+' liberados' : '—';
+    return;
+  }
+
   if(msg.type==='scan_result'){
-    stopWd();
+    stopLoadingSequence((msg.items||[]).length);
     if(msg.mem) updateMem(msg.mem);
     if(_memBaseline===0 && msg.mem) _memBaseline=msg.mem.pageKb;
     updateHiddenBtn(msg.hiddenCount||0);
     _cache.comp = { items: msg.items||[] };
+    // alimenta score — preserva images de scan anterior se não houve scan de imagens
+    if(!_scoreData) _scoreData = { instances:0, hidden:0, images:[], topFrames:0, totalNodes:0, customFonts:0, pageCount:1 };
+    _scoreData.instances  = (msg.items||[]).length;
+    _scoreData.hidden     = msg.hiddenCount || 0;
+    _scoreData.topFrames  = msg.topFrames   || 0;
+    _scoreData.totalNodes = msg.mem ? msg.mem.pageNodes : _scoreData.totalNodes;
+    _scoreData.pageCount  = msg.mem ? msg.mem.pageCount : _scoreData.pageCount;
+    _scoreData.customFonts= msg.customFonts || 0;
+    // images: preserva valor anterior se não foi re-escaneado
+    // (será sobrescrito quando scan_images_result chegar)
+    renderScore(_scoreData);
     renderList(msg.items||[], false);
     return;
   }
 
   if(msg.type==='scan_hidden_result'){
-    stopWd();
+    stopLoadingSequence((msg.items||[]).length);
     if(msg.mem) updateMem(msg.mem);
     // se veio de quick-remove: seleciona tudo e executa
     if(_quickRemoveAll){
@@ -619,6 +1228,10 @@ window.onmessage=function(e){
       return;
     }
     _cache.hidden = { items: msg.items||[] };
+    if(_scoreData) {
+      _scoreData.hidden = (msg.items||[]).length;
+      renderScore(_scoreData);
+    }
     renderList(msg.items||[], true);
     return;
   }
@@ -628,9 +1241,47 @@ window.onmessage=function(e){
     return;
   }
 
+  // compressão via Canvas API do browser
+  if(msg.type==='compress_request'){
+    var bytes = new Uint8Array(msg.bytes);
+    var blob = new Blob([bytes]);
+    var url = URL.createObjectURL(blob);
+    var imgEl = new Image();
+    imgEl.onload = function(){
+      var canvas = document.createElement('canvas');
+      canvas.width = imgEl.naturalWidth;
+      canvas.height = imgEl.naturalHeight;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(imgEl, 0, 0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(function(blob2){
+        if(!blob2){ parent.postMessage({ pluginMessage:{ type:'compress_result', nodeId:msg.nodeId, fillIdx:msg.fillIdx, bytes:null } }, '*'); return; }
+        var reader = new FileReader();
+        reader.onload = function(){
+          var ab = reader.result;
+          var arr = Array.from(new Uint8Array(ab));
+          parent.postMessage({ pluginMessage:{ type:'compress_result', nodeId:msg.nodeId, fillIdx:msg.fillIdx, bytes:arr } }, '*');
+        };
+        reader.readAsArrayBuffer(blob2);
+      }, 'image/jpeg', msg.quality||0.72);
+    };
+    imgEl.onerror = function(){
+      URL.revokeObjectURL(url);
+      parent.postMessage({ pluginMessage:{ type:'compress_result', nodeId:msg.nodeId, fillIdx:msg.fillIdx, bytes:null } }, '*');
+    };
+    imgEl.src = url;
+    return;
+  }
+
   if(msg.type==='detach_done'||msg.type==='remove_done'){
     var memBefore = _memCurrent;
     if(msg.mem) updateMem(msg.mem);
+    // atualiza score após operação
+    if(_scoreData) {
+      if(mode==='hidden') _scoreData.hidden = 0;
+      else _scoreData.instances = 0;
+      renderScore(_scoreData);
+    }
     var action = mode==='hidden' ? 'hidden' : 'detach';
     addHistory(action, msg.done, 0, msg.mem, memBefore);
 
@@ -648,9 +1299,21 @@ window.onmessage=function(e){
   }
 };
 
-// init — splash de abertura, depois idle
+// init — splash → loading → scan
 try{ $('hdr-pg').textContent = figma.currentPage.name; }catch(e){}
-showSplash(function(){ showOnly('view-idle'); });
+showSplash(function(){
+  // DOM pronto: prepara loading e avisa o code.js para iniciar o scan
+  _ldPrev=-1;
+  mode='comp';
+  var tc=$('tab-comp');   if(tc) tc.className='tab on';
+  var th=$('tab-hidden'); if(th) th.className='tab';
+  var ti=$('tab-img');    if(ti) ti.className='tab';
+  showOnly('view-loading');
+  startLoadingSequence('comp');
+  quickScoreEstimate(1);
+  // sinaliza ao code.js que a UI está pronta para receber resultados
+  parent.postMessage({ pluginMessage: { type: 'ui_ready' } }, '*');
+});
 </script>
 </body>
 </html>

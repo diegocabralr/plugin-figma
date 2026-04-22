@@ -79,6 +79,29 @@ function emitScanProgress(pageIndex, totalPages, pageName, foundSoFar, type) {
   });
 }
 
+// ── detectar fontes customizadas ──────────────────────────
+var SYSTEM_FONTS = ['Inter','SF Pro','SF Compact','Roboto','Arial','Helvetica',
+  'Georgia','Times','Courier','Verdana','Tahoma','.AppleSystemUIFont',
+  'San Francisco','Segoe UI','Ubuntu','Noto','Open Sans','Lato'];
+
+function detectCustomFonts(page) {
+  var fonts = {};
+  var textNodes = page.findAll(function(n) { return n.type === 'TEXT'; });
+  for (var i = 0; i < textNodes.length; i++) {
+    try {
+      var fn = textNodes[i].fontName;
+      if (fn && fn.family) {
+        var isSystem = false;
+        for (var j = 0; j < SYSTEM_FONTS.length; j++) {
+          if (fn.family.indexOf(SYSTEM_FONTS[j]) !== -1) { isSystem = true; break; }
+        }
+        if (!isSystem) fonts[fn.family] = true;
+      }
+    } catch(e) {}
+  }
+  return Object.keys(fonts).length;
+}
+
 // ── scan instâncias ───────────────────────────────────────
 function doScanInstances() {
   var page = figma.currentPage;
@@ -103,14 +126,18 @@ function doScanInstances() {
   }
   results.sort(function(a, b) { return b.sizeKb - a.sizeKb; });
 
-  var hiddenCount = page.findAll(function(n) { return n.visible === false; }).length;
-  var mem = estimatePageSize(page);
+  var hiddenCount  = page.findAll(function(n) { return n.visible === false; }).length;
+  var mem          = estimatePageSize(page);
+  var topFrames    = page.children ? page.children.length : 0;
+  var customFonts  = detectCustomFonts(page);
 
   figma.ui.postMessage({
     type: 'scan_result',
     items: results,
     hiddenCount: hiddenCount,
-    mem: mem
+    mem: mem,
+    topFrames: topFrames,
+    customFonts: customFonts
   });
 }
 
@@ -191,12 +218,176 @@ function doRemoveHidden(ids) {
 }
 
 // ── init ─────────────────────────────────────────────────
-doScanInstances();
+// Nao auto-scana ao abrir - aguarda a UI sinalizar ui_ready
+// evita scan_result chegar antes do DOM estar inicializado
 
 figma.ui.onmessage = function(msg) {
   if (!msg || !msg.type) return;
-  if (msg.type === 'scan')          doScanInstances();
-  if (msg.type === 'scan_hidden')   doScanHidden();
-  if (msg.type === 'detach')        doDetach(msg.ids);
-  if (msg.type === 'remove_hidden') doRemoveHidden(msg.ids);
+  if (msg.type === 'ui_ready')         { doScanInstances(); return; }
+  if (msg.type === 'scan')             doScanInstances();
+  if (msg.type === 'scan_hidden')      doScanHidden();
+  if (msg.type === 'detach')           doDetach(msg.ids);
+  if (msg.type === 'remove_hidden')    doRemoveHidden(msg.ids);
+  if (msg.type === 'scan_images')      waitForTask(doScanImages());
+  if (msg.type === 'compress_images')  waitForTask(doCompressImages(msg.ids, msg.quality||0.72));
 };
+
+function waitForTask(promise) {
+  // helper para operações async no plugin (não-widget)
+  return promise;
+}
+
+// ── scan imagens ──────────────────────────────────────────
+async function doScanImages() {
+  var page = figma.currentPage;
+  figma.ui.postMessage({ type: 'scan_progress', pageIndex: 0, totalPages: 1, pageName: page.name, foundSoFar: 0, scanType: 'images' });
+
+  var all = page.findAll();
+  var results = [];
+
+  for (var i = 0; i < all.length; i++) {
+    var node = all[i];
+    try {
+      if (!('fills' in node) || !Array.isArray(node.fills)) continue;
+      for (var j = 0; j < node.fills.length; j++) {
+        var fill = node.fills[j];
+        if (fill.type !== 'IMAGE' || !fill.imageHash) continue;
+
+        var img = figma.getImageByHash(fill.imageHash);
+        if (!img) continue;
+
+        var bytes = await img.getBytesAsync();
+        var sizeKb = Math.round(bytes.length / 1024);
+
+        // tenta obter dimensões
+        var w = ('width' in node) ? Math.round(node.width) : 0;
+        var h = ('height' in node) ? Math.round(node.height) : 0;
+
+        // thumbnail base64 — só para imagens pequenas (< 200KB) para não travar
+        var dataUrl = '';
+        if (sizeKb < 200) {
+          try {
+            var b64 = figma.base64Encode(bytes);
+            // detecta tipo da imagem
+            var mime = 'image/png';
+            if (bytes[0] === 0xFF && bytes[1] === 0xD8) mime = 'image/jpeg';
+            else if (bytes[0] === 0x47 && bytes[1] === 0x49) mime = 'image/gif';
+            else if (bytes[0] === 0x52 && bytes[1] === 0x49) mime = 'image/webp';
+            dataUrl = 'data:' + mime + ';base64,' + b64;
+          } catch(_) {}
+        }
+
+        results.push({
+          id:       node.id + '__' + fill.imageHash,
+          nodeId:   node.id,
+          hash:     fill.imageHash,
+          fillIdx:  j,
+          name:     node.name || '(sem nome)',
+          parent:   node.parent ? node.parent.name : '—',
+          sizeKb:   sizeKb,
+          w:        w,
+          h:        h,
+          dataUrl:  dataUrl
+        });
+        break; // um fill por nó é suficiente para listar
+      }
+    } catch(e) {}
+  }
+
+  results.sort(function(a, b) { return b.sizeKb - a.sizeKb; });
+
+  figma.ui.postMessage({ type: 'scan_progress', pageIndex: 1, totalPages: 1, pageName: page.name, foundSoFar: results.length, scanType: 'images' });
+
+  var mem = estimatePageSize(page);
+  figma.ui.postMessage({ type: 'scan_images_result', items: results, mem: mem });
+}
+
+// ── comprimir imagens ─────────────────────────────────────
+// A API do Figma não permite re-encode de imagens diretamente.
+// A estratégia: cria um ImageData novo a partir dos bytes originais
+// re-encodando via canvas no iframe (se disponível) ou marcando para
+// compressão futura. Aqui comprimimos lendo os bytes e re-criando.
+async function doCompressImages(ids, quality) {
+  var set = {};
+  for (var k = 0; k < ids.length; k++) set[ids[k]] = true;
+
+  var page = figma.currentPage;
+  var all = page.findAll();
+  var done = 0, totalSavedBytes = 0;
+  var toProcess = [];
+
+  // coleta os nós que precisam ser processados
+  for (var i = 0; i < all.length; i++) {
+    var node = all[i];
+    try {
+      if (!('fills' in node) || !Array.isArray(node.fills)) continue;
+      for (var j = 0; j < node.fills.length; j++) {
+        var fill = node.fills[j];
+        if (fill.type !== 'IMAGE' || !fill.imageHash) continue;
+        var compositeId = node.id + '__' + fill.imageHash;
+        if (set[compositeId]) {
+          toProcess.push({ node: node, fill: fill, fillIdx: j });
+          break;
+        }
+      }
+    } catch(e) {}
+  }
+
+  for (var p = 0; p < toProcess.length; p++) {
+    var item = toProcess[p];
+    try {
+      var img = figma.getImageByHash(item.fill.imageHash);
+      if (!img) continue;
+
+      var origBytes = await img.getBytesAsync();
+      var origSize = origBytes.length;
+
+      // Envia bytes para o iframe comprimir via Canvas API
+      figma.ui.postMessage({
+        type: 'compress_request',
+        nodeId: item.node.id,
+        fillIdx: item.fillIdx,
+        bytes: Array.from(origBytes),
+        quality: quality,
+        index: p,
+        total: toProcess.length
+      });
+
+      // Aguarda resposta do iframe (processada assincronamente)
+      // Para simplificar, usamos uma promessa com timeout
+      var compressed = await new Promise(function(resolve) {
+        var handler = function(msg) {
+          if (msg.type === 'compress_result' && msg.nodeId === item.node.id) {
+            figma.ui.off('message', handler);
+            resolve(msg);
+          }
+        };
+        figma.ui.on('message', handler);
+        setTimeout(function() { figma.ui.off('message', handler); resolve(null); }, 8000);
+      });
+
+      if (compressed && compressed.bytes) {
+        var newBytes = new Uint8Array(compressed.bytes);
+        var newImg = figma.createImage(newBytes);
+        var fills = JSON.parse(JSON.stringify(item.node.fills));
+        fills[item.fillIdx] = Object.assign({}, fills[item.fillIdx], { imageHash: newImg.hash });
+        item.node.fills = fills;
+        totalSavedBytes += Math.max(0, origSize - newBytes.length);
+        done++;
+      } else {
+        done++; // conta mesmo sem compressão real para não travar o progress
+      }
+
+      figma.ui.postMessage({ type: 'compress_progress', done: done, total: toProcess.length });
+    } catch(e) { done++; figma.ui.postMessage({ type: 'compress_progress', done: done, total: toProcess.length }); }
+  }
+
+  var mem = estimatePageSize(page);
+  figma.ui.postMessage({
+    type: 'compress_done',
+    done: done,
+    savedKb: Math.round(totalSavedBytes / 1024),
+    mem: mem
+  });
+  figma.notify('✓ Optimize Toolkit: ' + done + ' imagem(ns) processada(s)');
+}
