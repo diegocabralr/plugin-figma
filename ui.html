@@ -1,0 +1,3682 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<style>
+/* ════════════════════════════════════════════════════════════
+   OPTIMIZE TOOLKIT — Design System Revolut
+   Font display : Aeonik Pro (com fallback Inter/Arial)
+   Font body/UI : Inter, system-ui
+   Cores        : #191c1f (dark) · #f4f4f4 (surface) · #fff
+   Botões       : pill (9999px) — único padrão
+   Sombras      : ZERO — profundidade por contraste
+   Radius cards : 12px / 20px
+   Base spacing : 8px
+   ════════════════════════════════════════════════════════════ */
+
+/* Inter carregada via <link> no head com preconnect */
+
+:root {
+  /* ── Revolut palette — invariantes ── */
+  --rev-teal:    #00a87e;
+  --rev-blue:    #494fdf;
+  --rev-danger:  #e23b4a;
+  --rev-warn:    #ec7e00;
+  --rev-yellow:  #b09000;
+
+  /* ── LIGHT theme (default) ── */
+  --rev-dark:    #191c1f;
+  --rev-white:   #ffffff;
+  --rev-surface: #f4f4f4;
+  --rev-mid:     #505a63;
+  --rev-muted:   #8d969e;
+  --rev-border:  #c9c9cd;
+  --error:       var(--rev-danger);
+  --error-bg:    #fdf2f3;
+
+  /* aliases semânticos */
+  --black:   var(--rev-dark);
+  --gray-60: var(--rev-mid);
+  --gray-20: var(--rev-border);
+  --gray-10: var(--rev-surface);
+  --gray-05: #ebebeb;
+  --white:   var(--rev-white);
+  --ink: var(--rev-dark);
+  --i2:  var(--rev-mid);
+  --i3:  var(--rev-muted);
+  --i4:  var(--rev-border);
+  --surf: var(--rev-white);
+  --rule: var(--rev-border);
+  --r2:  var(--rev-surface);
+
+  /* ── tipografia ── */
+  --display: 'Aeonik Pro','Inter',Arial,sans-serif;
+  --sans:    'Inter',system-ui,-apple-system,sans-serif;
+  --mono:    'SF Mono',Monaco,'Cascadia Code','Roboto Mono',Consolas,'Courier New',monospace;
+
+  /* ── raios Revolut ── */
+  --rad:    9999px;
+  --rad-card: 12px;
+  --rad-lg:   20px;
+}
+
+/* ── DARK theme ──────────────────────────────────────────────
+   Tokens Revolut dark:
+   bg       : #0e1013  (mais fundo que o dark ink #191c1f)
+   surface  : #191c1f  (o ink vira surface no dark)
+   surface2 : #22262b  (elevação 2)
+   texto    : #f4f4f4  (light surface vira texto)
+   muted    : #6b7480
+   border   : #2e3338
+─────────────────────────────────────────────────────────────── */
+/* ── DARK theme — ativado via classe html.dark ── */
+html.dark {
+  --rev-dark:    #f4f4f4;
+  --rev-white:   #0e1013;
+  --rev-surface: #191c1f;
+  --rev-mid:     #a8b0b8;
+  --rev-muted:   #6b7480;
+  --rev-border:  #2e3338;
+  --gray-05:     #22262b;
+  --error-bg:    #2d1215;
+  --black:       #f4f4f4;
+  --white:       #0e1013;
+  --ink:         #f4f4f4;
+  --i2:          #a8b0b8;
+  --i3:          #6b7480;
+  --i4:          #2e3338;
+  --surf:        #0e1013;
+  --rule:        #2e3338;
+  --r2:          #191c1f;
+  --gray-10:     #191c1f;
+  --gray-20:     #2e3338;
+  --gray-60:     #a8b0b8;
+  --error:       var(--rev-danger);
+}
+
+/* ── transição suave de tema em todas as props de cor ──
+   200ms ease — snap percebido, sem brutalidade.
+   Spring não faz sentido para cores (sem overshooot visual).
+─────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  transition:
+    background-color 200ms cubic-bezier(0.4,0,0.2,1),
+    border-color     200ms cubic-bezier(0.4,0,0.2,1),
+    color            200ms cubic-bezier(0.4,0,0.2,1),
+    fill             200ms cubic-bezier(0.4,0,0.2,1),
+    stroke           200ms cubic-bezier(0.4,0,0.2,1);
+}
+/* animações internas não devem herdar a transição de tema */
+.ld-ring-arc,.ld-bar-pulse,.ld-bar-fill,.prog-bar-fill,
+.stb-fill,.mem-seg-orig,.mem-seg-saved,.dots span,.skel,
+.ld-ring-dot {
+  transition: none !important;
+}
+
+/* ── reset ─────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--sans);
+  font-size:14px;line-height:1.5;
+  background:var(--rev-white);color:var(--rev-dark);
+  -webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;
+  height:100vh;        /* altura fixa — o iframe do Figma tem altura definida */
+  overflow:hidden;     /* body não rola — só app-content rola */
+}
+
+/* ── keyframes ──────────────────────────────────────────── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes shimPulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes stepIn{
+  from{opacity:0;transform:translateX(-6px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes dotPulse{0%,80%,100%{opacity:.15}40%{opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes barPulse{
+  0%,100%{opacity:.7} 50%{opacity:1}
+}
+@keyframes indeterminate{
+  0%  {transform:translateX(-100%)}
+  100%{transform:translateX(400%)}
+}
+
+/* reticências */
+.dots span{display:inline-block;animation:dotPulse 1.4s ease-in-out infinite}
+.dots span:nth-child(2){animation-delay:.18s}
+.dots span:nth-child(3){animation-delay:.36s}
+
+/* ── header ─────────────────────────────────────────────── */
+.hdr{
+  padding:14px 16px;
+  border-bottom:1px solid var(--rev-surface);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;background:var(--rev-white);
+}
+.wm{
+  font-family:var(--display);
+  font-size:13px;font-weight:500;
+  letter-spacing:.02em;text-transform:uppercase;
+  color:var(--rev-dark);
+  line-height:1;
+}
+.hdr-pg{
+  font-family:var(--mono);font-size:10px;
+  color:var(--rev-muted);letter-spacing:.03em;
+}
+
+/* ── tabs ───────────────────────────────────────────────── */
+.tabs{
+  display:flex;border-bottom:1px solid var(--rev-surface);
+  flex-shrink:0;background:var(--rev-white);
+}
+.tab{
+  flex:1;padding:11px 0;
+  font-family:var(--sans);font-size:11px;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;text-align:center;
+  color:var(--rev-muted);background:transparent;border:none;cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:color .15s,border-color .15s,background .15s;
+}
+.tab:hover{color:var(--rev-dark);background:var(--rev-surface)}
+.tab.on{color:var(--rev-dark);border-bottom-color:var(--rev-dark)}
+
+/* ── skeleton ───────────────────────────────────────────── */
+.skel{background:var(--rev-surface);border-radius:var(--rad-card);animation:shimPulse 1.6s ease-in-out infinite}
+.skel-row{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--rev-surface)}
+.skel-icon{width:32px;height:32px;border-radius:var(--rad-card);flex-shrink:0}
+.skel-body{flex:1;display:flex;flex-direction:column;gap:7px}
+.skel-line{height:8px;border-radius:9999px}
+.skel-line.w70{width:70%}.skel-line.w45{width:45%}
+.skel-meta{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.skel-line.w28{width:28px}.skel-line.w20{width:20px}
+
+/* ── idle ───────────────────────────────────────────────── */
+#view-idle{
+  padding:40px 24px 32px;
+  display:flex;flex-direction:column;align-items:center;gap:24px;
+}
+.idle-icon{
+  width:52px;height:52px;border-radius:var(--rad-lg);
+  background:var(--rev-surface);
+  display:flex;align-items:center;justify-content:center;
+}
+.idle-title{
+  font-family:var(--display);
+  font-size:18px;font-weight:500;letter-spacing:-.02em;
+  line-height:1.2;margin-bottom:6px;text-align:center;color:var(--rev-dark);
+}
+.idle-sub{
+  font-size:13px;color:var(--rev-muted);
+  line-height:1.5;text-align:center;
+}
+/* ── Botão primário PILL Revolut ── */
+.btn-scan{
+  width:100%;padding:14px 32px;
+  background:var(--rev-dark);color:var(--rev-white);
+  border:none;border-radius:var(--rad);   /* 9999px pill */
+  font-family:var(--sans);font-size:14px;font-weight:600;
+  letter-spacing:.02em;cursor:pointer;
+  transition:opacity .15s;
+}
+.btn-scan:hover{opacity:.85}
+.btn-scan:focus-visible{outline:2px solid var(--rev-dark);outline-offset:3px}
+
+/* ── splash ─────────────────────────────────────────────── */
+#view-splash{padding:40px 24px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.splash-name{font-family:var(--display);font-size:13px;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.splash-bar-wrap{width:100%;display:flex;flex-direction:column;gap:6px}
+.splash-bar-lbl{font-size:12px;color:var(--rev-muted)}
+.splash-track{height:2px;background:var(--rev-surface);overflow:hidden;border-radius:9999px}
+.splash-fill{height:100%;background:var(--rev-dark);width:0%;transition:width .3s ease}
+
+
+/* ── advanced page ── */
+.adv-section{padding:12px 16px;border-bottom:1px solid var(--rev-surface)}
+.adv-section-title{
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--rev-muted);margin-bottom:10px;
+}
+.adv-item{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:12px;                            /* garante espaço entre info e botão */
+  padding:12px 0;border-bottom:1px solid var(--rev-surface);
+}
+.adv-item:last-child{border-bottom:none}
+.adv-item-info{
+  flex:1;min-width:0;                  /* permite text truncation */
+  display:flex;flex-direction:column;gap:3px;
+}
+.adv-item-name{
+  font-size:13px;font-weight:600;
+  color:var(--rev-dark);
+  line-height:1.3;
+}
+.adv-item-desc{
+  font-size:11px;color:var(--rev-muted);
+  line-height:1.45;
+  /* wrap natural — sem overflow */
+}
+.adv-run{
+  flex-shrink:0;
+  padding:7px 14px;
+  background:transparent;color:var(--rev-dark);
+  border:1.5px solid var(--rev-border);border-radius:9999px;
+  font-size:11px;font-weight:600;letter-spacing:.02em;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+  align-self:flex-start;             /* alinha ao topo, não estica */
+}
+.adv-run:hover{border-color:var(--rev-dark);background:var(--rev-surface)}
+.adv-run:disabled{opacity:.4;cursor:not-allowed}
+/* resultado */
+.adv-result{
+  font-size:11px;color:var(--rev-muted);
+  padding:6px 0 2px;line-height:1.5;display:none;
+}
+.adv-result.visible{display:block}
+.adv-result b{color:var(--rev-dark)}
+/* flow score card */
+.flow-score-card{
+  margin:12px 0;padding:14px;
+  border:1.5px solid var(--rev-surface);border-radius:12px;
+}
+.flow-score-num{
+  font-family:var(--display);font-size:40px;font-weight:500;
+  letter-spacing:-.5px;line-height:1;margin-bottom:4px;
+}
+.flow-score-lbl{font-size:12px;color:var(--rev-muted);margin-bottom:12px}
+.flow-score-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.flow-score-metric{padding:8px;background:var(--rev-surface);border-radius:8px}
+.flow-score-metric-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--rev-dark)}
+.flow-score-metric-lbl{font-size:10px;color:var(--rev-muted);margin-top:2px}
+
+/* ── ícone history no header ── */
+.hdr-actions{display:flex;align-items:center;gap:2px}
+.btn-icon{
+  width:30px;height:30px;border-radius:9999px;
+  background:transparent;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--rev-muted);
+  /* transição de cor já coberta pelo * rule acima */
+}
+.btn-icon:hover{background:var(--rev-surface);color:var(--rev-dark)}
+
+/* tema toggle — ícone com rotação ao trocar */
+.btn-theme svg{
+  transition: transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1), /* spring para o ícone */
+              opacity 180ms ease;
+}
+.btn-theme.switching svg{
+  transform: rotate(180deg) scale(0.7);
+  opacity: 0;
+}
+/* pill indicador de tema — pequeno dot embaixo do botão */
+.theme-indicator{
+  width:4px;height:4px;border-radius:50%;
+  background:var(--rev-teal);
+  margin:0 auto;margin-top:1px;
+  opacity:0;transition:opacity .2s ease;
+}
+html.dark .theme-indicator{ opacity:1; }
+
+/* ── page history ── */
+#page-history{display:none;flex-direction:column;flex:1}
+
+/* ── badges do menu home ── */
+.mi-badge.done{
+  background:#dcfce7;color:#15803d;
+  font-size:10px;font-weight:600;
+}
+
+/* ════════════════════════════════════════════════════════════
+   LOADING Revolut — fullscreen centrado, sem botão de voltar
+   Motion: pulse orbital + fade suave nas fases
+   ════════════════════════════════════════════════════════════ */
+#view-loading{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  flex:1;padding:0 32px 40px;
+  gap:0;position:relative;
+}
+
+/* anel orbital pulsante */
+@keyframes orbit{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes orbitPulse{0%,100%{opacity:.15}50%{opacity:1}}
+.ld-ring-wrap{
+  position:relative;width:64px;height:64px;
+  margin:0 auto 28px;
+}
+.ld-ring{
+  width:64px;height:64px;border-radius:50%;
+  border:2px solid var(--rev-surface);
+  position:absolute;top:0;left:0;
+}
+.ld-ring-arc{
+  width:64px;height:64px;border-radius:50%;
+  border:2px solid transparent;
+  border-top-color:var(--rev-dark);
+  position:absolute;top:0;left:0;
+  animation:orbit .9s linear infinite;
+}
+.ld-ring-dot{
+  position:absolute;width:6px;height:6px;
+  border-radius:50%;background:var(--rev-dark);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  animation:orbitPulse 1.8s ease-in-out infinite;
+}
+
+/* fase / mensagem contextual */
+.ld-phase{
+  text-align:center;min-height:18px;
+  margin-bottom:10px;position:relative;
+}
+.ld-phase-txt{
+  display:block;font-size:13px;font-weight:500;
+  color:var(--rev-dark);
+  animation:fadeUp .3s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+/* contador */
+.ld-count{
+  font-family:var(--display);
+  font-size:40px;font-weight:500;letter-spacing:-.5px;
+  color:var(--rev-dark);line-height:1;margin-bottom:4px;
+  text-align:center;
+  transition:transform .15s ease;
+}
+.ld-count.pop{transform:scale(1.06)}
+.ld-unit{
+  font-size:12px;color:var(--rev-muted);
+  text-align:center;margin-bottom:28px;min-height:16px;
+}
+
+/* barra de progresso — fina, Revolut style */
+.ld-bar-wrap{
+  position:relative;width:100%;height:1px;
+  background:var(--rev-surface);border-radius:9999px;
+  overflow:hidden;margin-bottom:24px;
+}
+.ld-bar-fill{
+  position:absolute;top:0;left:0;height:100%;
+  background:var(--rev-dark);border-radius:9999px;
+  width:0%;transition:width .6s ease;
+}
+.ld-bar-pulse{
+  position:absolute;top:0;left:0;height:100%;width:35%;
+  background:linear-gradient(90deg,transparent,rgba(0,0,0,.25),transparent);
+  border-radius:9999px;
+  animation:indeterminate 1.2s ease-in-out infinite;
+}
+.ld-bar-pulse.done{display:none}
+
+/* steps — lista compacta */
+.ld-log{
+  display:flex;flex-direction:column;gap:6px;
+  width:100%;
+}
+.ld-step{
+  display:flex;align-items:center;gap:8px;
+  animation:stepIn .22s ease forwards;opacity:0;
+}
+.ld-step-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:var(--rev-surface);flex-shrink:0;transition:background .2s;
+}
+.ld-step-dot.done{background:var(--rev-teal)}
+.ld-step-txt{font-size:12px;color:var(--rev-muted);transition:color .2s}
+.ld-step-txt.done{color:var(--rev-dark);font-weight:500}
+
+/* ── progress (detach / remove / compress) ──────────────── */
+#view-progress{
+  padding:32px 24px 0;
+  display:none;flex-direction:column;gap:0;
+}
+.prog-lbl{
+  font-size:12px;color:var(--rev-muted);margin-bottom:32px;
+}
+.prog-count{
+  font-family:var(--display);
+  font-size:48px;font-weight:500;letter-spacing:-.5px;
+  color:var(--rev-dark);line-height:1;margin-bottom:6px;
+  transition:transform .12s ease;
+}
+.prog-count.pop{transform:scale(1.05)}
+.prog-unit{
+  font-size:12px;color:var(--rev-muted);margin-bottom:32px;
+}
+.prog-bar-meta{display:flex;justify-content:space-between;margin-bottom:8px}
+.prog-bar-pct{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--rev-dark)}
+.prog-bar-frac{font-family:var(--mono);font-size:11px;color:var(--rev-muted)}
+
+/* barra de progress — mesmo padrão duplo do loading */
+.prog-bar-wrap{
+  position:relative;height:2px;
+  background:var(--rev-surface);border-radius:9999px;
+  overflow:hidden;margin-bottom:0;
+}
+.prog-bar-fill{
+  position:absolute;top:0;left:0;
+  height:100%;background:var(--rev-dark);
+  border-radius:9999px;width:0%;
+  transition:width .25s ease;
+}
+.prog-bar-pulse{
+  position:absolute;top:0;left:0;height:100%;width:30%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);
+  border-radius:9999px;
+  animation:indeterminate 1.2s ease-in-out infinite;
+}
+.prog-bar-pulse.done{display:none}
+/* compat — ids antigos usados no JS */
+.prog-track{display:none}
+.prog-fill{display:none}
+
+/* ── summary ────────────────────────────────────────────── */
+.summary{
+  padding:12px 16px;border-bottom:1px solid var(--rev-surface);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.sum-left{display:flex;align-items:baseline;gap:8px}
+.sum-n{
+  font-family:var(--display);
+  font-size:24px;font-weight:500;line-height:1;color:var(--rev-dark);
+}
+.sum-lbl{font-size:12px;color:var(--rev-muted)}
+.sum-sz{font-family:var(--mono);font-size:11px;color:var(--rev-muted)}
+
+/* ── toolbar ────────────────────────────────────────────── */
+.toolbar{
+  padding:10px 16px;border-bottom:1px solid var(--rev-surface);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.cb-all{width:14px;height:14px;accent-color:var(--rev-dark);cursor:pointer}
+.sel-lbl{font-size:12px;color:var(--rev-muted);cursor:pointer;user-select:none}
+.sel-ct{font-family:var(--mono);font-size:11px;color:var(--rev-muted)}
+
+/* ── lista de itens ─────────────────────────────────────── */
+.item-list{overflow-y:auto;max-height:220px}
+.item-list::-webkit-scrollbar{width:3px}
+.item-list::-webkit-scrollbar-thumb{background:var(--rev-surface);border-radius:9999px}
+.ci{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;border-bottom:1px solid var(--rev-surface);
+  cursor:pointer;transition:background .1s;
+}
+.ci:hover{background:var(--rev-surface)}.ci.sel{background:var(--rev-surface);outline:1.5px solid var(--rev-border);outline-offset:-1px}
+.ci:last-child{border-bottom:none}
+.ci-cb{width:14px;height:14px;accent-color:var(--rev-dark);flex-shrink:0;cursor:pointer}
+.sz-bar{
+  width:30px;height:30px;border-radius:var(--rad-card);
+  background:var(--rev-surface);flex-shrink:0;
+  display:flex;align-items:flex-end;padding:3px;overflow:hidden;
+}
+.sz-fill{width:100%;background:var(--rev-mid);border-radius:4px}
+.eye-ic{
+  width:30px;height:30px;border-radius:var(--rad-card);
+  background:var(--rev-surface);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.ci-info{flex:1;min-width:0}
+.ci-name{
+  font-size:13px;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:var(--rev-dark);
+}
+.ci-par{
+  font-size:11px;color:var(--rev-muted);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ci-meta{text-align:right;flex-shrink:0}
+.ci-kb{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--rev-dark)}
+.ci-nodes{font-family:var(--mono);font-size:10px;color:var(--rev-muted)}
+.ci-bar{height:2px;border-radius:9999px;margin-top:4px;transition:width .3s ease}
+
+/* ── footer ─────────────────────────────────────────────── */
+.footer{
+  padding:12px 16px;border-top:1px solid var(--rev-surface);
+  display:flex;flex-direction:column;gap:8px;flex-shrink:0;
+}
+
+/* Botão primário pill */
+.btn-primary{
+  width:100%;padding:12px 32px;
+  background:var(--rev-dark);color:var(--rev-white);
+  border:none;border-radius:var(--rad);
+  font-family:var(--sans);font-size:13px;font-weight:600;
+  cursor:pointer;transition:opacity .15s;
+}
+.btn-primary:hover{opacity:.85}
+.btn-primary:disabled{background:var(--rev-surface);color:var(--rev-muted);cursor:not-allowed;opacity:1}
+.btn-primary:focus-visible{outline:2px solid var(--rev-dark);outline-offset:3px}
+
+/* Botão secondary outlined pill */
+.btn-secondary{
+  width:100%;padding:10px 32px;
+  background:transparent;color:var(--rev-dark);
+  border:1.5px solid var(--rev-dark);border-radius:var(--rad);
+  font-family:var(--sans);font-size:13px;font-weight:600;
+  cursor:pointer;transition:opacity .15s,background .15s;
+}
+.btn-secondary:hover{background:var(--rev-surface)}
+.btn-secondary:focus-visible{outline:2px solid var(--rev-dark);outline-offset:3px}
+
+/* botão quick-action hidden */
+.btn-hidden-quick{
+  display:none;width:100%;padding:10px 32px;
+  background:transparent;color:var(--rev-dark);
+  border:1.5px solid var(--rev-border);border-radius:var(--rad);
+  font-family:var(--sans);font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .15s;
+}
+.btn-hidden-quick.visible{display:block}
+.btn-hidden-quick:hover{border-color:var(--rev-dark)}
+
+/* ── imagens ────────────────────────────────────────────── */
+.img-toolbar{
+  padding:10px 16px;border-bottom:1px solid var(--rev-surface);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.quality-toggle{
+  display:flex;align-items:center;
+  background:var(--rev-surface);
+  border-radius:9999px;
+  padding:3px;gap:2px;
+}
+.qt-btn{
+  font-family:var(--sans);font-size:11px;font-weight:600;
+  letter-spacing:.02em;
+  padding:5px 12px;border:none;
+  background:transparent;
+  color:var(--rev-muted);
+  border-radius:9999px;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.qt-btn.on{
+  background:var(--rev-dark);color:var(--rev-white);
+  box-shadow:0 1px 3px rgba(0,0,0,.12);
+}
+.qt-btn:not(.on):hover{background:rgba(0,0,0,.06);color:var(--rev-dark)}
+.quality-lbl{font-family:var(--mono);font-size:10px;color:var(--rev-muted)}
+
+.ii{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;border-bottom:1px solid var(--rev-surface);
+  cursor:pointer;transition:background .1s;
+}
+.ii:hover{background:var(--rev-surface)}.ii.sel{background:var(--rev-surface);outline:1.5px solid var(--rev-border);outline-offset:-1px}.ii:last-child{border-bottom:none}
+.ii-cb{width:14px;height:14px;accent-color:var(--rev-dark);flex-shrink:0;cursor:pointer}
+.ii-thumb{
+  width:38px;height:30px;border-radius:var(--rad-card);
+  background:var(--rev-surface);flex-shrink:0;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.ii-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.ii-thumb-ph{width:14px;height:14px;opacity:.3}
+.ii-info{flex:1;min-width:0}
+.ii-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--rev-dark)}
+.ii-par{font-size:11px;color:var(--rev-muted);margin-top:1px}
+.ii-meta{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:2px;max-width:72px}
+.ii-kb{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--rev-dark)}
+.ii-kb.heavy{color:var(--rev-danger)}
+.ii-dim{font-family:var(--mono);font-size:10px;color:var(--rev-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:68px}
+.ii-weight{height:2px;border-radius:9999px;margin-top:2px;transition:width .3s ease}
+.ii-compressed{display:none;align-items:center;gap:4px;margin-top:3px}
+.ii-compressed.visible{display:flex}
+.ii-compressed-dot{width:4px;height:4px;border-radius:50%;background:var(--rev-teal);flex-shrink:0}
+.ii-compressed-txt{font-family:var(--mono);font-size:10px;color:var(--rev-teal)}
+.ii-kb-was{font-family:var(--mono);font-size:10px;color:var(--rev-muted);text-decoration:line-through}
+#img-quality-hint{
+  padding:7px 16px;border-bottom:1px solid var(--rev-surface);
+  font-size:11px;color:var(--rev-muted);
+}
+
+/* ── guardrail modal ────────────────────────────────────── */
+#guardrail-overlay{
+  position:fixed;inset:0;
+  background:rgba(25,28,31,.5);
+  z-index:100;display:none;
+  align-items:center;justify-content:center;padding:24px;
+  animation:fadeIn .15s ease;
+}
+#guardrail-overlay.visible{display:flex}
+.guard-card{
+  background:var(--rev-white);
+  border-radius:var(--rad-lg);
+  padding:24px;width:100%;max-width:280px;
+  /* Revolut usa ZERO sombras — profundidade por contraste */
+  border:1px solid var(--rev-surface);
+  animation:slideUp .2s ease;
+}
+.guard-icon{
+  width:36px;height:36px;border-radius:var(--rad-card);
+  background:var(--error-bg);
+  display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+}
+.guard-title{
+  font-family:var(--display);
+  font-size:16px;font-weight:500;letter-spacing:-.02em;
+  color:var(--rev-dark);margin-bottom:8px;
+}
+.guard-msg{
+  font-size:13px;color:var(--rev-mid);
+  line-height:1.5;margin-bottom:20px;white-space:pre-wrap;
+}
+.guard-btn{
+  width:100%;padding:14px 32px;
+  background:var(--rev-dark);color:var(--rev-white);
+  border:none;border-radius:var(--rad);
+  font-family:var(--sans);font-size:14px;font-weight:600;
+  cursor:pointer;transition:opacity .15s;
+  text-transform:uppercase;letter-spacing:.04em;
+}
+.guard-btn:hover{opacity:.85}
+
+/* ── banner COMPONENT_SET ───────────────────────────────── */
+#comp-set-banner{
+  display:none;margin:8px 16px;padding:10px 14px;
+  border-radius:var(--rad-card);
+  background:#fffbeb;border:1px solid #fcd34d;
+}
+#comp-set-banner.visible{display:flex;align-items:flex-start;gap:8px}
+.csb-icon{flex-shrink:0;margin-top:1px}
+.csb-txt{font-size:12px;color:#92400e;line-height:1.5}
+
+/* ── score top bar ──────────────────────────────────────── */
+#score-top-bar{
+  padding:12px 16px;
+  border-bottom:1px solid var(--rev-surface);
+  background:var(--rev-white);flex-shrink:0;cursor:pointer;
+  transition:background .12s;
+}
+#score-top-bar:hover{background:var(--rev-surface)}
+.stb-row{display:flex;align-items:center;gap:10px}
+.stb-lbl{
+  font-family:var(--sans);font-size:11px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--rev-muted);white-space:nowrap;
+}
+.stb-track{
+  flex:1;height:2px;
+  background:var(--rev-surface);border-radius:9999px;overflow:hidden;
+}
+.stb-fill{height:100%;border-radius:9999px;transition:width .5s ease,background .3s ease}
+.stb-num{
+  font-family:var(--display);font-size:14px;font-weight:500;
+  color:var(--rev-dark);white-space:nowrap;
+}
+.stb-badge{
+  font-size:10px;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;
+  padding:3px 8px;border-radius:var(--rad);white-space:nowrap;
+}
+.stb-badge.ready{background:#dcfce7;color:#15803d}
+.stb-badge.warn {background:#fef9c3;color:#a16207}
+.stb-badge.heavy{background:#ffedd5;color:#c2410c}
+.stb-badge.crit {background:var(--error-bg);color:var(--rev-danger)}
+
+/* histórico */
+.stb-hist{overflow:hidden;max-height:0;transition:max-height .25s ease}
+.stb-hist.open{max-height:200px}
+.stb-hist-inner{padding:8px 0 4px;display:flex;flex-direction:column;gap:5px}
+.stb-hist-row{display:flex;align-items:center;gap:8px;padding:2px 0}
+.stb-hist-time{font-family:var(--mono);font-size:10px;color:var(--rev-muted);min-width:32px}
+.stb-hist-bar{flex:1;height:1px;background:var(--rev-surface);overflow:hidden;border-radius:9999px}
+.stb-hist-fill{height:100%;border-radius:9999px}
+.stb-hist-val{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--rev-dark);min-width:24px;text-align:right}
+.stb-hist-lbl{font-size:10px;color:var(--rev-muted)}
+
+/* breakdown */
+.score-breakdown-panel{
+  overflow:hidden;max-height:0;
+  transition:max-height .25s ease;
+  border-bottom:1px solid var(--rev-surface);
+}
+.score-breakdown-panel.open{max-height:260px}
+.score-bd-wrap{padding:10px 16px 12px}
+.bd-row{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 0;border-bottom:1px solid var(--rev-surface);
+}
+.bd-row:last-child{border-bottom:none}
+.bd-icon{
+  width:16px;height:16px;border-radius:var(--rad-card);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;
+}
+.bd-icon.ok{background:#dcfce7;color:#15803d}
+.bd-icon.bad{background:var(--error-bg);color:var(--rev-danger)}
+.bd-icon.mid{background:#fef9c3;color:#a16207}
+.bd-lbl{flex:1;font-size:11px;color:var(--rev-muted)}
+.bd-val{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--rev-dark);text-align:right}
+.bd-pen{font-family:var(--mono);font-size:11px;color:var(--rev-muted);text-align:right;min-width:28px}
+
+/* ── bottom bar ─────────────────────────────────────────── */
+#bottom-bar{
+  position:sticky;bottom:0;
+  padding:12px 16px;
+  border-top:1px solid var(--rev-surface);
+  background:var(--rev-white);flex-shrink:0;display:none;
+}
+#bottom-bar.visible{display:block}
+.btn-novo-scan{
+  width:100%;padding:12px 32px;
+  background:var(--rev-surface);color:var(--rev-dark);
+  border:none;border-radius:var(--rad);
+  font-family:var(--sans);font-size:13px;font-weight:600;
+  cursor:pointer;transition:opacity .15s;
+}
+.btn-novo-scan:hover{opacity:.75}
+.btn-novo-scan:focus-visible{outline:2px solid var(--rev-dark);outline-offset:3px}
+
+/* ── result ─────────────────────────────────────────────── */
+#view-result{
+  display:none;padding:40px 24px 20px;
+  flex-direction:column;align-items:center;gap:4px;
+}
+.r-n{
+  font-family:var(--display);
+  font-size:80px;font-weight:500;
+  line-height:1;letter-spacing:-.8px;color:var(--rev-dark);
+}
+.r-u{
+  font-size:12px;color:var(--rev-muted);letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:32px;
+}
+.r-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+.r-table tr{border-bottom:1px solid var(--rev-surface)}
+.r-table tr:last-child{border-bottom:none}
+.r-table td{padding:10px 0;font-size:13px}
+.r-table td:first-child{color:var(--rev-muted)}
+.r-table td:last-child{font-family:var(--mono);font-size:12px;font-weight:500;text-align:right;color:var(--rev-dark)}
+
+/* ── memory bar ─────────────────────────────────────────── */
+.mem-bar{
+  border-top:1px solid var(--rev-surface);
+  padding:12px 16px 8px;background:var(--rev-white);flex-shrink:0;
+}
+.mem-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mem-lbl{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--rev-muted)}
+.mem-val{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--rev-dark)}
+.mem-sub{font-size:11px;color:var(--rev-muted);margin-top:10px;margin-bottom:0;text-align:left}
+.mem-track{
+  height:4px;background:var(--rev-surface);border-radius:9999px;
+  overflow:hidden;margin-bottom:8px;display:flex;
+}
+.mem-seg-orig{height:100%;background:var(--rev-dark);border-radius:9999px 0 0 9999px;transition:width .5s ease;min-width:0}
+.mem-seg-saved{height:100%;background:var(--rev-teal);transition:width .5s ease;min-width:0}
+.mem-legend{display:flex;align-items:center;gap:14px;margin-bottom:2px}
+.mem-leg-item{display:flex;align-items:center;gap:5px}
+.mem-leg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.mem-leg-lbl{font-size:11px;color:var(--rev-muted)}
+.mem-sizes{display:flex;align-items:baseline}
+.mem-size-cur{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--rev-dark)}
+.mem-size-saved{font-family:var(--mono);font-size:11px;color:var(--rev-teal);font-weight:500}
+
+/* ── histórico — estilo extrato bancário Revolut ─────────── */
+.hist{padding:0;flex-shrink:0}
+
+/* grupo de data (Today / Yesterday / 25 abr.) */
+.hist-date-group{padding:0}
+.hist-date-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 16px 8px;
+  position:sticky;top:0;
+  background:var(--rev-white);
+  z-index:2;
+}
+.hist-date-label{
+  font-family:var(--display);
+  font-size:15px;font-weight:500;letter-spacing:-.01em;
+  color:var(--rev-dark);
+}
+.hist-date-sub{font-size:12px;color:var(--rev-muted);font-weight:400}
+
+/* linha de transação */
+.hist-entry{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 16px;
+  border-bottom:1px solid var(--rev-surface);
+  animation:fadeUp .22s cubic-bezier(.22,1,.36,1);
+  cursor:default;
+  transition:background .1s;
+}
+.hist-entry:last-child{border-bottom:none}
+.hist-entry:active{background:var(--rev-surface)}
+
+/* ícone categoria — círculo colorido à la Revolut */
+.hist-icon{
+  width:40px;height:40px;border-radius:50%;
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  background:var(--rev-surface);       /* fallback — adapta ao tema */
+  color:var(--rev-dark);
+}
+/* light: tints coloridos suaves */
+.hist-icon.detach  {background:#f1f5f9;color:#334155}
+.hist-icon.hidden  {background:#f3f4f6;color:#374151}
+.hist-icon.img     {background:#eff6ff;color:#1d4ed8}
+.hist-icon.dissolve{background:#f0fdf4;color:#166534}
+.hist-icon.orphans {background:#fefce8;color:#854d0e}
+.hist-icon.effects {background:#fff1f2;color:#9f1239}
+.hist-icon.overrides{background:#faf5ff;color:#6b21a8}
+
+/* dark: usar surface sem cor — ícone SVG herda stroke de currentColor */
+html.dark .hist-icon         {background:var(--rev-surface);color:var(--rev-muted)}
+html.dark .hist-icon.detach  {background:#1e293b;color:#94a3b8}
+html.dark .hist-icon.hidden  {background:#1f2937;color:#9ca3af}
+html.dark .hist-icon.img     {background:#1e3a5f;color:#60a5fa}
+html.dark .hist-icon.dissolve{background:#064e3b;color:#34d399}
+html.dark .hist-icon.orphans {background:#3b2a00;color:#fbbf24}
+html.dark .hist-icon.effects {background:#3b0d12;color:#f87171}
+html.dark .hist-icon.overrides{background:#2e1b4e;color:#a78bfa}
+
+/* info central */
+.hist-info{flex:1;min-width:0}
+.hist-action{
+  font-size:14px;font-weight:500;
+  color:var(--rev-dark);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:2px;
+}
+.hist-meta{font-size:12px;color:var(--rev-muted);line-height:1.4}
+
+/* valor à direita */
+.hist-right{text-align:right;flex-shrink:0}
+.hist-amount{
+  font-family:var(--display);
+  font-size:15px;font-weight:500;
+  color:var(--rev-dark);letter-spacing:-.01em;
+  white-space:nowrap;
+}
+.hist-amount.saved{color:var(--rev-teal)}
+.hist-amount.neutral{color:var(--rev-dark)}
+.hist-ts{
+  font-size:11px;color:var(--rev-muted);
+  display:block;margin-top:2px;
+}
+
+/* chip extra (de/para tamanho, score) */
+.hist-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-top:4px;padding:3px 8px;
+  background:var(--rev-surface);border-radius:9999px;
+  font-size:10px;font-weight:500;color:var(--rev-muted);
+  white-space:nowrap;
+}
+.hist-chip.positive{background:#dcfce7;color:#15803d}
+
+/* estado vazio */
+.hist-empty{
+  padding:32px 16px;text-align:center;
+  font-size:13px;color:var(--rev-muted);line-height:1.6;
+}
+.hist-empty-icon{
+  font-size:28px;margin-bottom:8px;opacity:.4;
+}
+
+
+
+.typo-action{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px;border:1.5px solid var(--rev-surface);
+  border-radius:var(--rad-card);background:var(--rev-white);
+  transition:border-color .15s;
+}
+.typo-action:hover{border-color:var(--rev-border)}
+.typo-action-info{display:flex;flex-direction:column;gap:3px}
+.typo-action-name{font-size:13px;font-weight:600;color:var(--rev-dark)}
+.typo-action-desc{font-size:11px;color:var(--rev-muted)}
+.typo-action-run{
+  font-family:var(--sans);font-size:11px;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;
+  color:var(--rev-dark);padding:8px 16px;
+  border:1.5px solid var(--rev-dark);border-radius:var(--rad);
+  background:transparent;cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.typo-action-run:hover{background:var(--rev-dark);color:var(--rev-white)}
+.typo-action-run:disabled{color:var(--rev-muted);cursor:not-allowed;border-color:var(--rev-border)}
+
+/* ── empty state ────────────────────────────────────────── */
+.empty{padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.empty-t{font-size:14px;font-weight:600;color:var(--rev-dark)}
+.empty-s{font-size:12px;color:var(--rev-muted);line-height:1.5}
+
+/* ════════════════════════════════════════════════════════
+   LAYOUT — sticky chrome + nav pages
+   ════════════════════════════════════════════════════════
+
+   Estrutura do body:
+   ┌─────────────────────────┐  ← sticky-chrome (position:sticky top:0)
+   │  .hdr                   │
+   │  #score-top-bar         │
+   │  #score-breakdown       │
+   └─────────────────────────┘
+   ┌─────────────────────────┐  ← #app-content (flex-1, overflow-y:auto)
+   │  [view ativo]           │  (home ou page-*)
+   └─────────────────────────┘
+   ┌─────────────────────────┐  ← #sticky-actions (position:sticky bottom:0)
+   │  botões de ação         │
+   │  mem-bar + histórico    │
+   └─────────────────────────┘
+*/
+
+/* Chrome fixo no topo — flex-shrink:0 garante que não comprime */
+#sticky-chrome{
+  flex-shrink:0;
+  background:var(--rev-white);
+  border-bottom:1px solid var(--rev-surface);
+  z-index:10;
+}
+
+/* Conteúdo scrollável — cresce entre chrome e actions */
+#app-content{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  display:flex;
+  flex-direction:column;
+  min-height:0; /* essencial para overflow funcionar em flex child */
+}
+#app-content::-webkit-scrollbar{width:3px}
+#app-content::-webkit-scrollbar-thumb{background:var(--rev-surface);border-radius:9999px}
+
+/* Ações fixas no fundo — flex-shrink:0 garante que sempre aparece */
+#sticky-actions{
+  flex-shrink:0;
+  background:var(--rev-white);
+  border-top:1px solid var(--rev-surface);
+  display:none;
+  z-index:10;
+  position:sticky;  /* ancora no fundo do viewport do plugin */
+  bottom:0;
+}
+#sticky-actions.visible{display:block}
+.sa-btns{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+
+/* ── menu home — lista de seções ── */
+#view-home{display:none;flex-direction:column;width:100%}
+.menu-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px;border-bottom:1px solid var(--rev-surface);
+  cursor:pointer;transition:background .12s;
+  text-decoration:none;
+}
+.menu-item:last-child{border-bottom:none}
+.menu-item:hover{background:var(--rev-surface)}
+.menu-item:active{background:#ebebeb}
+.mi-left{display:flex;align-items:center;gap:12px}
+.mi-icon{
+  width:36px;height:36px;border-radius:var(--rad-card);
+  background:var(--rev-surface);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.mi-info{display:flex;flex-direction:column;gap:2px}
+.mi-title{font-size:14px;font-weight:600;color:var(--rev-dark)}
+.mi-sub{font-size:12px;color:var(--rev-muted)}
+.mi-badge{
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  color:var(--rev-muted);background:var(--rev-surface);
+  padding:3px 8px;border-radius:9999px;white-space:nowrap;
+}
+.mi-badge.has-items{background:var(--rev-dark);color:var(--rev-white)}
+.mi-arrow{color:var(--rev-muted);flex-shrink:0}
+
+/* ── page (sub-tela de cada seção) ── */
+.page-view{
+  display:none;flex-direction:column;
+  flex:1;
+}
+.page-view.active{display:flex}
+
+/* top bar da page */
+.page-topbar{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;border-bottom:1px solid var(--rev-surface);
+  background:var(--rev-white);flex-shrink:0;
+}
+.page-back{
+  width:32px;height:32px;border-radius:9999px;
+  background:transparent;
+  border:1.5px solid var(--rev-border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  transition:background .12s, border-color .12s;
+}
+.page-back:hover{
+  background:var(--rev-dark);
+  border-color:var(--rev-dark);
+}
+.page-back:hover svg{
+  stroke:var(--rev-white) !important;
+}
+.page-title{font-size:14px;font-weight:600;color:var(--rev-dark)}
+
+/* scroll interno de cada page */
+.page-scroll{flex:1;overflow-y:auto}
+.page-scroll::-webkit-scrollbar{width:3px}
+.page-scroll::-webkit-scrollbar-thumb{background:var(--rev-surface);border-radius:9999px}
+
+/* ── DARK MODE — ativado via classe html.dark pelo JS ── */
+/* Sem @media de tokens — o JS detecta o SO e adiciona a classe */
+
+/* ── page-back: ícone sempre visível ── */
+.page-back svg{
+  stroke:var(--rev-dark);
+}
+
+/* ── checkbox custom Revolut ── */
+.rev-check{
+  appearance:none;-webkit-appearance:none;
+  width:18px;height:18px;flex-shrink:0;
+  border:1.5px solid var(--rev-border);
+  border-radius:5px;
+  background:transparent;
+  cursor:pointer;
+  position:relative;
+  display:inline-block;
+  vertical-align:middle;
+  transition:all .15s;
+}
+.rev-check:checked{
+  background:var(--rev-dark);
+  border-color:var(--rev-dark);
+}
+.rev-check:checked::after{
+  content:'';
+  position:absolute;
+  left:4px;top:1px;
+  width:6px;height:10px;
+  border:2px solid var(--rev-white);
+  border-top:none;border-left:none;
+  transform:rotate(45deg);
+}
+.rev-check:indeterminate{
+  background:var(--rev-dark);border-color:var(--rev-dark);
+}
+.rev-check:indeterminate::after{
+  content:'';
+  position:absolute;
+  left:3px;top:7px;
+  width:10px;height:2px;
+  background:var(--rev-white);
+  border-radius:1px;
+}
+/* rev-check usa var() — responde automaticamente ao tema */
+
+/* ── empty state rico (pós-operação) ── */
+.empty-rich{
+  padding:32px 20px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:0;text-align:center;
+}
+.empty-rich-check{
+  width:52px;height:52px;border-radius:50%;
+  background:#dcfce7;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;
+}
+html.dark{
+  .empty-rich-check{ background:#064e3b }
+}
+.empty-rich-title{
+  font-family:var(--display);
+  font-size:16px;font-weight:500;letter-spacing:-.01em;
+  color:var(--rev-dark);margin-bottom:6px;
+}
+.empty-rich-sub{
+  font-size:12px;color:var(--rev-muted);
+  line-height:1.6;margin-bottom:14px;
+}
+.empty-rich-chips{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:6px;
+}
+.empty-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:9999px;
+  font-size:11px;font-weight:500;
+  background:var(--rev-surface);color:var(--rev-muted);
+}
+.empty-chip.positive{
+  background:#dcfce7;color:#15803d;
+}
+html.dark{
+  .empty-chip.positive{ background:#064e3b;color:#34d399 }
+}
+
+/* ── page info do score ── */
+#page-info{display:none;flex-direction:column;flex:1}
+.info-section{padding:16px;border-bottom:1px solid var(--rev-surface)}
+.info-section-title{
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--rev-muted);margin-bottom:12px;
+}
+.info-dim{
+  padding:12px 0;border-bottom:1px solid var(--rev-surface);
+}
+.info-dim:last-child{border-bottom:none}
+.info-dim-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.info-dim-name{font-size:13px;font-weight:600;color:var(--rev-dark)}
+.info-dim-weight{font-family:var(--mono);font-size:11px;color:var(--rev-muted)}
+.info-dim-desc{font-size:12px;color:var(--rev-muted);line-height:1.5}
+
+/* ── seta do score breakdown ── */
+.stb-chevron{
+  color:var(--rev-muted);flex-shrink:0;
+  transition:transform 250ms cubic-bezier(.4,0,.2,1);
+}
+.stb-chevron.open{transform:rotate(180deg)}
+</style>
+</head>
+<body>
+
+<!-- guardrail overlay -->
+<div id="guardrail-overlay">
+  <div class="guard-card">
+    <div class="guard-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="guard-title" id="guard-title">Arquivo não elegível</div>
+    <div class="guard-msg" id="guard-msg"></div>
+    <button class="guard-btn" onclick="closeGuardrail()" type="button">Entendido</button>
+  </div>
+</div>
+
+<!-- ════ STICKY CHROME (sempre visível no topo) ════ -->
+<div id="sticky-chrome">
+  <!-- header -->
+  <div class="hdr">
+    <span class="wm">Optimize Toolkit</span>
+    <div class="hdr-actions">
+      <!-- ícone info — abre explicação do score -->
+      <button class="btn-icon" onclick="navTo('info')" title="Como funciona o score" type="button" aria-label="Score info">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      </button>
+      <!-- botão de tema dark/light -->
+      <button class="btn-icon btn-theme" id="btn-theme" onclick="toggleTheme()" title="Alternar tema" type="button" aria-label="Alternar tema escuro/claro">
+        <!-- ícone sun (light) -->
+        <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <!-- ícone moon (dark) — oculto inicialmente -->
+        <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <!-- botão histórico -->
+      <button class="btn-icon" onclick="navTo('history')" title="Histórico" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- score de otimização — sticky no chrome -->
+  <div id="score-top-bar" onclick="toggleScoreBreakdown()">
+    <div class="stb-row">
+      <span class="stb-lbl">Otimização</span>
+      <div class="stb-track"><div class="stb-fill" id="score-fill" style="width:0%"></div></div>
+      <span class="stb-num" id="score-num">—</span>
+      <span class="stb-badge" id="score-status">...</span>
+      <svg class="stb-chevron" id="stb-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="stb-hist" id="score-hist-panel">
+      <div class="stb-hist-inner" id="score-hist-inner"></div>
+    </div>
+  </div>
+  <div class="score-breakdown-panel" id="score-breakdown">
+    <div class="score-bd-wrap">
+      <div class="score-bd-inner" id="score-bd-inner"></div>
+    </div>
+  </div>
+</div>
+<!-- ════ FIM STICKY CHROME ════ -->
+
+<!-- ════ CONTEÚDO SCROLLÁVEL ════ -->
+<div id="app-content">
+
+  <!-- splash (hidden) -->
+  <div id="view-splash" style="display:none">
+    <span class="splash-name">Optimize Toolkit</span>
+    <div class="splash-bar-wrap">
+      <span class="splash-bar-lbl" id="splash-lbl">Iniciando…</span>
+      <div class="splash-track"><div class="splash-fill" id="splash-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- idle -->
+  <div id="view-idle" style="display:none">
+    <div class="idle-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div>
+      <div class="idle-title">Pronto para escanear</div>
+      <div class="idle-sub">Identifica instâncias de componentes<br>e layers ocultas na página atual</div>
+    </div>
+    <button class="btn-scan" onclick="goScan()" type="button">Escanear página</button>
+  </div>
+
+  <!-- loading -->
+  <div id="view-loading" style="display:none">
+    <!-- anel orbital — Revolut motion -->
+    <div class="ld-ring-wrap">
+      <div class="ld-ring"></div>
+      <div class="ld-ring-arc"></div>
+      <div class="ld-ring-dot"></div>
+    </div>
+    <div class="ld-phase"><span class="ld-phase-txt" id="ld-name">Iniciando</span></div>
+    <!-- contador e barra ocultos — sem feedback numérico durante o scan -->
+    <div class="ld-count" id="ld-num" style="display:none"></div>
+    <div class="ld-unit" id="ld-unit" style="display:none"></div>
+    <div class="ld-bar-wrap" style="display:none">
+      <div class="ld-bar-fill" id="ld-fill"></div>
+      <div class="ld-bar-pulse" id="ld-pulse"></div>
+    </div>
+    <div class="ld-log" id="ld-log" style="display:none"></div>
+  </div>
+
+  <!-- skeleton -->
+  <div id="view-skeleton" style="display:none">
+    <div class="skel-row"><div class="skel skel-icon"></div><div class="skel-body"><div class="skel skel-line w70"></div><div class="skel skel-line w45"></div></div><div class="skel-meta"><div class="skel skel-line w28"></div><div class="skel skel-line w20"></div></div></div>
+    <div class="skel-row"><div class="skel skel-icon"></div><div class="skel-body"><div class="skel skel-line w70"></div><div class="skel skel-line w45"></div></div><div class="skel-meta"><div class="skel skel-line w28"></div><div class="skel skel-line w20"></div></div></div>
+    <div class="skel-row" style="opacity:.55"><div class="skel skel-icon"></div><div class="skel-body"><div class="skel skel-line w70"></div><div class="skel skel-line w45"></div></div><div class="skel-meta"><div class="skel skel-line w28"></div><div class="skel skel-line w20"></div></div></div>
+    <div class="skel-row" style="opacity:.25"><div class="skel skel-icon"></div><div class="skel-body"><div class="skel skel-line w70"></div><div class="skel skel-line w45"></div></div><div class="skel-meta"><div class="skel skel-line w28"></div><div class="skel skel-line w20"></div></div></div>
+  </div>
+
+  <!-- ── HOME — menu de navegação ── -->
+  <div id="view-home" style="display:none;flex-direction:column">
+
+    <!-- Componentes -->
+    <div class="menu-item" onclick="navTo('comp')" role="button">
+      <div class="mi-left">
+        <div class="mi-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="7" width="8" height="8" rx="2"/><rect x="14" y="7" width="8" height="8" rx="2"/><rect x="8" y="2" width="8" height="8" rx="2"/><rect x="8" y="14" width="8" height="8" rx="2"/></svg>
+        </div>
+        <div class="mi-info">
+          <span class="mi-title">Componentes</span>
+          <span class="mi-sub">Instâncias vinculadas à biblioteca</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="mi-badge" id="badge-comp">—</span>
+        <svg class="mi-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <!-- Layers ocultas -->
+    <div class="menu-item" onclick="navTo('hidden')" role="button">
+      <div class="mi-left">
+        <div class="mi-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </div>
+        <div class="mi-info">
+          <span class="mi-title">Layers ocultas</span>
+          <span class="mi-sub">Nós invisíveis que pesam o arquivo</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="mi-badge" id="badge-hidden">—</span>
+        <svg class="mi-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <!-- Imagens -->
+    <div class="menu-item" onclick="navTo('img')" role="button">
+      <div class="mi-left">
+        <div class="mi-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="mi-info">
+          <span class="mi-title">Imagens</span>
+          <span class="mi-sub">Comprimir fills de imagem pesados</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="mi-badge" id="badge-img">—</span>
+        <svg class="mi-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <!-- Páginas soltas -->
+    <div class="menu-item" onclick="navTo('loose-pages')" role="button">
+      <div class="mi-left">
+        <div class="mi-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+            <line x1="12" y1="12" x2="12" y2="18"/>
+          </svg>
+        </div>
+        <div class="mi-info">
+          <span class="mi-title">Páginas soltas</span>
+          <span class="mi-sub">Páginas sem frames de interface ou contexto</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="mi-badge" id="badge-loose-pages">—</span>
+        <svg class="mi-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <!-- Protótipo -->
+    <div class="menu-item" onclick="navTo('proto')" role="button">
+      <div class="mi-left">
+        <div class="mi-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div class="mi-info">
+          <span class="mi-title">Protótipo</span>
+          <span class="mi-sub">Transições, fluxo e otimizações avançadas</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <svg class="mi-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+
+  </div><!-- /view-home -->
+
+  <!-- ── PAGE: Componentes ── -->
+  <div class="page-view" id="page-comp">
+    <div class="page-topbar">
+      <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="page-title">Componentes</span>
+    </div>
+    <div class="page-scroll">
+      <div class="summary">
+        <div class="sum-left">
+          <span class="sum-n" id="s-count">0</span>
+          <span class="sum-lbl" id="s-label">encontrados</span>
+        </div>
+        <span class="sum-sz" id="s-size">—</span>
+      </div>
+      <div class="toolbar">
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="checkbox" class="rev-check" id="cb-all" onchange="toggleAll(this.checked)"/>
+          <label class="sel-lbl" for="cb-all">Selecionar tudo</label>
+        </div>
+        <span class="sel-ct" id="sel-ct">0 selecionados</span>
+      </div>
+      <div class="item-list" id="item-list" style="max-height:none"></div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: Layers ocultas ── -->
+  <div class="page-view" id="page-hidden">
+    <div class="page-topbar">
+      <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="page-title">Layers ocultas</span>
+    </div>
+    <div class="page-scroll">
+      <div class="summary">
+        <div class="sum-left">
+          <span class="sum-n" id="h-count">0</span>
+          <span class="sum-lbl" id="h-label">encontradas</span>
+        </div>
+        <span class="sum-sz" id="h-size">—</span>
+      </div>
+      <div class="toolbar">
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="checkbox" class="rev-check" id="cb-all-h" onchange="toggleAll(this.checked)"/>
+          <label class="sel-lbl" for="cb-all-h">Selecionar tudo</label>
+        </div>
+        <span class="sel-ct" id="sel-ct-h">0 selecionadas</span>
+      </div>
+      <div class="item-list" id="item-list-h" style="max-height:none"></div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: Imagens ── -->
+  <div class="page-view" id="page-img">
+    <div class="page-topbar">
+      <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="page-title">Imagens</span>
+    </div>
+    <div class="page-scroll">
+      <div class="summary">
+        <div class="sum-left">
+          <span class="sum-n" id="img-count">0</span>
+          <span class="sum-lbl" id="img-label">imagens encontradas</span>
+        </div>
+        <span class="sum-sz" id="img-size">—</span>
+      </div>
+      <div class="img-toolbar">
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="checkbox" class="rev-check" id="img-cb-all" onchange="toggleAllImg(this.checked)"/>
+          <label class="sel-lbl" for="img-cb-all">Selecionar tudo</label>
+        </div>
+        <div class="quality-toggle">
+          <button class="qt-btn" id="qt-high" onclick="setQuality('high')" type="button">Alta</button>
+          <button class="qt-btn on" id="qt-mid"  onclick="setQuality('mid')"  type="button">Média</button>
+          <button class="qt-btn" id="qt-low"  onclick="setQuality('low')"  type="button">Baixa</button>
+        </div>
+      </div>
+      <div id="img-quality-hint">Qualidade média — JPEG 72% · bom para protótipos</div>
+      <div class="item-list" id="img-list" style="max-height:none"></div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: Páginas soltas ── -->
+  <div class="page-view" id="page-loose-pages">
+    <div class="page-topbar">
+      <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="page-title">Páginas soltas</span>
+    </div>
+    <div class="page-scroll">
+      <div class="summary" id="loose-summary" style="display:none">
+        <div class="sum-row">
+          <span class="sum-n" id="loose-count">0</span>
+          <span class="sum-lbl">páginas encontradas</span>
+        </div>
+      </div>
+      <div class="toolbar" id="loose-toolbar" style="display:none">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" class="rev-check" id="cb-all-loose" onchange="toggleAllLoose(this.checked)"/>
+          <span style="font-size:13px;color:var(--rev-muted)">Selecionar tudo</span>
+        </label>
+        <span class="sel-ct" id="sel-ct-loose"></span>
+      </div>
+      <div id="loose-list"></div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: Protótipo ── -->
+  <div class="page-view" id="page-proto">
+    <div class="page-topbar">
+      <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="page-title">Protótipo</span>
+    </div>
+    <div class="page-scroll">
+
+      <!-- dissolve — mesmo padrão dos adv-items -->
+      <div class="adv-section">
+        <div class="adv-section-title">Interações do protótipo</div>
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Padronizar para Dissolve</span>
+            <span class="adv-item-desc">Aplica Dissolve 300ms em todas as transições da página</span>
+            <div class="adv-result" id="proto-result"></div>
+          </div>
+          <button class="adv-run" id="btn-dissolve" onclick="runSetDissolve()" type="button">Executar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- adv-sections incorporadas do Avançado -->
+    <div id="adv-scroll-in-proto" style="overflow-y:auto">
+
+      <div class="adv-section">
+        <div class="adv-section-title">Estrutura do fluxo</div>
+        <div class="adv-item"><div class="adv-item-info"><span class="adv-item-name">Score do fluxo ativo</span><span class="adv-item-desc">Score só dos frames conectados ao starting point</span><div class="adv-result" id="res-flow-score"></div></div><button class="adv-run" onclick="runAdvanced('score_flow','res-flow-score')" type="button">Calcular</button></div>
+        <div class="adv-item"><div class="adv-item-info"><span class="adv-item-name">Frames órfãos</span><span class="adv-item-desc">Frames sem conexão no prototype</span><div class="adv-result" id="res-orphans"></div></div><button class="adv-run" onclick="runAdvanced('scan_orphans','res-orphans')" type="button">Escanear</button></div>
+        <div class="adv-item"><div class="adv-item-info"><span class="adv-item-name">Loops de navegação</span><span class="adv-item-desc">Ciclos A→B→A que confundem participantes</span><div class="adv-result" id="res-loops"></div></div><button class="adv-run" onclick="runAdvanced('scan_loops','res-loops')" type="button">Escanear</button></div>
+      </div>
+
+      <div class="adv-section">
+        <div class="adv-section-title">Interações</div>
+        <div class="adv-item"><div class="adv-item-info"><span class="adv-item-name">Triggers não-click</span><span class="adv-item-desc">Hover/drag quebram em mobile e no Maze</span><div class="adv-result" id="res-triggers"></div></div><button class="adv-run" onclick="runAdvanced('scan_triggers','res-triggers')" type="button">Escanear</button></div>
+      </div>
+
+      <div class="adv-section">
+        <div class="adv-section-title">Componentes</div>
+        <div class="adv-item"><div class="adv-item-info"><span class="adv-item-name">Limpar overrides</span><span class="adv-item-desc">Remove overrides idênticos ao componente original</span><div class="adv-result" id="res-overrides"></div></div><button class="adv-run" onclick="runAdvanced('clean_overrides','res-overrides')" type="button">Executar</button></div>
+      </div>
+
+      <div class="adv-section">
+        <div class="adv-section-title">Renderização</div>
+        <div class="adv-item"><div class="adv-item-info"><span class="adv-item-name">Scroll desnecessário</span><span class="adv-item-desc">Frames com scroll ativo mas conteúdo que cabe na tela</span><div class="adv-result" id="res-scroll"></div></div><button class="adv-run" onclick="runAdvanced('scan_scroll','res-scroll')" type="button">Escanear</button></div>
+        <div class="adv-item"><div class="adv-item-info"><span class="adv-item-name">Efeitos pesados</span><span class="adv-item-desc">Blur e sombras aumentam custo de composição</span><div class="adv-result" id="res-effects"></div></div><button class="adv-run" onclick="runAdvanced('scan_effects','res-effects')" type="button">Escanear</button></div>
+        <div class="adv-item"><div class="adv-item-info"><span class="adv-item-name">Vetores complexos</span><span class="adv-item-desc">Vetores com 80+ pontos — flatten reduz processamento</span><div class="adv-result" id="res-vectors"></div></div><button class="adv-run" onclick="runAdvanced('scan_vectors','res-vectors')" type="button">Escanear</button></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PAGE: Avançado (incorporado em Protótipo) ── -->
+  <div class="page-view" id="page-advanced">
+    <div class="page-topbar">
+      <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="page-title">Avançado</span>
+    </div>
+    <div class="page-scroll">
+
+      <!-- Estrutura do fluxo -->
+      <div class="adv-section">
+        <div class="adv-section-title">Estrutura do fluxo</div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Score do fluxo ativo</span>
+            <span class="adv-item-desc">Score só dos frames conectados ao starting point</span>
+            <div class="adv-result" id="res-flow-score"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('score_flow','res-flow-score')" type="button">Calcular</button>
+        </div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Frames órfãos</span>
+            <span class="adv-item-desc">Frames sem conexão no prototype — pesam o arquivo</span>
+            <div class="adv-result" id="res-orphans"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('scan_orphans','res-orphans')" type="button">Escanear</button>
+        </div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Loops de navegação</span>
+            <span class="adv-item-desc">Ciclos A→B→A que confundem participantes</span>
+            <div class="adv-result" id="res-loops"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('scan_loops','res-loops')" type="button">Escanear</button>
+        </div>
+      </div>
+
+      <!-- Interações -->
+      <div class="adv-section">
+        <div class="adv-section-title">Interações</div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Triggers não-click</span>
+            <span class="adv-item-desc">Hover/drag quebram em mobile e no Maze</span>
+            <div class="adv-result" id="res-triggers"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('scan_triggers','res-triggers')" type="button">Escanear</button>
+        </div>
+      </div>
+
+      <!-- Componentes -->
+      <div class="adv-section">
+        <div class="adv-section-title">Componentes</div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Limpar overrides</span>
+            <span class="adv-item-desc">Remove overrides idênticos ao componente original</span>
+            <div class="adv-result" id="res-overrides"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('clean_overrides','res-overrides')" type="button">Executar</button>
+        </div>
+      </div>
+
+      <!-- Renderização -->
+      <div class="adv-section">
+        <div class="adv-section-title">Renderização</div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Scroll desnecessário</span>
+            <span class="adv-item-desc">Frames com scroll ativo mas conteúdo que cabe na tela</span>
+            <div class="adv-result" id="res-scroll"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('scan_scroll','res-scroll')" type="button">Escanear</button>
+        </div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Efeitos pesados</span>
+            <span class="adv-item-desc">Blur e sombras aumentam custo de composição</span>
+            <div class="adv-result" id="res-effects"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('scan_effects','res-effects')" type="button">Escanear</button>
+        </div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Vetores complexos</span>
+            <span class="adv-item-desc">Vetores com 80+ pontos — flatten reduz o processamento</span>
+            <div class="adv-result" id="res-vectors"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('scan_vectors','res-vectors')" type="button">Escanear</button>
+        </div>
+      </div>
+
+      <!-- ── Nova seção: Estrutura de nós ── -->
+      <div class="adv-section">
+        <div class="adv-section-title">Estrutura de nós</div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Grupos com filho único</span>
+            <span class="adv-item-desc">Grupos inúteis para organização — dissolve sem impacto visual</span>
+            <div class="adv-result" id="res-single-groups"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('scan_single_groups','res-single-groups')" type="button">Escanear</button>
+        </div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Nós com aninhamento excessivo</span>
+            <span class="adv-item-desc">Elementos com mais de 6 níveis — aumentam o custo de renderização</span>
+            <div class="adv-result" id="res-deep-nodes"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('scan_deep_nodes','res-deep-nodes')" type="button">Escanear</button>
+        </div>
+
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Layers completamente cobertas</span>
+            <span class="adv-item-desc">Retângulos e elipses invisíveis por estarem atrás de outros elementos</span>
+            <div class="adv-result" id="res-covered"></div>
+          </div>
+          <button class="adv-run" onclick="runAdvanced('scan_covered','res-covered')" type="button">Escanear</button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PAGE: Info do Score ── -->
+  <div class="page-view" id="page-info">
+    <div class="page-topbar">
+      <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="page-title">Como funciona o score</span>
+    </div>
+    <div class="page-scroll">
+      <div class="info-section">
+        <p style="font-size:13px;color:var(--rev-muted);line-height:1.6;margin-bottom:0">
+          O score vai de <b style="color:var(--rev-dark)">0 a 100</b> e mede o quanto um arquivo está pronto para ser usado em testes de usabilidade no Maze. Cada dimensão penaliza o score com base na severidade do problema encontrado.
+        </p>
+      </div>
+      <div class="info-section">
+        <div class="info-section-title">Dimensões avaliadas</div>
+        <div class="info-dim">
+          <div class="info-dim-row">
+            <span class="info-dim-name">Instâncias vinculadas</span>
+            <span class="info-dim-weight">até −35 pts</span>
+          </div>
+          <div class="info-dim-desc">Componentes vinculados a bibliotecas externas precisam ser resolvidos pelo Figma ao carregar o protótipo. Quanto mais instâncias, mais lento o carregamento.</div>
+        </div>
+        <div class="info-dim">
+          <div class="info-dim-row">
+            <span class="info-dim-name">Layers ocultas</span>
+            <span class="info-dim-weight">até −20 pts</span>
+          </div>
+          <div class="info-dim-desc">Nós invisíveis ainda são processados pelo motor de renderização. Eles aumentam o peso do arquivo e o tempo de carregamento sem contribuir para o teste.</div>
+        </div>
+        <div class="info-dim">
+          <div class="info-dim-row">
+            <span class="info-dim-name">Imagens pesadas</span>
+            <span class="info-dim-weight">até −25 pts</span>
+          </div>
+          <div class="info-dim-desc">A documentação do Maze aponta imagens como principal causa de crash em iOS. O Figma não comprime imagens automaticamente. O score avalia o peso total e a maior imagem individualmente — imagens acima de 800 KB representam risco real de crash em dispositivos móveis.</div>
+        </div>
+        <div class="info-dim">
+          <div class="info-dim-row">
+            <span class="info-dim-name">Frames e nós</span>
+            <span class="info-dim-weight">até −18 pts</span>
+          </div>
+          <div class="info-dim-desc">O Figma usa memória WebAssembly (WASM) para renderizar nós. Acima de 8000 nós o protótipo fica lento; acima de 15000 pode travar em iOS. Frames individuais não penalizam muito — o problema é a densidade de nós por frame. Use as ferramentas de "Estrutura de nós" na aba Protótipo para reduzir essa contagem.</div>
+        </div>
+        <div class="info-dim">
+          <div class="info-dim-row">
+            <span class="info-dim-name">Fontes customizadas</span>
+            <span class="info-dim-weight">até −12 pts</span>
+          </div>
+          <div class="info-dim-desc">A documentação do Maze alerta: "fontes customizadas grandes podem impedir o carregamento em mobile". Cada fonte é baixada pelo dispositivo do participante antes de qualquer frame renderizar — 2 fontes já representa risco real. Fontes do sistema (Inter, SF Pro, Roboto) não têm custo de download.</div>
+        </div>
+        <div class="info-dim">
+          <div class="info-dim-row">
+            <span class="info-dim-name">Páginas no arquivo</span>
+            <span class="info-dim-weight">até −30 pts</span>
+          </div>
+          <div class="info-dim-desc">Arquivos de teste devem ter no máximo 2 páginas — uma de capa e uma de protótipo. Arquivos com mais páginas são tipicamente arquivos de trabalho sendo usados indevidamente para teste.</div>
+        <div class="info-dim">
+          <div class="info-dim-row">
+            <span class="info-dim-name">Interações</span>
+            <span class="info-dim-weight">até −10 pts</span>
+          </div>
+          <div class="info-dim-desc">Protótipos com transições não padronizadas ou triggers de hover/drag perdem pontos — esses comportamentos quebram em mobile e distraem participantes durante testes. Use "Padronizar para Dissolve" e "Triggers não-click" na aba Protótipo para resolver.</div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-title">Faixas de pontuação</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:8px;height:8px;border-radius:50%;background:#16a34a;flex-shrink:0"></div>
+            <span style="font-size:13px;color:var(--rev-dark)"><b>85–100</b> · Pronto para teste</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:8px;height:8px;border-radius:50%;background:#ca8a04;flex-shrink:0"></div>
+            <span style="font-size:13px;color:var(--rev-dark)"><b>65–84</b> · Falta otimizar</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:8px;height:8px;border-radius:50%;background:#ea580c;flex-shrink:0"></div>
+            <span style="font-size:13px;color:var(--rev-dark)"><b>40–64</b> · Arquivo pesado</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:8px;height:8px;border-radius:50%;background:#dc2626;flex-shrink:0"></div>
+            <span style="font-size:13px;color:var(--rev-dark)"><b>0–39</b> · Crítico</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: Histórico ── -->
+  <div class="page-view" id="page-history">
+    <div class="page-topbar">
+      <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="page-title">Histórico</span>
+    </div>
+    <div class="page-scroll" style="flex:1">
+      <div class="hist" style="border-top:none">
+        <div class="hist-timeline" id="hist-list-page">
+          <div class="hist-empty">
+        <div class="hist-empty-icon">📋</div>
+        Nenhuma modificação ainda.<br>Execute uma ação para ver o extrato.
+      </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- progress -->
+  <div id="view-progress" style="display:none;flex-direction:column">
+    <!-- mesmo visual do view-loading: anel orbital + fase + barra -->
+    <div class="ld-ring-wrap" style="margin-top:8px">
+      <div class="ld-ring"></div>
+      <div class="ld-ring-arc" id="prog-ring-arc"></div>
+      <div class="ld-ring-dot" id="prog-ring-dot"></div>
+    </div>
+    <div class="ld-phase" style="margin-bottom:10px">
+      <span class="ld-phase-txt" id="prog-page">Processando</span>
+    </div>
+    <!-- contador — visível só ao concluir -->
+    <div class="ld-count" id="prog-count" style="visibility:hidden"></div>
+    <div class="ld-unit"  id="prog-unit"  style="visibility:hidden"></div>
+    <!-- barra de progresso -->
+    <div class="ld-bar-wrap" style="margin-bottom:0">
+      <div class="ld-bar-fill" id="prog-fill-real"></div>
+      <div class="ld-bar-pulse" id="prog-pulse"></div>
+    </div>
+    <div class="prog-bar-meta" style="margin-top:6px">
+      <span class="prog-bar-pct" id="prog-pct">0%</span>
+      <span class="prog-bar-frac" id="prog-frac">0 / 0</span>
+    </div>
+    <!-- compat -->
+    <div style="display:none"><div id="prog-fill"></div></div>
+  </div>
+
+  <!-- result -->
+  <div id="view-result" style="display:none;flex-direction:column;align-items:center;padding:40px 24px 20px;gap:4px">
+    <div class="r-n" id="r-n">0</div>
+    <div class="r-u" id="r-u">processados</div>
+    <table class="r-table">
+      <tr><td id="r-l1">—</td><td id="r-v1">—</td></tr>
+      <tr><td>Espaço liberado</td><td id="r-nodes">—</td></tr>
+    </table>
+  </div>
+
+</div><!-- /app-content -->
+
+<!-- ════ STICKY ACTIONS (fundo fixo) ════ -->
+<div id="sticky-actions">
+  <div class="sa-btns">
+    <!-- botão primário de ação (detach / remover / comprimir) -->
+    <button class="btn-primary" id="btn-action" onclick="runAction()" type="button" disabled style="display:none">Detach para protótipo</button>
+    <button class="btn-primary" id="btn-img-action" onclick="runImgAction()" type="button" disabled style="display:none">Comprimir selecionadas</button>
+    <button class="btn-hidden-quick visible" id="btn-hidden-quick" onclick="runHiddenQuick()" type="button" style="display:none">Remover layers ocultas</button>
+    <button class="btn-primary btn-action-danger" id="btn-loose-action" onclick="runRemoveLoosePages()" type="button" disabled style="display:none">Remover páginas</button>
+    <!-- novo scan sempre disponível -->
+    <button class="btn-novo-scan" onclick="goScan()" type="button">↺ Novo scan</button>
+  </div>
+  <!-- mem bar e histórico -->
+  <div class="mem-bar">
+    <div class="mem-row">
+      <span class="mem-lbl">Tamanho do arquivo</span>
+      <div class="mem-sizes">
+        <span class="mem-size-cur" id="mem-page">—</span>
+        <span class="mem-size-saved" id="mem-saved" style="display:none;margin-left:8px"></span>
+      </div>
+    </div>
+    <div class="mem-track">
+      <div class="mem-seg-orig" id="mem-seg-orig" style="width:100%"></div>
+      <div class="mem-seg-saved" id="mem-seg-saved" style="width:0%"></div>
+    </div>
+    <div class="mem-legend">
+      <div class="mem-leg-item"><div class="mem-leg-dot" style="background:var(--rev-dark)"></div><span class="mem-leg-lbl">Atual</span></div>
+      <div class="mem-leg-item"><div class="mem-leg-dot" style="background:var(--rev-teal)"></div><span class="mem-leg-lbl">Liberado</span></div>
+      <div class="mem-leg-item"><div class="mem-leg-dot" style="background:var(--rev-surface)"></div><span class="mem-leg-lbl">Disponível</span></div>
+    </div>
+    <div class="mem-sub" id="mem-file"></div>
+  </div>
+</div>
+<!-- ════ FIM STICKY ACTIONS ════ -->
+
+<script>
+var mode = 'comp';
+var allItems = [], selectedIds = {}, maxKb = 1;
+var _ldPrev = -1;
+var _memBaseline = 0;
+var _memCurrent  = 0;
+var _totalSaved  = 0;
+var _hiddenCount = 0;
+var _scoreData   = null; // dados para o score
+var VIEWS = ['view-splash','view-idle','view-loading','view-skeleton','view-home','view-progress','view-result'];
+var PAGES = ['page-comp','page-hidden','page-img','page-proto','page-history','page-info','page-loose-pages'];
+var _cache = { comp: null, hidden: null, img: null };
+
+
+/* ── utilitários globais ── */
+function fmtSize(kb){
+  if(kb>=1024) return (kb/1024).toFixed(1)+' MB';
+  return kb+' KB';
+}
+
+/* ── score de prontidão ─────────────────────────────── */
+var SYSTEM_FONTS = ['Inter','SF Pro','SF Compact','Roboto','Arial','Helvetica',
+  'Georgia','Times','Courier','Verdana','Tahoma','Trebuchet','.AppleSystemUIFont',
+  'San Francisco','System Font','Segoe UI','Ubuntu','Noto','Open Sans','Lato'];
+
+function calcScore(d) {
+  // Calibrado com base na documentação oficial do Maze (jan 2026):
+  // maze.co/hc/articles/360052723313 e artigo iOS performance
+  // d: { instances, hidden, images[], topFrames, totalNodes, customFonts, pageCount }
+  var score = 100;
+  var breakdown = [];
+
+  // 1. Instâncias vinculadas — maior impacto (memória WASM + tempo de resolução)
+  // Doc Maze: "Run Detach all nested instances" é o 1º passo recomendado
+  var inst = d.instances || 0;
+  var pInst = inst > 100 ? 35 : inst > 50 ? 25 : inst > 20 ? 15 : inst > 5 ? 8 : inst > 0 ? 3 : 0;
+  score -= pInst;
+  breakdown.push({ lbl:'Instâncias vinculadas', val: inst, pen: pInst,
+    hint: inst === 0 ? 'ok' : inst > 50 ? 'bad' : 'mid' });
+
+  // 2. Layers ocultas — doc Maze: "add unnecessary memory and can cause errors"
+  var hid = d.hidden || 0;
+  var pHid = hid > 100 ? 20 : hid > 30 ? 12 : hid > 10 ? 6 : hid > 0 ? 2 : 0;
+  score -= pHid;
+  breakdown.push({ lbl:'Layers ocultas', val: hid, pen: pHid,
+    hint: hid === 0 ? 'ok' : hid > 30 ? 'bad' : 'mid' });
+
+  // 3. Imagens — doc Maze: "principal causa de lentidão e crash"
+  // "Figma doesn't compress images automatically"
+  var imgs = d.images || [];
+  var totalImgKb = imgs.reduce(function(a,i){ return a+(i.sizeKb||0); }, 0);
+  var maxImgKb   = imgs.length ? Math.max.apply(null, imgs.map(function(i){ return i.sizeKb||0; })) : 0;
+  var heavyImgs  = imgs.filter(function(i){ return (i.sizeKb||0) > 200; }).length;
+  // Penaliza pelo total agregado (impacto no loading) E pela imagem maior (crash iOS)
+  var pImg = 0;
+  if      (maxImgKb > 2048 || totalImgKb > 5000) pImg = 25; // crash provável iOS
+  else if (maxImgKb > 800  || totalImgKb > 2000) pImg = 18; // lentidão severa
+  else if (maxImgKb > 300  || heavyImgs >= 3)    pImg = 12; // lentidão moderada
+  else if (heavyImgs >= 1  || totalImgKb > 500)  pImg = 6;  // atenção
+  else if (imgs.length > 0)                       pImg = 0;  // ok — imagens leves
+  score -= pImg;
+  var imgLabel = imgs.length === 0 ? 'Sem imagens'
+    : (totalImgKb > 0 ? fmtSize(totalImgKb)+' total · ' : '') + imgs.length+' imagens';
+  breakdown.push({ lbl:'Imagens', val: imgLabel, pen: pImg,
+    hint: pImg === 0 ? 'ok' : pImg >= 18 ? 'bad' : 'mid' });
+
+  // 4. Nós totais — doc Maze: memória WASM, pior em iOS
+  // 7 frames com 10097 nós = ~1440/frame, riscos reais acima de 8000 nós totais
+  // Separado de "frames" que é apenas quantidade de artboards
+  var nodes = d.totalNodes || 0;
+  var pNodes = nodes > 15000 ? 18   // crash provável iOS
+             : nodes > 8000  ? 12   // lentidão severa
+             : nodes > 4000  ? 6    // atenção
+             : nodes > 2000  ? 2    // ok mas monitorar
+             : 0;
+  score -= pNodes;
+  var frames = d.topFrames || 0;
+  breakdown.push({ lbl:'Frames / nós', val: frames+' frames · '+nodes+' nós', pen: pNodes,
+    hint: pNodes === 0 ? 'ok' : pNodes >= 12 ? 'bad' : 'mid' });
+
+  // 5. Fontes customizadas — doc Maze: "may prevent prototypes from loading on mobile"
+  // 2 fontes já representa risco real (download obrigatório antes de renderizar)
+  var fonts = d.customFonts || 0;
+  var pFonts = fonts >= 4 ? 12 : fonts >= 2 ? 6 : fonts >= 1 ? 3 : 0;
+  score -= pFonts;
+  breakdown.push({ lbl:'Fontes customizadas', val: fonts, pen: pFonts,
+    hint: pFonts === 0 ? 'ok' : pFonts >= 6 ? 'bad' : 'mid' });
+
+  // 6. Páginas — critério de arquivo dedicado ao teste
+  // ≤2 páginas = ok (Cover + Protótipo). Doc Maze recomenda arquivo dedicado.
+  var pages = d.pageCount || 1;
+  var pPages = pages > 5 ? 20 : pages > 3 ? 10 : pages > 2 ? 5 : 0;
+  score -= pPages;
+  breakdown.push({ lbl:'Páginas no arquivo', val: pages, pen: pPages,
+    hint: pPages === 0 ? 'ok' : pPages >= 10 ? 'bad' : 'mid' });
+
+  // 7. Interações do protótipo
+  // dissolveOk: true = interações padronizadas para Dissolve
+  var dissolveOk = d.dissolveOk || false;
+  var badTriggers = d.badTriggers || 0; // triggers não-click
+  var pProto = 0;
+  if(!dissolveOk) pProto += 5;          // -5 se interações não padronizadas
+  if(badTriggers > 0) pProto += 5;      // -5 adicional se hover/drag presente
+  score -= pProto;
+  var protoLabel = dissolveOk
+    ? (badTriggers > 0 ? badTriggers+' trigger'+(badTriggers!==1?'s':'')+' não-click' : 'Padronizado')
+    : 'Não padronizado';
+  breakdown.push({ lbl:'Interações', val: protoLabel, pen: pProto,
+    hint: pProto === 0 ? 'ok' : pProto >= 10 ? 'bad' : 'mid' });
+
+  return { score: Math.max(0, score), breakdown: breakdown };
+}
+
+function scoreStatus(s) {
+  if (s >= 85) return { cls:'ready', lbl:'Pronto', color:'#16a34a' };
+  if (s >= 65) return { cls:'warn',  lbl:'Otimizar', color:'#ca8a04' };
+  if (s >= 40) return { cls:'heavy', lbl:'Pesado',   color:'#ea580c' };
+  return             { cls:'crit',  lbl:'Crítico',  color:'#dc2626' };
+}
+
+var _scoreHistory = []; // histórico de scores — persiste entre trocas de aba
+var _lastScore = null;  // último score calculado
+
+function renderScore(data) {
+  _scoreData = data;
+  var result = calcScore(data);
+  var s = result.score;
+  var st = scoreStatus(s);
+
+  // só salva no histórico se o score mudou
+  if (_lastScore !== null && _lastScore !== s) {
+    var now = new Date();
+    var ts = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    _scoreHistory.unshift({ score: s, time: ts, label: st.lbl, color: st.color });
+    if (_scoreHistory.length > 5) _scoreHistory.pop();
+    renderScoreHistory();
+  }
+  _lastScore = s;
+
+  // atualiza top bar
+  $('score-num').textContent = s;
+  var badge = $('score-status');
+  badge.textContent = st.lbl;
+  badge.className = 'stb-badge ' + st.cls;
+  var fill = $('score-fill');
+  fill.style.width = s + '%';
+  fill.style.background = st.color;
+
+  // breakdown
+  var inner = $('score-bd-inner');
+  inner.innerHTML = '';
+  result.breakdown.forEach(function(row) {
+    var div = document.createElement('div');
+    div.className = 'bd-row';
+    var icon = row.hint === 'ok' ? '✓' : row.hint === 'bad' ? '✗' : '!';
+    var penStr = row.pen > 0 ? '−'+row.pen : '';
+    div.innerHTML =
+      '<div class="bd-icon '+row.hint+'">'+icon+'</div>'+
+      '<span class="bd-lbl">'+row.lbl+'</span>'+
+      '<span class="bd-val">'+row.val+'</span>'+
+      '<span class="bd-pen">'+penStr+'</span>';
+    inner.appendChild(div);
+  });
+}
+
+function renderScoreHistory() {
+  var inner = $('score-hist-inner');
+  if (!inner || !_scoreHistory.length) return;
+  inner.innerHTML = '';
+  _scoreHistory.forEach(function(h) {
+    var row = document.createElement('div');
+    row.className = 'stb-hist-row';
+    row.innerHTML =
+      '<span class="stb-hist-time">'+h.time+'</span>'+
+      '<div class="stb-hist-bar"><div class="stb-hist-fill" style="width:'+h.score+'%;background:'+h.color+'"></div></div>'+
+      '<span class="stb-hist-val">'+h.score+'</span>'+
+      '<span class="stb-hist-lbl">'+h.label+'</span>';
+    inner.appendChild(row);
+  });
+}
+
+function toggleScoreBreakdown() {
+  var chev = $('stb-chevron');
+  if(chev) chev.classList.toggle('open');
+  // abre/fecha o breakdown de dimensões
+  var bd = $('score-breakdown');
+  var hist = $('score-hist-panel');
+  bd.classList.toggle('open');
+  // se abre breakdown, fecha hist e vice-versa
+  if (bd.classList.contains('open')) {
+    if (hist) hist.classList.remove('open');
+  }
+}
+function toggleScoreHistory() {
+  var hist = $('score-hist-panel');
+  var bd = $('score-breakdown');
+  if (hist) hist.classList.toggle('open');
+  if (bd) bd.classList.remove('open');
+}
+
+/* estimativa rápida — só atualiza visual, preserva _lastScore e _scoreData */
+function quickScoreEstimate(pageCount) {
+  // Não zera _lastScore nem _scoreData para manter histórico entre scans
+  var badge = $('score-status');
+  if (badge) { badge.textContent = 'escaneando'; badge.className = 'stb-badge'; }
+  // mantém barra no último valor conhecido durante o scan
+}
+
+function $(id){ return document.getElementById(id); }
+
+/* ── navegação de páginas ── */
+function showOnly(id){
+  // 1. esconder VIEWS (removendo display inline)
+  VIEWS.forEach(function(v){ var el=$(v); if(el) el.style.display='none'; });
+  // 2. desativar PAGES: remove classe active E limpa display inline
+  PAGES.forEach(function(p){
+    var el=$(p);
+    if(!el) return;
+    el.classList.remove('active');
+    el.style.display='none'; // limpa qualquer inline setado anteriormente
+  });
+  // 3. sticky-actions
+  var sa=$('sticky-actions');
+  if(sa) sa.className=(id==='view-home'||id==='view-result'||PAGES.indexOf(id)!==-1)?'visible':'';
+  // 4. mostrar alvo
+  var el=$(id); if(!el) return;
+  if(PAGES.indexOf(id)!==-1){
+    el.style.display='flex';  // inline explícito — não depende do CSS da classe
+    el.classList.add('active');
+  } else {
+    el.style.display='flex';
+    if(id==='view-home') el.style.flexDirection='column';
+  }
+  // 5. botões contextuais
+  _updateActionBtns(id);
+}
+
+function _updateActionBtns(id){
+  var ba  = $('btn-action');
+  var bia = $('btn-img-action');
+  var bhq = $('btn-hidden-quick');
+  [ba,bia,bhq].forEach(function(b){ if(b) b.style.display='none'; });
+  var bla=$('btn-loose-action');
+  if(bla) bla.style.display='none';
+  if(id==='page-comp'){
+    if(ba && allItems && allItems.length > 0) ba.style.display='block';
+  } else if(id==='page-hidden'){
+    if(bhq && allItems && allItems.length > 0) bhq.style.display='block';
+  } else if(id==='page-img'){
+    if(bia) bia.style.display='block';
+  } else if(id==='page-loose-pages'){
+    if(bla) bla.style.display='block';
+  }
+  // page-history, page-proto, page-info, views: nenhum botão de ação
+}
+
+function navTo(m){
+  _prevMode = mode;
+  mode = m;
+  if(m==='history'){ showOnly('page-history'); return; }
+  if(m==='info')   { showOnly('page-info');    return; }
+  if(m==='proto')        { showOnly('page-proto');       return; }
+  if(m==='loose-pages')  {
+    if(_cache['loose-pages']){
+      _renderLoosePagesPage(_cache['loose-pages'].items);
+      showOnly('page-loose-pages');
+      return;
+    }
+    showOnly('view-loading');
+    startLoadingSequence('comp');
+    parent.postMessage({ pluginMessage:{ type:'scan_loose_pages' } }, '*');
+    return;
+  }
+
+  // ── Imagens ──────────────────────────────────────────────
+  if(m==='img'){
+    if(_cache.img){
+      // usa cache — sem loading
+      _renderImgPage(_cache.img.items);
+      showOnly('page-img');
+      return;
+    }
+    showOnly('view-loading');
+    startLoadingSequence('images');
+    imgSelectedIds={};
+    parent.postMessage({ pluginMessage:{ type:'scan_images', scope:'page' } }, '*');
+    return;
+  }
+
+  // ── Componentes e Layers ocultas ─────────────────────────
+  var cacheKey = m; // 'comp' | 'hidden'
+  if(_cache[cacheKey]){
+    // usa cache — sem loading
+    _renderListPage(m, _cache[cacheKey].items);
+    showOnly(m==='comp' ? 'page-comp' : 'page-hidden');
+    return;
+  }
+
+  // sem cache — escaneia
+  showOnly('view-loading');
+  startLoadingSequence(m==='hidden' ? 'hidden' : 'comp');
+  selectedIds={}; _ldPrev=-1;
+  var msgType = m === 'comp' ? 'scan' : 'scan_hidden';
+  parent.postMessage({ pluginMessage:{ type: msgType, scope:'page' } }, '*');
+}
+
+function navBack(){
+  // cancela loading em andamento — NÃO invalida cache
+  _ldClearAll();
+  _ldDone = true;
+  showOnly('view-home');
+}
+
+/* invalidar cache de uma seção específica após operação */
+function _invalidateCache(section){
+  if(section === 'comp'         || section === 'all') _cache.comp              = null;
+  if(section === 'hidden'       || section === 'all') _cache.hidden            = null;
+  if(section === 'img'          || section === 'all') _cache.img               = null;
+  if(section === 'loose-pages'  || section === 'all') _cache['loose-pages']    = null;
+}
+function setMode(m){ navTo(m); }
+var _origSetMode = setMode;
+/* splash removido — vai direto para loading para eliminar latência
+   O loading progressivo já dá feedback contextual adequado        */
+function showSplash(onReady){
+  onReady(); // chama imediatamente, sem animação
+}
+function showList(){
+  VIEWS.forEach(function(v){ $(v).style.display='none'; });
+  $('view-list').style.display = 'block';
+  $('tabs').style.display = 'flex';
+  var bb = $('bottom-bar'); if (bb) bb.className = 'visible';
+}
+function showImgList(){
+  VIEWS.forEach(function(v){ $(v).style.display='none'; });
+  $('view-img-list').style.display = 'block';
+  $('tabs').style.display = 'flex';
+  var bb = $('bottom-bar'); if (bb) bb.className = 'visible';
+}
+function showSkeleton(cb){
+  VIEWS.forEach(function(v){ $(v).style.display='none'; });
+  $('view-skeleton').style.display = 'block';
+  $('tabs').style.display = 'flex';
+  setTimeout(cb, 350);
+}
+
+/* ── memory bar + histórico ── */
+
+function updateMem(mem){
+  if(!mem) return;
+  _memCurrent = mem.pageKb;
+  if(_memBaseline === 0) _memBaseline = mem.pageKb;
+
+  // valor atual
+  $('mem-page').textContent = fmtSize(mem.pageKb) + ' · ' + mem.pageNodes + ' nós';
+
+  // info do arquivo (sem "divider" — já filtrado no code.js)
+  var fileTxt = 'Arquivo total: ' + fmtSize(mem.fileKb);
+  if(mem.pageCount > 1) fileTxt += ' · ' + mem.pageCount + ' página(s)';
+  $('mem-file').textContent = fileTxt;
+
+  // barra empilhada
+  var saved  = Math.max(0, _memBaseline - mem.pageKb);
+  var base   = _memBaseline > 0 ? _memBaseline : mem.pageKb;
+  var pctCur = base > 0 ? Math.min(100, Math.round(mem.pageKb / base * 100)) : 100;
+  var pctSav = base > 0 ? Math.min(100, Math.round(saved / base * 100)) : 0;
+
+  var segOrig  = $('mem-seg-orig');
+  var segSaved = $('mem-seg-saved');
+  if(segOrig)  segOrig.style.width  = pctCur + '%';
+  if(segSaved) segSaved.style.width = pctSav + '%';
+
+  // badge de poupança
+  var savedEl = $('mem-saved');
+  if(savedEl){
+    if(saved > 0){
+      savedEl.style.display = 'inline';
+      savedEl.textContent = '−' + fmtSize(saved) + ' liberados';
+    } else {
+      savedEl.style.display = 'none';
+    }
+  }
+
+  // score
+  if(_scoreData){
+    _scoreData.totalNodes = mem.pageNodes || _scoreData.totalNodes;
+    _scoreData.pageCount  = mem.pageCount || _scoreData.pageCount;
+    renderScore(_scoreData);
+  }
+}
+
+/* ── configuração do histórico ── */
+var HIST_CFG = {
+  detach:   { label:'Detach de componentes', icon:'⛓',  unitFn:function(n){ return n+' instância'+(n!==1?'s':'')+' desvinculada'+(n!==1?'s':''); } },
+  hidden:   { label:'Layers ocultas',        icon:'◉',  unitFn:function(n){ return n+' layer'+(n!==1?'s':'')+' removida'+(n!==1?'s':''); } },
+  img:      { label:'Compressão de imagens', icon:'⊡',  unitFn:function(n){ return n+' imagem'+(n!==1?'ns':'')+' comprimida'+(n!==1?'s':''); } },
+  dissolve: { label:'Dissolve aplicado',     icon:'◎',  unitFn:function(n){ return n+' transição'+(n!==1?'ões':'')+'  padronizada'+(n!==1?'s':''); } },
+};
+// aliases para compatibilidade
+var HIST_LABELS = {};
+var HIST_UNITS  = {};
+Object.keys(HIST_CFG).forEach(function(k){ HIST_LABELS[k]=HIST_CFG[k].label; HIST_UNITS[k]=HIST_CFG[k].unitFn; });
+
+/* agrupa por data e monta grupos "Hoje / Ontem / DD Mmm" */
+function _histDateLabel(date){
+  var now = new Date();
+  var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var entryDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  var diff = Math.round((today - entryDay) / 86400000);
+  if(diff === 0) return 'Hoje';
+  if(diff === 1) return 'Ontem';
+  return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+}
+
+/* ícones SVG por categoria */
+var HIST_ICONS = {
+  detach:    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  hidden:    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>',
+  img:       '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+  dissolve:  '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>',
+  orphans:   '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="17.5" y1="17.5" x2="17.5" y2="17.5" stroke-width="3"/></svg>',
+  effects:   '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
+  overrides: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+};
+
+function addHistory(action, done, hiddenDone, memAfter, memBefore, extraData){
+  if(!done && !hiddenDone) return;
+  var now  = new Date();
+  var time = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  var dateLabel = _histDateLabel(now);
+
+  var saved    = (memBefore>0 && memAfter) ? Math.max(0, memBefore - memAfter.pageKb) : 0;
+  var savedPct = (memBefore>0 && saved>0)  ? Math.round(saved/memBefore*100) : 0;
+  var sizeNow  = memAfter ? fmtSize(memAfter.pageKb) : null;
+
+  var cfg    = HIST_CFG[action] || { label:action, icon:'●', unitFn:function(n){return n+' itens';} };
+  var iconSvg = HIST_ICONS[action] || cfg.icon;
+
+  /* valor principal à direita */
+  var amountStr, amountCls;
+  if(saved > 0){
+    amountStr = '−'+fmtSize(saved);
+    amountCls = 'saved';
+  } else {
+    amountStr = done+'';
+    amountCls = 'neutral';
+  }
+
+  /* linha de meta */
+  var metaParts = [cfg.unitFn(done)];
+  if(savedPct > 0) metaParts.push(savedPct+'% menor');
+  if(sizeNow)      metaParts.push('agora '+sizeNow);
+  var metaStr = metaParts.join(' · ');
+
+  /* chip de/para para imagens */
+  var chipHtml = '';
+  if(extraData && extraData.fromKb && extraData.toKb){
+    chipHtml += '<span class="hist-chip">'+fmtSize(extraData.fromKb)+' → '+fmtSize(extraData.toKb)+'</span> ';
+  }
+
+  /* score impact — calcula automaticamente se não vier via extraData */
+  var sB = (extraData && typeof extraData.scoreBefore==='number') ? extraData.scoreBefore : _lastScore;
+  var sA = (extraData && typeof extraData.scoreAfter==='number')  ? extraData.scoreAfter  : null;
+
+  // se não temos scoreAfter calculado, estimar a partir do _scoreData atual
+  if(sA === null && _scoreData && memAfter){
+    var _sdNow = Object.assign({}, _scoreData);
+    _sdNow.totalNodes = memAfter.pageNodes || _sdNow.totalNodes;
+    // ajustar dimensão relevante pela ação
+    if(action==='detach')   _sdNow.instances = 0;
+    if(action==='hidden')   _sdNow.hidden    = 0;
+    if(action==='dissolve') _sdNow.instances = Math.max(0, (_sdNow.instances||0) - done);
+    sA = calcScore(_sdNow).score;
+  }
+
+  if(typeof sB==='number' && typeof sA==='number' && sA > sB){
+    chipHtml += '<span class="hist-chip positive">↑ Score '+sB+' → '+sA+' (+' + (sA-sB) + ' pts)</span>';
+  } else if(typeof sB==='number' && typeof sA==='number' && sA === sB && saved > 0){
+    chipHtml += '<span class="hist-chip">Score: '+sA+'</span>';
+  }
+
+  var list = $('hist-list-page');
+  if(!list) return;
+
+  /* remove placeholder */
+  var empty = list.querySelector('.hist-empty');
+  if(empty) empty.remove();
+
+  /* verifica se já existe grupo para essa data */
+  var existingGroup = null;
+  var groups = list.querySelectorAll('.hist-date-group');
+  for(var g=0; g<groups.length; g++){
+    var lbl = groups[g].querySelector('.hist-date-label');
+    if(lbl && lbl.textContent === dateLabel){ existingGroup = groups[g]; break; }
+  }
+
+  /* cria grupo se não existir */
+  if(!existingGroup){
+    existingGroup = document.createElement('div');
+    existingGroup.className = 'hist-date-group';
+    existingGroup.innerHTML = '<div class="hist-date-hdr"><span class="hist-date-label">'+dateLabel+'</span></div>';
+    list.insertBefore(existingGroup, list.firstChild);
+  }
+
+  /* cria a entrada */
+  var entry = document.createElement('div');
+  entry.className = 'hist-entry';
+  entry.innerHTML =
+    '<div class="hist-icon '+action+'">'+iconSvg+'</div>'+
+    '<div class="hist-info">'+
+      '<div class="hist-action">'+cfg.label+'</div>'+
+      '<div class="hist-meta">'+metaStr+'</div>'+
+      (chipHtml ? '<div style="margin-top:5px">'+chipHtml+'</div>' : '')+
+    '</div>'+
+    '<div class="hist-right">'+
+      (amountCls==='saved' ? '<div class="hist-amount saved">'+amountStr+'</div>' : '')+
+      '<span class="hist-ts">'+time+'</span>'+
+    '</div>';
+
+  /* insere no início do grupo (mais recente no topo) */
+  var hdr = existingGroup.querySelector('.hist-date-hdr');
+  existingGroup.insertBefore(entry, hdr.nextSibling);
+
+  /* limita total */
+  var allEntries = list.querySelectorAll('.hist-entry');
+  if(allEntries.length > 20) allEntries[allEntries.length-1].remove();
+}
+
+/* ── hidden quick ── */
+function updateHiddenBtn(count){
+  _hiddenCount = count || 0;
+  var btn = $('btn-hidden-quick');
+  if(_hiddenCount > 0){
+    btn.textContent = 'Remover ' + _hiddenCount + ' layer' + (_hiddenCount!==1?'s':'') + ' oculta' + (_hiddenCount!==1?'s':'');
+    btn.classList.add('visible');
+  } else {
+    btn.classList.remove('visible');
+  }
+}
+
+function runHiddenQuick(){
+  // scan rápido das ocultas e remove tudo
+  parent.postMessage({ pluginMessage: { type: 'scan_hidden', scope: 'page' } }, '*');
+  _quickRemoveAll = true;
+}
+var _quickRemoveAll = false;
+
+/* ══════════════════════════════════════════════════════
+   LOADING PROGRESSIVO — sistema de fases autônomo
+   Funciona independente do scan_progress (que só emite
+   2 eventos). Cada fase tem timing e mensagem próprios.
+   ══════════════════════════════════════════════════════ */
+
+var _ldTimers     = [];     // ARRAY de timers — não variável única
+var _ldLoopTimer  = null;   // timer do loop de espera após fases
+var _ldFoundReal  = 0;
+var _ldScanType   = 'comp';
+var _ldDone       = false;
+var _ldStartTime  = 0;      // para calcular tempo decorrido
+
+// Sequências de fases por tipo de scan
+var LD_PHASES = {
+  comp: [
+    { pct:  8, msg: 'Conectando ao documento',   delay: 0    },
+    { pct: 22, msg: 'Lendo estrutura da página', delay: 320  },
+    { pct: 38, msg: 'Mapeando hierarquia',        delay: 650  },
+    { pct: 54, msg: 'Escaneando componentes',     delay: 1050 },
+    { pct: 68, msg: 'Contando instâncias',        delay: 1600 },
+    { pct: 78, msg: 'Verificando dependências',   delay: 2300 },
+    { pct: 86, msg: 'Calculando score',           delay: 3200 },
+    { pct: 91, msg: 'Aguardando resultado',       delay: 4400 },
+  ],
+  hidden: [
+    { pct:  8, msg: 'Conectando ao documento',   delay: 0    },
+    { pct: 25, msg: 'Lendo estrutura da página', delay: 300  },
+    { pct: 48, msg: 'Escaneando layers ocultas', delay: 700  },
+    { pct: 70, msg: 'Percorrendo grupos',         delay: 1400 },
+    { pct: 86, msg: 'Verificando visibilidade',  delay: 2300 },
+    { pct: 91, msg: 'Aguardando resultado',      delay: 3500 },
+  ],
+  images: [
+    { pct:  8, msg: 'Conectando ao documento',   delay: 0    },
+    { pct: 18, msg: 'Lendo fills da página',      delay: 350  },
+    { pct: 34, msg: 'Detectando imagens',         delay: 850  },
+    { pct: 52, msg: 'Lendo bytes das imagens',    delay: 1600 },
+    { pct: 68, msg: 'Gerando thumbnails',         delay: 2800 },
+    { pct: 82, msg: 'Calculando tamanhos',        delay: 4200 },
+    { pct: 91, msg: 'Aguardando resultado',       delay: 5800 },
+  ]
+};
+
+// Mensagens de espera — rotacionam quando o scan demora mais que as fases
+var LD_WAIT_MSGS = [
+  'Processando arquivo grande',
+  'Isso pode demorar um pouco',
+  'Lendo nós da página',
+  'Quase lá',
+  'Ainda processando',
+  'Arquivo com muitos elementos',
+];
+
+var LD_UNIT_LABEL = { comp:'instâncias', hidden:'layers ocultas', images:'imagens' };
+
+function _ldClearAll(){
+  // cancela TODOS os timers pendentes
+  _ldTimers.forEach(function(t){ clearTimeout(t); });
+  _ldTimers = [];
+  if(_ldLoopTimer){ clearTimeout(_ldLoopTimer); _ldLoopTimer = null; }
+}
+
+function _ldSetPhase(msg, pct){
+  // atualiza só o texto da fase — o anel já comunica o movimento
+  var el = $('ld-name');
+  if(!el) return;
+  var span = document.createElement('span');
+  span.className = 'ld-phase-txt';
+  span.textContent = msg;
+  el.innerHTML = '';
+  el.appendChild(span);
+  var fill = $('ld-fill');
+  if(fill) fill.style.width = Math.min(pct, 94) + '%';
+}
+
+function _ldAddStep(msg){
+  // steps ocultos — design com anel não usa feed de etapas
+}
+
+// Loop de espera: quando as fases acabam mas o scan ainda não voltou,
+// oscila a barra entre 91-94% e troca a mensagem a cada 2.5s
+function _ldStartWaitLoop(){
+  var idx = 0;
+  var dir = 1;
+  var curPct = 91;
+  function tick(){
+    if(_ldDone) return;
+    curPct += dir * 1.5;
+    if(curPct >= 94) dir = -1;
+    if(curPct <= 91) dir = 1;
+    var fill = $('ld-fill');
+    if(fill) fill.style.width = curPct.toFixed(1) + '%';
+    // troca mensagem a cada ~2.5s (5 ticks de 500ms)
+    if(idx % 5 === 0){
+      var msg = LD_WAIT_MSGS[(idx/5) % LD_WAIT_MSGS.length];
+      _ldSetPhase(msg, curPct);
+      _ldAddStep(msg);
+    }
+    idx++;
+    _ldLoopTimer = setTimeout(tick, 500);
+  }
+  _ldLoopTimer = setTimeout(tick, 500);
+}
+
+function startLoadingSequence(scanType){
+  _ldClearAll();
+  _ldFoundReal = 0;
+  _ldDone      = false;
+  _ldScanType  = scanType || 'comp';
+  _ldStartTime = Date.now();
+  // retoma animação do anel
+  var arc = document.querySelector('.ld-ring-arc');
+  if(arc) arc.style.animationPlayState='running';
+  var dot2 = document.querySelector('.ld-ring-dot');
+  if(dot2) dot2.style.animationPlayState='running';
+
+  // reset UI — número oculto até ter dados reais
+  var num  = $('ld-num');  if(num)  { num.textContent = ''; num.style.visibility = 'hidden'; }
+  var unit = $('ld-unit'); if(unit) { unit.textContent = ''; }  // sem dots — anel cuida
+  var fill = $('ld-fill'); if(fill) fill.style.width = '0%';
+  var log  = $('ld-log');  if(log)  { log.innerHTML = ''; log.style.display = 'none'; } // log oculto
+
+  var phases = LD_PHASES[_ldScanType] || LD_PHASES.comp;
+  var lastDelay = 0;
+
+  phases.forEach(function(phase){
+    lastDelay = phase.delay;
+    var t = setTimeout(function(){
+      if(_ldDone) return;
+      _ldSetPhase(phase.msg, phase.pct);
+      _ldAddStep(phase.msg);
+    }, phase.delay);
+    _ldTimers.push(t); // guarda TODOS os timers
+  });
+
+  // após a última fase, entra no loop de espera infinito
+  var waitStart = setTimeout(function(){
+    if(!_ldDone) _ldStartWaitLoop();
+  }, lastDelay + 600);
+  _ldTimers.push(waitStart);
+}
+
+function stopLoadingSequence(found){
+  _ldDone = true;
+  _ldClearAll();
+
+  // para o anel
+  var arc = document.querySelector('.ld-ring-arc');
+  if(arc) arc.style.animationPlayState='paused';
+  var dot = document.querySelector('.ld-ring-dot');
+  if(dot) dot.style.animationPlayState='paused';
+
+  // para o pulse da barra
+  var pulse = $('ld-pulse'); if(pulse) pulse.classList.add('done');
+
+  // NÃO mostra "Concluído" — a navegação para a page acontece imediatamente
+  // e o loading sai da tela antes de qualquer frame renderizar o texto
+}
+
+/* updateLd — recebe scan_progress em tempo real do code.js */
+function updateLd(msg){
+  // atualiza só a fase de texto — sem contador (evita "0" piscando)
+  var found = msg.foundSoFar || 0;
+  _ldFoundReal = found;
+  if(found !== _ldPrev && found > 0){
+    _ldPrev = found;
+    // mostra contagem encontrada na fase
+    var lbl = LD_UNIT_LABEL[msg.scanType] || 'itens';
+    var el = $('ld-name');
+    if(el){
+      var span = document.createElement('span');
+      span.className = 'ld-phase-txt';
+      span.textContent = found + ' ' + lbl + ' encontrados';
+      el.innerHTML = ''; el.appendChild(span);
+    }
+  }
+}
+
+/* compat — stubs para chamadas legadas */
+function startWd(){ /* no-op */ }
+function stopWd(){  /* no-op */ }
+function touchWd(){ /* no-op */ }
+
+/* setMode definido abaixo com suporte a typo/proto */
+
+/* ── scan ── */
+function startScan(){
+  showOnly('view-loading');
+  _ldPrev=-1;
+  mode='comp';
+  // tabs podem estar ocultas — setar className com segurança
+  var tc=$('tab-comp');   if(tc) tc.className='tab on';
+  var th=$('tab-hidden'); if(th) th.className='tab';
+  var ti=$('tab-img');    if(ti) ti.className='tab';
+  startLoadingSequence('comp');
+  parent.postMessage({ pluginMessage:{ type:'scan', scope:'page' } }, '*');
+}
+
+function goScan(){
+  // Salva snapshot do score no histórico antes de novo scan
+  if(_lastScore !== null){
+    var now = new Date();
+    var ts = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    var st = scoreStatus(_lastScore);
+    _scoreHistory.unshift({ score:_lastScore, time:ts, label:st.lbl, color:st.color });
+    if(_scoreHistory.length > 5) _scoreHistory.pop();
+    renderScoreHistory();
+  }
+  // Preserva dados de imagens/fontes entre scans
+  // (não zera _scoreData — scan_result vai atualizar só as dims que ele conhece)
+  _invalidateCache('all');
+  startScan();
+}
+function goIdle(){ showOnly('view-idle'); }
+
+/* ── render list ── */
+function _renderListPage(m, items){
+  var isHid = (m==='hidden');
+  var listId = isHid ? 'item-list-h' : 'item-list';
+  allItems=items;
+  maxKb=items.length?Math.max.apply(null,items.map(function(i){ return i.sizeKb; })):1;
+  $(isHid?'h-label':'s-label').textContent=isHid?'layers ocultas':'instâncias';
+  $(isHid?'h-count':'s-count').textContent=items.length;
+  $(isHid?'h-size':'s-size').textContent=items.length?(items.reduce(function(a,b){ return a+b.sizeKb; },0)+' KB est.'):'—';
+  var btn=$('btn-action');
+  if(btn) btn.textContent=isHid?'Remover selecionadas':'Detach para protótipo';
+
+  var list=$(listId); list.innerHTML='';
+  // mostra/esconde summary e toolbar dependendo se há itens
+  var summaryEl = isHid ? $('page-hidden').querySelector('.summary') : $('page-comp').querySelector('.summary');
+  var toolbarEl = isHid ? $('page-hidden').querySelector('.toolbar') : $('page-comp').querySelector('.toolbar');
+  if(!items.length){
+    if(summaryEl) summaryEl.style.display='none';
+    if(toolbarEl) toolbarEl.style.display='none';
+    var emptyHtml = _buildEmptyState(isHid ? 'hidden' : 'comp');
+    list.innerHTML = emptyHtml;
+    updateSel(); return;
+  }
+  if(summaryEl) summaryEl.style.display='';
+  if(toolbarEl) toolbarEl.style.display='';
+
+  items.forEach(function(item){
+    var row=document.createElement('div'); row.className='ci'; row.dataset.id=item.id;
+    var pct=Math.max(8,Math.round((item.sizeKb/maxKb)*100));
+    var icon=isHid
+      ?'<div class="eye-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div>'
+      :'<div class="sz-bar"><div class="sz-fill" style="height:'+pct+'%"></div></div>';
+    row.innerHTML='<input type="checkbox" class="rev-check" data-id="'+item.id+'" onchange="toggleItem(\''+item.id+'\',this.checked)" onclick="event.stopPropagation()"/>'+icon+
+      '<div class="ci-info"><div class="ci-name" title="'+item.name+'">'+item.name+'</div><div class="ci-par">'+item.parent+'</div></div>'+
+      '<div class="ci-meta"><div class="ci-kb">'+item.sizeKb+' KB</div><div class="ci-nd">'+item.childCount+' nós</div></div>';
+    row.addEventListener('click',function(e){ if(e.target.classList.contains('rev-check')) return; var cb=row.querySelector('.rev-check[data-id]'); if(cb){cb.checked=!cb.checked; toggleItem(item.id,cb.checked);} });
+    list.appendChild(row);
+  });
+  updateSel();
+  // navegação fica no chamador (navTo ou scan_result handler)
+}
+
+function toggleItem(id,checked){ if(checked) selectedIds[id]=true; else delete selectedIds[id]; var r=document.querySelector('[data-id="'+id+'"].ci'); if(r) r.className='ci'+(checked?' sel':''); updateSel(); }
+function toggleAll(checked){
+  selectedIds={};
+  var listId = (mode==='hidden') ? 'item-list-h' : 'item-list';
+  var listEl = $(listId);
+  if(listEl) listEl.querySelectorAll('.rev-check[data-id]').forEach(function(cb){
+    cb.checked=checked;
+    if(checked) selectedIds[cb.dataset.id]=true;
+    var r=cb.closest('.ci'); if(r) r.className='ci'+(checked?' sel':'');
+  });
+  updateSel();
+}
+function updateSel(){
+  var sel=Object.keys(selectedIds).length, tot=allItems.length;
+  var isHid=(mode==='hidden');
+  var ctEl=$(isHid?'sel-ct-h':'sel-ct');
+  if(ctEl) ctEl.textContent=sel+' selecionado'+(sel!==1?'s':'');
+  var btn=$('btn-action');
+  if(btn){
+    btn.disabled=sel===0;
+    var base=isHid?'Remover':'Detach';
+    btn.textContent=sel>0?(base+' '+sel+' / '+tot):(base+' selecionados');
+  }
+  var cbEl=$(isHid?'cb-all-h':'cb-all');
+  if(cbEl){ cbEl.checked=sel===tot&&tot>0; cbEl.indeterminate=sel>0&&sel<tot; }
+}
+
+/* ── run action ── */
+function runAction(){
+  var ids=Object.keys(selectedIds); if(!ids.length) return;
+  var isHid=mode==='hidden';
+  showOnly('view-progress');
+  _resetProgress(isHid?'layers removidas':'instâncias desvinculadas', ids.length);
+  parent.postMessage({ pluginMessage:{ type:isHid?'remove_hidden':'detach', ids:ids, scope:'page' } }, '*');
+}
+
+function setProg(done,total){
+  var pct=total>0?Math.round(done/total*100):0;
+  // barra real de progresso
+  var pf=$('prog-fill-real'); if(pf) pf.style.width=pct+'%';
+  $('prog-pct').textContent=pct+'%';
+  $('prog-frac').textContent=done+' / '+total;
+}
+function showProgResult(done, unitLabel){
+  var pulse=$('prog-pulse'); if(pulse) pulse.classList.add('done');
+  var pf=$('prog-fill-real'); if(pf) pf.style.width='100%';
+  // para o anel do progress
+  var arc=$('prog-ring-arc'); if(arc) arc.style.animationPlayState='paused';
+  var dot=$('prog-ring-dot'); if(dot) dot.style.animationPlayState='paused';
+  var pc=$('prog-count'); var pu=$('prog-unit');
+  if(pc){ pc.textContent=done; pc.style.visibility='visible';
+    pc.classList.remove('pop'); void pc.offsetWidth; pc.classList.add('pop');
+    setTimeout(function(){ pc.classList.remove('pop'); },300);
+  }
+  if(pu){ pu.textContent=unitLabel||'processados'; pu.style.visibility='visible'; }
+  var pg=$('prog-page'); if(pg) pg.textContent='Concluído';
+  $('prog-pct').textContent='100%';
+}
+
+
+/* ── imagens ─────────────────────────────────────────── */
+var imgAllItems = [], imgSelectedIds = {};
+var _compressedMap = {}; // { compositeId: { from: KB, to: KB } }
+
+function markCompressedItems(map){
+  // atualiza badge nos itens já renderizados
+  _compressedMap = Object.assign(_compressedMap, map||{});
+  Object.keys(map||{}).forEach(function(id){
+    var row = document.querySelector('.ii[data-id="'+id+'"]');
+    if(!row) return;
+    var info = map[id];
+    var badge = row.querySelector('.ii-compressed');
+    if(badge){
+      badge.className = 'ii-compressed visible';
+      badge.querySelector('.ii-compressed-txt').textContent =
+        fmtSize(info.to) + ' · era ' + fmtSize(info.from);
+    }
+    // risca o kb original
+    var kb = row.querySelector('.ii-kb');
+    if(kb) kb.style.color = 'var(--i4)';
+  });
+}
+var imgQuality = 'mid'; // 'high'=90% | 'mid'=72% | 'low'=45%
+var IMG_QUALITY_MAP = { high: 0.90, mid: 0.72, low: 0.45 };
+var IMG_QUALITY_HINT = {
+  high: 'Qualidade alta — JPEG 90% · mínima perda visual',
+  mid:  'Qualidade média — JPEG 72% · bom para protótipos',
+  low:  'Qualidade baixa — JPEG 45% · máxima compressão'
+};
+
+function setQuality(q){
+  imgQuality=q;
+  ['high','mid','low'].forEach(function(k){
+    $('qt-'+k).className='qt-btn'+(k===q?' on':'');
+  });
+  $('img-quality-hint').textContent=IMG_QUALITY_HINT[q];
+}
+
+function _renderImgPage(items){
+  if(items===undefined && _cache.img) items=_cache.img.items||[];
+  imgAllItems=items;
+  imgAllItems=items;
+  var totalKb=items.reduce(function(a,b){ return a+(b.sizeKb||0); },0);
+  $('img-count').textContent=items.length;
+  $('img-label').textContent=items.length===1?'imagem encontrada':'imagens encontradas';
+  $('img-size').textContent=items.length?(totalKb>1024?(totalKb/1024).toFixed(1)+' MB':totalKb+' KB'):  '—';
+
+  var list=$('img-list'); list.innerHTML='';
+  if(!items.length){
+    list.innerHTML='<div class="empty"><div class="empty-t">Nenhuma imagem encontrada</div><div class="empty-s">Esta página não tem fills de imagem.</div></div>';
+    updateImgSel(); showOnly('page-img'); return;
+  }
+
+  var maxKb=items.length?Math.max.apply(null,items.map(function(i){ return i.sizeKb||1; })):1;
+
+  items.forEach(function(item){
+    var row=document.createElement('div'); row.className='ii'; row.dataset.id=item.id;
+    var pct=Math.max(4,Math.round((item.sizeKb/maxKb)*100));
+    var sizeKb=item.sizeKb||0;
+    var sizeStr=sizeKb>1024?(sizeKb/1024).toFixed(1)+' MB':sizeKb+' KB';
+    var heavy=sizeKb>200;
+    var dimStr=item.w&&item.h?(item.w+'×'+item.h):'—';
+    var thumbHtml = item.dataUrl
+      ? '<img src="'+item.dataUrl+'" alt=""/>'
+      : '<svg class="ii-thumb-ph" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+    var prevComp = _compressedMap[item.id];
+    var compBadge = prevComp
+      ? '<div class="ii-compressed visible"><div class="ii-compressed-dot"></div><span class="ii-compressed-txt">'+fmtSize(prevComp.to)+' · era '+fmtSize(prevComp.from)+'</span></div>'
+      : '<div class="ii-compressed"><div class="ii-compressed-dot"></div><span class="ii-compressed-txt"></span></div>';
+    var kbColor = prevComp ? 'color:var(--i4)' : '';
+    row.innerHTML=
+      '<input type="checkbox" class="rev-check" data-id="'+item.id+'" onchange="toggleImgItem(\'' + item.id + '\',this.checked)" onclick="event.stopPropagation()"/>'+
+      '<div class="ii-thumb">'+thumbHtml+'</div>'+
+      '<div class="ii-info"><div class="ii-name" title="'+item.name+'">'+item.name+'</div><div class="ii-par">'+item.parent+'</div>'+compBadge+'</div>'+
+      '<div class="ii-meta">'+
+        '<div class="ii-kb'+(heavy?' heavy':'')+'" style="'+kbColor+'">'+sizeStr+'</div>'+
+        '<div class="ii-dim">'+dimStr+'</div>'+
+        '<div class="ii-weight" style="width:'+pct+'%;background:'+(heavy?'var(--ink)':'var(--i4)')+'"></div>'+
+      '</div>';
+    row.addEventListener('click',function(e){ if(e.target.classList.contains('rev-check')) return; var cb=row.querySelector('.rev-check[data-id]'); if(cb){cb.checked=!cb.checked; toggleImgItem(item.id,cb.checked);} });
+    list.appendChild(row);
+  });
+  updateImgSel();
+  // navegação fica no chamador
+}
+
+function toggleImgItem(id,checked){
+  if(checked) imgSelectedIds[id]=true; else delete imgSelectedIds[id];
+  var r=document.querySelector('[data-id="'+id+'"].ii'); if(r) r.className='ii'+(checked?' sel':'');
+  updateImgSel();
+}
+function toggleAllImg(checked){
+  imgSelectedIds={};
+  document.querySelectorAll('#img-list .rev-check[data-id]').forEach(function(cb){
+    cb.checked=checked; if(checked) imgSelectedIds[cb.dataset.id]=true;
+    var r=cb.closest('.ii'); if(r) r.className='ii'+(checked?' sel':'');
+  });
+  updateImgSel();
+}
+function updateImgSel(){
+  var sel=Object.keys(imgSelectedIds).length, tot=imgAllItems.length; /* rev-check */
+  $('btn-img-action').disabled=sel===0;
+  $('btn-img-action').textContent=sel>0?('Comprimir '+sel+' / '+tot):'Comprimir selecionadas';
+  $('img-cb-all').checked=sel===tot&&tot>0;
+  $('img-cb-all').indeterminate=sel>0&&sel<tot;
+}
+
+function _resetProgress(unitLabel, total){
+  var pc=$('prog-count'); var pu=$('prog-unit');
+  if(pc){ pc.textContent=''; pc.style.visibility='hidden'; }
+  if(pu){ pu.textContent=unitLabel||'processados'; pu.style.visibility='hidden'; }
+  // reset barra real
+  var pf=$('prog-fill-real'); if(pf) pf.style.width='0%';
+  // reativar pulse
+  var pulse=$('prog-pulse'); if(pulse) pulse.classList.remove('done');
+  $('prog-pct').textContent='0%';
+  $('prog-frac').textContent='0 / '+(total||'…');
+  var pg=$('prog-page');
+  if(pg) pg.textContent='Processando';
+}
+
+function runImgAction(){
+  var ids=Object.keys(imgSelectedIds); if(!ids.length) return;
+  showOnly('view-progress');
+  _resetProgress('imagens comprimidas', ids.length);
+  parent.postMessage({ pluginMessage:{ type:'compress_images', ids:ids, quality:IMG_QUALITY_MAP[imgQuality] } }, '*');
+}
+
+
+
+
+/* ── empty state rico pós-operação ── */
+function _buildEmptyState(section){
+  var stats = _lastOpStats;
+  var isHid = section === 'hidden';
+
+  // mensagem padrão sem stats
+  if(!stats || stats.action !== section){
+    var defaultMsg = isHid
+      ? 'Nenhuma layer oculta encontrada. A página está limpa.'
+      : 'Nenhuma instância vinculada encontrada. O arquivo está pronto.';
+    return '<div class="empty-rich">'+
+      '<div class="empty-rich-check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>'+
+      '<div class="empty-rich-title">Tudo otimizado</div>'+
+      '<div class="empty-rich-sub">'+defaultMsg+'</div>'+
+    '</div>';
+  }
+
+  var done    = stats.done;
+  var saved   = stats.saved;
+  var sbefore = _lastScore !== null ? _lastScore : null;
+  var safter  = null;
+  if(_scoreData){
+    var sd2 = Object.assign({}, _scoreData);
+    if(isHid) sd2.hidden = 0; else sd2.instances = 0;
+    safter = calcScore(sd2).score;
+  }
+
+  var label   = isHid ? 'layer'+(done!==1?'s':'')+' removida'+(done!==1?'s':'') : 'instância'+(done!==1?'s':'')+' desvinculada'+(done!==1?'s':'');
+  var subtitle = isHid
+    ? 'Removemos todas as layers ocultas desta página. O arquivo ficou mais leve e o Figma vai renderizar mais rápido.'
+    : 'Desvinculamos todos os componentes da biblioteca. O protótipo agora é autossuficiente e carrega sem depender de bibliotecas externas.';
+
+  var chips = '';
+  chips += '<div class="empty-chip positive">✓ '+done+' '+label+'</div>';
+  if(saved > 0) chips += '<div class="empty-chip positive">−'+fmtSize(saved)+' liberados</div>';
+  if(sbefore !== null && safter !== null && safter > sbefore)
+    chips += '<div class="empty-chip positive">Score +' + (safter - sbefore) + ' pts</div>';
+
+  return '<div class="empty-rich">'+
+    '<div class="empty-rich-check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>'+
+    '<div class="empty-rich-title">Otimização concluída</div>'+
+    '<div class="empty-rich-sub">'+subtitle+'</div>'+
+    '<div class="empty-rich-chips">'+chips+'</div>'+
+  '</div>';
+}
+
+
+/* ── páginas soltas ── */
+var _looseSelected = {};
+
+function _renderLoosePagesPage(items){
+  var list    = document.getElementById('loose-list');
+  var summary = document.getElementById('loose-summary');
+  var toolbar = document.getElementById('loose-toolbar');
+  var countEl = document.getElementById('loose-count');
+  list.innerHTML = '';
+
+  if(!items || !items.length){
+    if(summary) summary.style.display='none';
+    if(toolbar) toolbar.style.display='none';
+    var em = document.createElement('div'); em.className='empty-rich';
+    em.innerHTML =
+      '<div class="empty-rich-check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+      '<div class="empty-rich-title">Nenhuma página solta</div>' +
+      '<div class="empty-rich-sub">Todas as páginas têm frames de interface ou nome contextualizado.</div>';
+    list.appendChild(em);
+    return;
+  }
+
+  if(summary){ summary.style.display=''; countEl.textContent=items.length; }
+  if(toolbar) toolbar.style.display='';
+
+  items.forEach(function(item){
+    var row = document.createElement('div');
+    row.className = 'ci'; row.dataset.id = item.id;
+
+    var cb = document.createElement('input');
+    cb.type='checkbox'; cb.className='rev-check'; cb.dataset.id=item.id;
+    cb.addEventListener('change', (function(id){ return function(){ toggleLooseItem(id, cb.checked); }; })(item.id));
+    cb.addEventListener('click', function(e){ e.stopPropagation(); });
+
+    var info = document.createElement('div'); info.className='ci-info';
+    var nm = document.createElement('div'); nm.className='ci-name'; nm.title=item.name; nm.textContent=item.name;
+    var pr = document.createElement('div'); pr.className='ci-par'; pr.textContent=item.reason;
+    info.appendChild(nm); info.appendChild(pr);
+
+    var meta = document.createElement('div'); meta.className='ci-meta';
+    var kb = document.createElement('div'); kb.className='ci-kb'; kb.style.fontSize='11px'; kb.textContent=item.frameCount+' frames';
+    var nd = document.createElement('div'); nd.className='ci-nd'; nd.textContent=item.itemCount+' itens';
+    meta.appendChild(kb); meta.appendChild(nd);
+
+    row.appendChild(cb); row.appendChild(info); row.appendChild(meta);
+    row.addEventListener('click', (function(id){ return function(e){
+      if(e.target===cb) return;
+      cb.checked=!cb.checked; toggleLooseItem(id, cb.checked);
+    }; })(item.id));
+    list.appendChild(row);
+  });
+  _updateLooseSel();
+}
+function toggleLooseItem(id, checked){
+  if(checked) _looseSelected[id]=true; else delete _looseSelected[id];
+  _updateLooseSel();
+}
+
+function toggleAllLoose(checked){
+  _looseSelected={};
+  document.querySelectorAll('#loose-list .rev-check[data-id]').forEach(function(cb){
+    cb.checked=checked;
+    if(checked) _looseSelected[cb.dataset.id]=true;
+    var r=cb.closest('.ci'); if(r) r.className='ci'+(checked?' sel':'');
+  });
+  _updateLooseSel();
+}
+
+function _updateLooseSel(){
+  var sel=Object.keys(_looseSelected).length;
+  var tot=(_cache['loose-pages']&&_cache['loose-pages'].items||[]).length;
+  var ct=$('sel-ct-loose'); if(ct) ct.textContent=sel>0?sel+' selecionada'+(sel!==1?'s':''):'';
+  var cball=$('cb-all-loose');
+  if(cball){ cball.checked=sel===tot&&tot>0; cball.indeterminate=sel>0&&sel<tot; }
+  var btn=$('btn-loose-action'); if(btn){ btn.disabled=sel===0; btn.textContent='Remover '+sel+' página'+(sel!==1?'s':''); }
+}
+
+function runRemoveLoosePages(){
+  var ids=Object.keys(_looseSelected); if(!ids.length) return;
+  showOnly('view-loading');
+  startLoadingSequence('comp');
+  _invalidateCache('loose-pages');
+  _looseSelected={};
+  parent.postMessage({ pluginMessage:{ type:'remove_loose_pages', ids:ids } }, '*');
+}
+
+/* ── home helpers ── */
+function _updateHomeBadge(section, count){
+  var el = $('badge-'+section);
+  if(!el) return;
+  if(count === 0){
+    el.textContent = 'Concluído';
+    el.className = 'mi-badge done';
+  } else if(count > 0){
+    el.textContent = count;
+    el.className = 'mi-badge has-items';
+  } else {
+    el.textContent = '—';
+    el.className = 'mi-badge';
+  }
+}
+function showHome(){
+  showOnly('view-home');
+}
+function updateCompSetBanner(){ /* removido conforme solicitado */ }
+
+/* ── guardrail UI ── */
+var _prevMode = 'comp'; // aba antes do guardrail disparar
+var _lastOpStats = null; // stats da última operação para empty state
+
+function closeGuardrail(){
+  var el = $('guardrail-overlay');
+  if(el) el.classList.remove('visible');
+  // restaura a aba que estava ativa antes do guardrail
+  if(_prevMode && _prevMode !== mode){
+    setMode(_prevMode);
+  }
+}
+function showGuardrail(reason){
+  var el = $('guardrail-overlay');
+  var msg = $('guard-msg');
+  if(el && msg){ msg.textContent = reason; el.classList.add('visible'); }
+}
+
+/* ── banner COMPONENT_SET ── */
+function updateCompSetBanner(hasCS){
+  var b = $('comp-set-banner');
+  if(b) b.className = hasCS ? 'visible' : '';
+}
+
+/* ── setMode expandido (typo + proto) ── */
+var _origSetMode = setMode;
+function setMode(m){
+  // salva aba anterior para restaurar se guardrail bloquear
+  _prevMode = mode;
+
+  // tabs
+  ['comp','hidden','img','proto'].forEach(function(k){
+    var t = $('tab-'+k); if(t) t.className = 'tab' + (m===k?' on':'');
+  });
+  $('tabs').style.display = 'flex';
+  mode = m;
+
+  // typo removida da v1.2
+  if(m === 'proto'){
+    VIEWS.forEach(function(v){ $(v).style.display='none'; });
+    $('view-proto').style.display = 'block';
+    var bb2 = $('bottom-bar'); if(bb2) bb2.className = 'visible';
+    return;
+  }
+  if(m === 'img'){
+    if(_cache.img){ _renderImgPage(_cache.img.items); return; }
+    showOnly('view-loading');
+    startLoadingSequence('images');
+    imgSelectedIds={};
+    parent.postMessage({ pluginMessage:{ type:'scan_images', scope:'page' } }, '*');
+    return;
+  }
+  if(_cache[m]){ _renderListPage(m, _cache[m].items); return; }
+  showOnly('view-loading');
+  startLoadingSequence(m === 'hidden' ? 'hidden' : 'comp');
+  selectedIds={}; _ldPrev=-1;
+  parent.postMessage({ pluginMessage:{ type: m==='comp'?'scan':'scan_hidden', scope:'page' } }, '*');
+}
+
+/* ── outline text ── */
+function runOutlineText(){
+  var btn = $('btn-outline');
+  if(btn){ btn.textContent='...'; btn.disabled=true; }
+  parent.postMessage({ pluginMessage:{ type:'outline_text' } }, '*');
+}
+
+/* ── set dissolve — SEM guardrail (proto pode ter qualquer nome) ── */
+function runSetDissolve(){
+  var btn = $('btn-dissolve');
+  if(btn){ btn.textContent='Executando...'; btn.disabled=true; }
+  // set_dissolve dispara diretamente — sem guardrail na UI
+parent.postMessage({ pluginMessage:{ type:'set_dissolve_direct' } }, '*');
+}
+
+/* ── detach em lote ── */
+function runDetachAll(){
+  showOnly('view-progress');
+  _resetProgress('instâncias desvinculadas', null);
+  parent.postMessage({ pluginMessage:{ type:'detach_all' } }, '*');
+}
+
+
+
+/* ── tema dark / light ─────────────────────────────────── */
+var _isDark = false;
+
+function toggleTheme(){
+  var html = document.documentElement;
+  var btn  = $('btn-theme');
+  var sun  = $('icon-sun');
+  var moon = $('icon-moon');
+  if(btn) btn.classList.add('switching');
+  setTimeout(function(){
+    _isDark = !_isDark;
+    // classe html.dark = única fonte de verdade
+    if(_isDark) html.classList.add('dark');
+    else        html.classList.remove('dark');
+    if(sun)  sun.style.display  = _isDark ? 'none' : '';
+    if(moon) moon.style.display = _isDark ? ''     : 'none';
+    if(btn) btn.classList.remove('switching');
+    try { localStorage.setItem('ot-theme', _isDark ? 'dark' : 'light'); } catch(_){}
+  }, 150);
+}
+
+// inicialização — detecta SO e preferência salva
+(function(){
+  var prefersDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches);
+  var saved = null;
+  try { saved = localStorage.getItem('ot-theme'); } catch(_){}
+  if(saved === 'dark' || (saved === null && prefersDark)){
+    document.documentElement.classList.add('dark');
+    _isDark = true;
+    // ícones trocam sem animação (init silencioso)
+    setTimeout(function(){
+      var s = $('icon-sun'); var m = $('icon-moon');
+      if(s) s.style.display='none'; if(m) m.style.display='';
+    }, 0);
+  }
+  // escuta mudanças do SO quando não há preferência salva
+  try {
+    window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', function(e){
+      var pref = null;
+      try { pref = localStorage.getItem('ot-theme'); } catch(_){}
+      if(pref === null){
+        if(e.matches && !_isDark) toggleTheme();
+        else if(!e.matches && _isDark) toggleTheme();
+      }
+    });
+  } catch(_){}
+})();
+
+/* ── advanced ops ── */
+var _advPending = {}; // resId → true enquanto aguarda resposta
+var _advPendingIds = {}; // armazena ids para ações inline
+
+
+function runAdvancedAction(op, ids, resId) {
+  var res = $(resId);
+  if(res){ res.innerHTML='Executando...'; }
+  parent.postMessage({ pluginMessage: { type: op, ids: ids } }, '*');
+}
+
+function runAdvanced(op, resId) {
+  var btn = document.querySelector('[onclick*="runAdvanced"][onclick*="'+resId+'"]');
+  var res = $(resId);
+  if(btn){ btn.disabled=true; btn.textContent='...'; btn.style.background=''; btn.style.color=''; btn.style.borderColor=''; }
+  if(res){ res.className='adv-result'; res.textContent=''; }
+  _advPending[resId] = true;
+  // restaura onclick original para escanear novamente
+  if(btn) btn.onclick = function(){ runAdvanced(op, resId); };
+  parent.postMessage({ pluginMessage: { type: op } }, '*');
+}
+
+/* mapa de rótulos de ação por tipo de scan */
+var ADV_ACTION_BTN = {
+  'res-orphans':        { scan:'Escanear', apply:'Remover',   applyOp:'remove_orphans'        },
+  'res-triggers':       { scan:'Escanear', apply:'Aplicar',   applyOp:'fix_triggers'          },
+  'res-scroll':         { scan:'Escanear', apply:'Aplicar',   applyOp:'fix_scroll'            },
+  'res-effects':        { scan:'Escanear', apply:'Aplicar',   applyOp:'remove_effects'        },
+  'res-vectors':        { scan:'Escanear', apply:'Aplicar',   applyOp:'flatten_vectors'       },
+  'res-single-groups':  { scan:'Escanear', apply:'Dissolver', applyOp:'flatten_single_groups' },
+  'res-deep-nodes':     { scan:'Escanear', apply:'Achatar',   applyOp:'flatten_deep_nodes'    },
+  'res-covered':        { scan:'Escanear', apply:'Remover',   applyOp:'remove_covered'        },
+  'res-overrides':      { scan:'Executar', apply:null,        applyOp:null                    },
+  'res-flow-score':     { scan:'Calcular', apply:null,        applyOp:null                    },
+  'res-loops':          { scan:'Escanear', apply:null,        applyOp:null                    },
+};
+
+function _advResult(resId, html, hasItems) {
+  var res = $(resId);
+  if(!res) return;
+  res.innerHTML = html;
+  res.className = 'adv-result visible';
+
+  var cfg = ADV_ACTION_BTN[resId];
+  var btn = document.querySelector('[onclick*="runAdvanced"][onclick*="'+resId+'"]');
+  if(!btn) return;
+
+  if(cfg && cfg.apply && hasItems){
+    // mostra "Aplicar" como botão primário
+    btn.textContent = cfg.apply;
+    btn.disabled = false;
+    btn.style.background = 'var(--rev-dark)';
+    btn.style.color = 'var(--rev-white)';
+    btn.style.borderColor = 'var(--rev-dark)';
+    // redireciona onclick para a ação de aplicar
+    btn.setAttribute('data-apply-op', cfg.applyOp);
+    btn.onclick = function(){
+      var ids = _advPendingIds[resId.replace('res-','')] || [];
+      runAdvancedAction(cfg.applyOp, ids, resId);
+      // restaura botão para "Escanear" após aplicar
+      btn.textContent = cfg.scan;
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+      btn.onclick = function(){ runAdvanced(resId.replace('res-','').replace('-','_'), resId); };
+    };
+  } else {
+    // sem ação disponível: restaura "Escanear"
+    btn.textContent = cfg ? cfg.scan : 'Escanear';
+    btn.disabled = false;
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+  }
+  delete _advPending[resId];
+}
+
+function _fmtList(items, labelFn) {
+  if(!items || !items.length) return '<b>Nenhum encontrado</b> — tudo certo!';
+  var html = '<b>' + items.length + ' encontrado' + (items.length!==1?'s':'') + '</b><br>';
+  items.slice(0,3).forEach(function(it){ html += '· ' + labelFn(it) + '<br>'; });
+  if(items.length > 3) html += '… e mais ' + (items.length-3);
+  return html;
+}
+
+/* ── messages ── */
+window.onmessage=function(e){
+  var msg=e.data.pluginMessage; if(!msg) return;
+
+  if(msg.type==='guardrail_error'){
+    showGuardrail(msg.reason);
+    return;
+  }
+
+  if(msg.type==='outline_done'){
+    if(msg.mem) updateMem(msg.mem);
+    return;
+  }
+
+  if(msg.type==='dissolve_done'){
+    if(msg.mem) updateMem(msg.mem);
+    var btn3 = $('btn-dissolve');
+    if(btn3){ btn3.textContent='Executar'; btn3.disabled=false; }
+
+    // captura score ANTES de atualizar dissolveOk
+    var dissolveScoreBefore = _lastScore;
+
+    // marca interações como padronizadas no _scoreData
+    if(!_scoreData) _scoreData = { instances:0, hidden:0, images:[], topFrames:0, totalNodes:0, customFonts:0, pageCount:1, dissolveOk:false, badTriggers:0 };
+    _scoreData.dissolveOk = true;
+    _scoreData.badTriggers = 0; // dissolve elimina triggers problemáticos
+
+    // calcula score APÓS
+    var dissolveScoreAfter = calcScore(_scoreData).score;
+
+    // re-renderiza score com nova dimensão
+    renderScore(_scoreData);
+
+    // feedback na page
+    var res2 = $('proto-result');
+    if(res2){
+      res2.className = 'adv-result visible';
+      var impactTxt = (dissolveScoreAfter > dissolveScoreBefore)
+        ? ' · Score ↑ '+(dissolveScoreAfter - dissolveScoreBefore)+' pts'
+        : '';
+      res2.innerHTML =
+        '<b>'+msg.done+'</b> interação'+(msg.done!==1?'ões':'')+
+        ' padronizada'+(msg.done!==1?'s':'')+' para Dissolve 300ms'+impactTxt;
+    }
+
+    addHistory('dissolve', msg.done, 0, msg.mem, _memCurrent, {
+      scoreBefore: dissolveScoreBefore,
+      scoreAfter:  dissolveScoreAfter,
+      savedKb: 0
+    });
+    return;
+  }
+
+  if(msg.type==='scan_progress'){
+    updateLd(msg);
+    return;
+  }
+
+  if(msg.type==='scan_images_result'){
+    stopLoadingSequence((msg.items||[]).length);
+    if(msg.mem) updateMem(msg.mem);
+    _cache.img = { items: msg.items||[], ts: Date.now() };
+    if(_scoreData){
+      _scoreData.images = (msg.items||[]).map(function(i){ return { sizeKb: i.sizeKb||0 }; });
+      renderScore(_scoreData);
+    }
+    _updateHomeBadge('img', (msg.items||[]).length);
+    _renderImgPage(msg.items||[]);
+    showOnly('page-img');
+    return;
+  }
+
+  if(msg.type==='compress_progress'){
+    setProg(msg.done, msg.total);
+    return;
+  }
+
+  if(msg.type==='compress_done'){
+    var memBefore2 = _memCurrent;
+    if(msg.mem) updateMem(msg.mem);
+    var _fromKb=0, _toKb=0;
+    if(msg.compressedMap){ Object.keys(msg.compressedMap).forEach(function(k){ var m=msg.compressedMap[k]; _fromKb+=(m.from||0); _toKb+=(m.to||0); }); }
+    var _sB=_lastScore, _sA=null;
+    if(_scoreData && msg.mem){ var _sd2=Object.assign({},_scoreData); _sd2.totalNodes=msg.mem.pageNodes||_sd2.totalNodes; _sA=calcScore(_sd2).score; }
+    addHistory('img', msg.done, 0, msg.mem, memBefore2, { savedKb:msg.savedKb||0, fromKb:_fromKb, toKb:_toKb, scoreBefore:_sB, scoreAfter:_sA });
+    if(msg.compressedMap) markCompressedItems(msg.compressedMap);
+    _invalidateCache('img');
+    // vai direto ao home — sem re-scan de imagens (getBytesAsync em 53 imgs é lento)
+    // o badge será atualizado na próxima entrada na seção
+    showOnly('view-home');
+    return;
+  }
+
+  if(msg.type==='scan_result'){
+    stopLoadingSequence((msg.items||[]).length);
+    if(msg.mem) updateMem(msg.mem);
+    if(_memBaseline===0 && msg.mem) _memBaseline=msg.mem.pageKb;
+    updateHiddenBtn(msg.hiddenCount||0);
+    _cache.comp = { items: msg.items||[], ts: Date.now() };
+    if(!_scoreData) _scoreData = { instances:0, hidden:0, images:[], topFrames:0, totalNodes:0, customFonts:0, pageCount:1, dissolveOk:false, badTriggers:0 };
+    _scoreData.instances  = (msg.items||[]).length;
+    _scoreData.hidden     = msg.hiddenCount || 0;
+    _scoreData.topFrames  = msg.topFrames   || 0;
+    _scoreData.totalNodes = msg.mem ? msg.mem.pageNodes : _scoreData.totalNodes;
+    _scoreData.pageCount  = msg.mem ? msg.mem.pageCount : _scoreData.pageCount;
+    _scoreData.customFonts= msg.customFonts || 0;
+    renderScore(_scoreData);
+    // pré-carrega cache para badges
+    _updateHomeBadge('comp', (msg.items||[]).length);
+    _updateHomeBadge('hidden', msg.hiddenCount||0);
+    // se veio de navTo('comp') vai para page-comp; do scan inicial vai pro home
+    if(mode === 'comp' && _prevMode !== 'comp'){
+      // scan inicial — vai para home com badges
+      showOnly('view-home');
+    } else if(mode === 'comp'){
+      _renderListPage('comp', msg.items||[]);
+      showOnly('page-comp');
+    } else {
+      showOnly('view-home');
+    }
+    return;
+  }
+
+  if(msg.type==='scan_hidden_result'){
+    stopLoadingSequence((msg.items||[]).length);
+    if(msg.mem) updateMem(msg.mem);
+    if(_quickRemoveAll){
+      _quickRemoveAll=false;
+      var ids=(msg.items||[]).map(function(i){ return i.id; });
+      if(ids.length>0){
+        showOnly('view-progress');
+        _resetProgress('layers removidas', ids.length);
+        parent.postMessage({ pluginMessage:{ type:'remove_hidden', ids:ids, scope:'page' } }, '*');
+      }
+      return;
+    }
+    _cache.hidden = { items: msg.items||[], ts: Date.now() };
+    if(_scoreData){
+      _scoreData.hidden = (msg.items||[]).length;
+      renderScore(_scoreData);
+    }
+    _updateHomeBadge('hidden', (msg.items||[]).length);
+    _renderListPage('hidden', msg.items||[]);
+    // sempre vai para page-hidden (veio de navTo('hidden'))
+    showOnly('page-hidden');
+    return;
+  }
+
+  if(msg.type==='detach_progress'||msg.type==='remove_progress'){
+    setProg(msg.done, msg.total);
+    return;
+  }
+
+  // ── handlers das novas otimizações ──
+  if(msg.type==='scan_orphans_result'){
+    var html = _fmtList(msg.items, function(it){ return it.name + ' ('+it.w+'×'+it.h+')'; });
+    if(msg.items && msg.items.length){
+      _advPendingIds['orphans'] = msg.items.map(function(i){return i.id;});
+    html += '<br><button class="adv-run" style="margin-top:6px;font-size:10px;padding:5px 12px" onclick="runAdvancedAction(\'remove_orphans\',_advPendingIds[\'orphans\'],\'res-orphans\')">Remover todos</button>';
+    }
+    _advResult('res-orphans', html, !!(msg.items&&msg.items.length));
+    return;
+  }
+  if(msg.type==='orphans_done'){
+    if(msg.mem) updateMem(msg.mem);
+    var r=$('res-orphans'); if(r) r.innerHTML='<b>'+msg.done+' frame(s) removido(s)</b>';
+    addHistory('detach', msg.done, 0, msg.mem, _memCurrent);
+    return;
+  }
+  if(msg.type==='clean_overrides'||msg.type==='overrides_done'){
+    if(msg.type==='overrides_done'){
+      if(msg.mem) updateMem(msg.mem);
+      var r2=$('res-overrides'); if(r2) r2.innerHTML='<b>'+msg.done+' instância(s) limpas</b>';
+      addHistory('detach', msg.done, 0, msg.mem, _memCurrent);
+    }
+    return;
+  }
+  if(msg.type==='scan_triggers_result'){
+    var html2 = _fmtList(msg.items, function(it){ return it.name+' ('+it.triggers+')'; });
+    if(msg.items && msg.items.length){
+      _advPendingIds['triggers'] = msg.items.map(function(i){return i.id;});
+    html2 += '<br><button class="adv-run" style="margin-top:6px;font-size:10px;padding:5px 12px" onclick="runAdvancedAction(\'fix_triggers\',_advPendingIds[\'triggers\'],\'res-triggers\')">Converter para On Click</button>';
+    }
+    _advResult('res-triggers', html2, !!(msg.items&&msg.items.length));
+    return;
+  }
+  if(msg.type==='triggers_done'){
+    if(msg.mem) updateMem(msg.mem);
+    var r3=$('res-triggers'); if(r3) r3.innerHTML='<b>'+msg.done+' interação(ões) corrigidas</b>';
+    return;
+  }
+  if(msg.type==='scan_loops_result'){
+    var html3 = msg.count===0 ? '<b>Nenhum loop encontrado</b> — tudo certo!' :
+      '<b>'+msg.count+' ciclo(s)</b><br>' + (msg.items||[]).slice(0,3).map(function(c){ return '· '+c; }).join('<br>');
+    _advResult('res-loops', html3, false);
+    return;
+  }
+  if(msg.type==='scan_scroll_result'){
+    var html4 = _fmtList(msg.items, function(it){ return it.name+' ('+it.direction+')'; });
+    if(msg.items && msg.items.length){
+      _advPendingIds['scroll'] = msg.items.map(function(i){return i.id;});
+    html4 += '<br><button class="adv-run" style="margin-top:6px;font-size:10px;padding:5px 12px" onclick="runAdvancedAction(\'fix_scroll\',_advPendingIds[\'scroll\'],\'res-scroll\')">Remover scroll</button>';
+    }
+    _advResult('res-scroll', html4, !!(msg.items&&msg.items.length));
+    return;
+  }
+  if(msg.type==='scroll_done'){
+    if(msg.mem) updateMem(msg.mem);
+    var r4=$('res-scroll'); if(r4) r4.innerHTML='<b>'+msg.done+' frame(s) corrigidos</b>';
+    return;
+  }
+  if(msg.type==='scan_effects_result'){
+    var html5 = _fmtList(msg.items, function(it){ return it.name+' ('+it.effects+')'; });
+    if(msg.items && msg.items.length){
+      _advPendingIds['effects'] = msg.items.map(function(i){return i.id;});
+    html5 += '<br><button class="adv-run" style="margin-top:6px;font-size:10px;padding:5px 12px" onclick="runAdvancedAction(\'remove_effects\',_advPendingIds[\'effects\'],\'res-effects\')">Remover efeitos</button>';
+    }
+    _advResult('res-effects', html5, !!(msg.items&&msg.items.length));
+    return;
+  }
+  if(msg.type==='effects_done'){
+    if(msg.mem) updateMem(msg.mem);
+    var r5=$('res-effects'); if(r5) r5.innerHTML='<b>'+msg.done+' nó(s) com efeitos removidos</b>';
+    addHistory('dissolve', msg.done, 0, msg.mem, _memCurrent);
+    return;
+  }
+  if(msg.type==='scan_vectors_result'){
+    var html6 = _fmtList(msg.items, function(it){ return it.name+' ('+it.points+' pontos)'; });
+    if(msg.items && msg.items.length){
+      _advPendingIds['vectors'] = msg.items.map(function(i){return i.id;});
+    html6 += '<br><button class="adv-run" style="margin-top:6px;font-size:10px;padding:5px 12px" onclick="runAdvancedAction(\'flatten_vectors\',_advPendingIds[\'vectors\'],\'res-vectors\')">Simplificar vetores</button>';
+    }
+    _advResult('res-vectors', html6, !!(msg.items&&msg.items.length));
+    return;
+  }
+  if(msg.type==='vectors_done'){
+    if(msg.mem) updateMem(msg.mem);
+    var r6=$('res-vectors'); if(r6) r6.innerHTML='<b>'+msg.done+' vetor(es) simplificados</b>';
+    return;
+  }
+  if(msg.type==='flow_score_result'){
+    var res7=$('res-flow-score');
+    if(!res7) return;
+    var btn7=document.querySelector('[onclick*="score_flow"]');
+    if(btn7){btn7.disabled=false;btn7.textContent='Calcular';}
+    if(msg.error){
+      res7.innerHTML='<b>'+msg.error+'</b>';
+      res7.className='adv-result visible';
+      return;
+    }
+    // calcula score só do fluxo
+    var sd={instances:msg.instances,hidden:msg.hidden,images:[],topFrames:msg.frameCount,totalNodes:msg.nodes,customFonts:msg.customFonts,pageCount:msg.pageCount};
+    for(var _i=0;_i<Math.round(msg.imgKb/50);_i++) sd.images.push({sizeKb:50});
+    var flowResult=calcScore(sd);
+    var st=scoreStatus(flowResult.score);
+    res7.innerHTML=
+      '<div class="flow-score-card">'+
+        '<div class="flow-score-num" style="color:'+st.color+'">'+flowResult.score+'</div>'+
+        '<div class="flow-score-lbl">Score do fluxo ('+msg.frameCount+' de '+msg.totalFrames+' frames)</div>'+
+        '<div class="flow-score-grid">'+
+          '<div class="flow-score-metric"><div class="flow-score-metric-val">'+msg.instances+'</div><div class="flow-score-metric-lbl">Instâncias</div></div>'+
+          '<div class="flow-score-metric"><div class="flow-score-metric-val">'+msg.nodes+'</div><div class="flow-score-metric-lbl">Nós totais</div></div>'+
+          '<div class="flow-score-metric"><div class="flow-score-metric-val">'+msg.hidden+'</div><div class="flow-score-metric-lbl">Hidden</div></div>'+
+          '<div class="flow-score-metric"><div class="flow-score-metric-val">'+msg.customFonts+'</div><div class="flow-score-metric-lbl">Fontes custom</div></div>'+
+        '</div>'+
+      '</div>';
+    res7.className='adv-result visible';
+    return;
+  }
+
+  if(msg.type==='scan_single_groups_result'){
+    var html7 = _fmtList(msg.items, function(it){ return it.name+' (prof. '+it.depth+')'; });
+    if(msg.items && msg.items.length){
+      _advPendingIds['single-groups'] = msg.items.map(function(i){return i.id;});
+      html7 += '<br><button class="adv-run" style="margin-top:6px;font-size:10px;padding:5px 12px" onclick="runAdvancedAction(\'flatten_single_groups\',_advPendingIds[\'single-groups\'],\'res-single-groups\')">Dissolver todos</button>';
+    }
+    _advResult('res-single-groups', html7, !!(msg.items&&msg.items.length));
+    return;
+  }
+  if(msg.type==='single_groups_done'){
+    if(msg.mem) updateMem(msg.mem);
+    var rsg=$('res-single-groups'); if(rsg) rsg.innerHTML='<b>'+msg.done+' grupo(s) dissolvido(s)</b>';
+    addHistory('detach', msg.done, 0, msg.mem, _memCurrent);
+    return;
+  }
+
+  if(msg.type==='scan_deep_nodes_result'){
+    var html8;
+    if(!msg.items || !msg.items.length){
+      html8 = '<b>Nenhum nó com aninhamento excessivo</b> — tudo certo!';
+    } else {
+      html8 = '<b>'+msg.items.length+' nó'+(msg.items.length!==1?'s':'')+' com >'+ msg.threshold +' níveis</b><br>';
+      html8 += 'Máximo encontrado: '+msg.maxDepth+' níveis<br>';
+      msg.items.slice(0,3).forEach(function(it){ html8 += '· '+it.name+' ('+it.type+', prof. '+it.depth+')<br>'; });
+      if(msg.items.length>3) html8 += '… e mais '+(msg.items.length-3);
+      _advPendingIds['deep-nodes'] = msg.items.map(function(i){return i.id;});
+      html8 += '<br><button class="adv-run" style="margin-top:6px;font-size:10px;padding:5px 12px" onclick="runAdvancedAction(\'flatten_deep_nodes\',_advPendingIds[\'deep-nodes\'],\'res-deep-nodes\')">Achatar selecionados</button>';
+    }
+    _advResult('res-deep-nodes', html8, !!(msg.items&&msg.items.length));
+    return;
+  }
+  if(msg.type==='deep_nodes_done'){
+    if(msg.mem) updateMem(msg.mem);
+    var rdn=$('res-deep-nodes'); if(rdn) rdn.innerHTML='<b>'+msg.done+' nó(s) achatado(s)</b>';
+    addHistory('detach', msg.done, 0, msg.mem, _memCurrent);
+    return;
+  }
+
+  if(msg.type==='scan_covered_result'){
+    var html9 = _fmtList(msg.items, function(it){ return it.name+' ('+it.type+') em '+it.parent; });
+    if(msg.items && msg.items.length){
+      _advPendingIds['covered'] = msg.items.map(function(i){return i.id;});
+      html9 += '<br><button class="adv-run" style="margin-top:6px;font-size:10px;padding:5px 12px" onclick="runAdvancedAction(\'remove_covered\',_advPendingIds[\'covered\'],\'res-covered\')">Remover todas</button>';
+    }
+    _advResult('res-covered', html9, !!(msg.items&&msg.items.length));
+    return;
+  }
+  if(msg.type==='covered_done'){
+    if(msg.mem) updateMem(msg.mem);
+    var rcov=$('res-covered'); if(rcov) rcov.innerHTML='<b>'+msg.done+' layer(s) removida(s)</b>';
+    addHistory('hidden', msg.done, 0, msg.mem, _memCurrent);
+    return;
+  }
+
+  if(msg.type==='scan_loose_pages_result'){
+    stopLoadingSequence((msg.items||[]).length);
+    _cache['loose-pages'] = { items: msg.items||[], ts: Date.now() };
+    _updateHomeBadge('loose-pages', (msg.items||[]).length);
+    _renderLoosePagesPage(msg.items||[]);
+    showOnly('page-loose-pages');
+    return;
+  }
+
+  if(msg.type==='remove_loose_pages_done'){
+    if(msg.mem) updateMem(msg.mem);
+    addHistory('hidden', msg.done, 0, msg.mem, _memCurrent);
+    _invalidateCache('all'); // páginas removidas afetam o score de páginas
+    if(_scoreData){ _scoreData.pageCount = Math.max(1,(_scoreData.pageCount||1)-msg.done); renderScore(_scoreData); }
+    // re-scan das páginas soltas
+    showOnly('view-loading');
+    startLoadingSequence('comp');
+    parent.postMessage({ pluginMessage:{ type:'scan_loose_pages' } }, '*');
+    return;
+  }
+
+  // ── fim handlers avançados ──
+
+  // compressão via Canvas API do browser
+  if(msg.type==='compress_request'){
+    var bytes = new Uint8Array(msg.bytes);
+    var blob = new Blob([bytes]);
+    var url = URL.createObjectURL(blob);
+    var imgEl = new Image();
+    imgEl.onload = function(){
+      var canvas = document.createElement('canvas');
+      canvas.width = imgEl.naturalWidth;
+      canvas.height = imgEl.naturalHeight;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(imgEl, 0, 0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(function(blob2){
+        if(!blob2){ parent.postMessage({ pluginMessage:{ type:'compress_result', nodeId:msg.nodeId, fillIdx:msg.fillIdx, bytes:null } }, '*'); return; }
+        var reader = new FileReader();
+        reader.onload = function(){
+          var ab = reader.result;
+          var arr = Array.from(new Uint8Array(ab));
+          parent.postMessage({ pluginMessage:{ type:'compress_result', nodeId:msg.nodeId, fillIdx:msg.fillIdx, bytes:arr } }, '*');
+        };
+        reader.readAsArrayBuffer(blob2);
+      }, 'image/jpeg', msg.quality||0.72);
+    };
+    imgEl.onerror = function(){
+      URL.revokeObjectURL(url);
+      parent.postMessage({ pluginMessage:{ type:'compress_result', nodeId:msg.nodeId, fillIdx:msg.fillIdx, bytes:null } }, '*');
+    };
+    imgEl.src = url;
+    return;
+  }
+
+  if(msg.type==='detach_done'||msg.type==='remove_done'){
+    var memBefore = _memCurrent;
+    if(msg.mem) updateMem(msg.mem);
+    if(_scoreData){
+      if(mode==='hidden') _scoreData.hidden = 0;
+      else _scoreData.instances = 0;
+      renderScore(_scoreData);
+    }
+    var action = mode==='hidden' ? 'hidden' : 'detach';
+    addHistory(action, msg.done, 0, msg.mem, memBefore);
+    if(msg.hiddenCount && msg.hiddenCount > 0) updateHiddenBtn(msg.hiddenCount);
+    // guarda stats da operação para o empty state
+    _lastOpStats = {
+      done: msg.done,
+      action: mode,
+      memBefore: memBefore,
+      memAfter: msg.mem,
+      saved: memBefore > 0 && msg.mem ? Math.max(0, memBefore - msg.mem.pageKb) : 0,
+    };
+    // invalida só o cache da seção atual e re-escaneia
+    var returnMode = mode;
+    _invalidateCache(returnMode);
+    showOnly('view-loading');
+    startLoadingSequence(returnMode === 'hidden' ? 'hidden' : 'comp');
+    selectedIds = {}; _ldPrev = -1;
+    var msgType = returnMode === 'hidden' ? 'scan_hidden' : 'scan';
+    parent.postMessage({ pluginMessage:{ type: msgType, scope:'page' } }, '*');
+    return;
+  }
+};
+
+// init — splash → loading → scan
+try{ $('hdr-pg').textContent = figma.currentPage.name; }catch(e){}
+showSplash(function(){
+  // DOM pronto: prepara loading e avisa o code.js para iniciar o scan
+  _ldPrev=-1;
+  mode='comp';
+  var tc=$('tab-comp');   if(tc) tc.className='tab on';
+  var th=$('tab-hidden'); if(th) th.className='tab';
+  var ti=$('tab-img');    if(ti) ti.className='tab';
+  showOnly('view-loading');
+  startLoadingSequence('comp');
+  quickScoreEstimate(1);
+  // sinaliza ao code.js que a UI está pronta para receber resultados
+  parent.postMessage({ pluginMessage: { type: 'ui_ready' } }, '*');
+});
+</script>
+</body>
+</html>
