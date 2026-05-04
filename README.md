@@ -6,9 +6,7 @@ Centraliza 17 otimizações cobrindo componentes vinculados, layers ocultas, ima
 
 ## Por que existe
 
-Designers que preparam testes de usabilidade enfrentam um problema silencioso antes de cada sessão: arquivos Figma acumulam instâncias vinculadas a bibliotecas, layers ocultas, imagens não comprimidas e estruturas de nó excessivamente complexas. Isso causa protótipos lentos, crashes em iOS durante testes no Maze e dependências frágeis de bibliotecas externas.
-
-A documentação oficial do Maze (jan 2026) confirma que imagens não comprimidas, fontes customizadas e instâncias vinculadas são as principais causas de falha em sessões de teste — especialmente em dispositivos iOS com limites rígidos de memória WebAssembly.
+Designers que preparam testes de usabilidade enfrentam um problema silencioso antes de cada sessão: arquivos Figma acumulam instâncias vinculadas a bibliotecas, layers ocultas, imagens não comprimidas e estruturas de layers excessivamente complexas. Isso causa protótipos lentos, crashes em iOS durante testes no Maze e dependências frágeis de bibliotecas externas.
 
 ## Funcionalidades principais
 
@@ -29,12 +27,6 @@ A documentação oficial do Maze (jan 2026) confirma que imagens não comprimida
 4. Selecione manifest.json na raiz do repo
 5. O plugin aparecerá em Plugins → Development → Optimize Toolkit
 ```
-
-Não há build step — o plugin roda direto dos arquivos source (`code.js` + `ui.html`).
-
-## Instalação via Figma Community
-
-*Em breve.* Aguardando review da Figma. Veja [CHANGELOG.md](CHANGELOG.md) para acompanhar versões.
 
 ## Como usar
 
@@ -77,40 +69,3 @@ optimize-toolkit/
 ├── EVOLUTION_REPORT.md    Diagnóstico de bugs e roadmap (interno)
 └── optimize-toolkit-prd.md  PRD completo do produto (referência)
 ```
-
-## Arquitetura técnica
-
-- **Sandbox sem build** — `code.js` puro JavaScript ES5 compatível com QuickJS do Figma
-- **UI em iframe isolado** — `ui.html` com tudo inline (CSS + JS), sem dependências externas exceto Inter via Google Fonts
-- **Comunicação por mensagens** — `figma.ui.postMessage` ↔ `parent.postMessage`
-- **Router único** — `figma.ui.onmessage` consolidado, sem encadeamento de handlers
-- **Performance** — uma única `findAll()` por scan, IPC a cada 50 ops, mainComponent lazy
-
-## Compatibilidade
-
-| Plataforma | Status |
-|---|---|
-| Figma Desktop (macOS) | ✓ |
-| Figma Desktop (Windows) | ✓ |
-| Figma Web | ✓ |
-| Figma Mobile | — (plugins não disponíveis) |
-| FigJam | — (escopo restrito a `editorType: figma`) |
-
-Requer Figma com suporte a `documentAccess: "dynamic-page"` (versão 116+).
-
-## Contribuir
-
-Bug reports e PRs são bem-vindos. Antes de enviar:
-
-1. Rode o checklist manual em [EVOLUTION_REPORT.md seção 6](EVOLUTION_REPORT.md)
-2. Teste em pelo menos 2 arquivos: um pequeno (<500 nós) e um grande (>5.000 nós)
-3. Verifique guardrails em arquivo com mais de 2 páginas
-4. Confirme que tema dark/light alterna sem flicker
-
-## Licença
-
-MIT — veja [LICENSE](LICENSE).
-
-## Autor
-
-Diflavio · Product Design — para uso interno e da comunidade.
