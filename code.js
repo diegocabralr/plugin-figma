@@ -1,7 +1,26 @@
 // ─────────────────────────────────────────────────────────────────
-// Optimize Toolkit — code.js  v2.0 (performance)
+// Optimize Toolkit — code.js  v2.5.1 (histórico persistente)
 //
-// Princípios de performance aplicados:
+// Mudanças v2.5.1:
+//  • H-01: histórico persistido via figma.clientStorage por arquivo
+//          (TTL 30 dias). Antes só vivia em RAM da UI.
+//  • Novo handler 'save_history' grava entradas vindas da UI
+//  • ui_ready agora também emite 'history_restore' com entradas salvas
+//
+// Mudanças v2.5:
+//  • F-03: cache persistente via figma.clientStorage — re-abertura
+//          instantânea no mesmo arquivo (TTL 1h)
+//  • doScanInstances persiste o resultado após cada scan
+//  • ui_ready envia cache primeiro (fromCache: true) e depois scan fresh
+//
+// Mudanças v2.4:
+//  • B-02: doScanInstances filtra apenas mainComponent.remote === true
+//          (alinha com PRD seção 7.1 — antes contava TODAS as instâncias)
+//  • B-04: todas as operações destrutivas passam por guardAndRun
+//          (remove_orphans, remove_covered, flatten_*, remove_loose_pages)
+//  • Compatível com manifest.documentAccess = "dynamic-page"
+//
+// Princípios de performance mantidos:
 //  • ZERO page.findAll() duplos: scan + estimativa em UMA passagem
 //  • mainComponent acessado com try/catch lazy (evita resolução remota)
 //  • doScanHidden usa children.length em vez de findAll() por nó
@@ -11,6 +30,79 @@
 // ─────────────────────────────────────────────────────────────────
 
 figma.showUI(__html__, { width: 340, height: 620 });
+
+// ── v2.5: cache persistente via figma.clientStorage ──────────────
+// Salva o último scan por arquivo (chave = figma.root.id). Na próxima
+// abertura no mesmo arquivo, o resultado anterior é reemitido para a UI
+// imediatamente, enquanto o scan novo roda em background. Corta o
+// "tempo até primeiro pixel" de ~1-3s para ~50ms em re-aberturas.
+var CACHE_VER     = 'v25';
+var CACHE_TTL_MS  = 1000 * 60 * 60; // 1 hora — depois disso só fresh
+
+function getCacheKey() {
+  try { return 'ot-scan-' + CACHE_VER + '-' + figma.root.id; }
+  catch (_) { return null; }
+}
+
+function saveScanCache(payload) {
+  var key = getCacheKey();
+  if (!key) return;
+  // fire-and-forget — não bloqueia o caller
+  try {
+    figma.clientStorage.setAsync(key, { ts: Date.now(), payload: payload })
+      .then(function(){}, function(){});
+  } catch (_) {}
+}
+
+function loadScanCache(cb) {
+  var key = getCacheKey();
+  if (!key) { cb(null); return; }
+  try {
+    figma.clientStorage.getAsync(key).then(function(data) {
+      if (data && data.ts && (Date.now() - data.ts) < CACHE_TTL_MS) {
+        cb(data.payload);
+      } else {
+        cb(null);
+      }
+    }, function(){ cb(null); });
+  } catch (_) {
+    cb(null);
+  }
+}
+
+// ── v2.5.1: histórico persistido via figma.clientStorage ──────────
+// Mantém o extrato bancário entre sessões. Chave por arquivo
+// (figma.root.id), TTL 30 dias. UI envia 'save_history' a cada
+// addHistory; na abertura, ui_ready dispara 'history_restore'.
+var HISTORY_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 dias
+
+function getHistoryKey() {
+  try { return 'ot-history-' + CACHE_VER + '-' + figma.root.id; }
+  catch (_) { return null; }
+}
+
+function saveHistory(entries) {
+  var key = getHistoryKey();
+  if (!key) return;
+  try {
+    figma.clientStorage.setAsync(key, { entries: entries, ts: Date.now() })
+      .then(function(){}, function(){});
+  } catch (_) {}
+}
+
+function loadHistory(cb) {
+  var key = getHistoryKey();
+  if (!key) { cb([]); return; }
+  try {
+    figma.clientStorage.getAsync(key).then(function(data) {
+      if (data && data.entries && data.ts && (Date.now() - data.ts) < HISTORY_TTL_MS) {
+        cb(data.entries);
+      } else {
+        cb([]);
+      }
+    }, function(){ cb([]); });
+  } catch (_) { cb([]); }
+}
 
 // ── utilitários ───────────────────────────────────────────────────
 
@@ -122,7 +214,24 @@ function scanPage(page) {
     // acumula KB por tipo (switch é mais rápido que if/else chain)
     switch (t) {
       case 'FRAME': case 'COMPONENT': case 'COMPONENT_SET': case 'GROUP': kb += 3; break;
-      case 'INSTANCE': kb += 2; instances.push(n); break;
+      case 'INSTANCE':
+        kb += 2;
+        // B-02 (v2.4): apenas instâncias REMOTAS pesam o score
+        // (componentes locais não dependem de bibliotecas externas).
+        // mainComponent.remote=true indica vínculo com biblioteca publicada.
+        // Em arquivos com biblioteca offline o acesso falha — tratamos como
+        // remota nesse caso (try/catch + flag pessimista).
+        try {
+          var mc = n.mainComponent;
+          if (mc) {
+            if (mc.remote === true) instances.push(n);
+          }
+        } catch (_) {
+          // resolução falhou — provável biblioteca remota inacessível,
+          // contar como remota (pessimista).
+          instances.push(n);
+        }
+        break;
       case 'VECTOR': case 'BOOLEAN_OPERATION': case 'STAR': case 'POLYGON': kb += 4; break;
       case 'TEXT':
         kb += 1;
@@ -159,10 +268,16 @@ function scanPage(page) {
   }
 
   // peso outras páginas — O(páginas), sem traversal
+  // try/catch necessário: com documentAccess:"dynamic-page" apenas a página
+  // atual está carregada; acessar .children de outras páginas sem loadAsync()
+  // lança "Cannot access property `children` on a page that has not been
+  // explicitly loaded". A estimativa falha silenciosamente — não é crítico.
   var otherKb = 0;
   var pages = figma.root.children;
   for (var p = 0; p < pages.length; p++) {
-    if (pages[p] !== page) otherKb += pages[p].children.length * 12;
+    if (pages[p] !== page) {
+      try { otherKb += pages[p].children.length * 12; } catch (_) {}
+    }
   }
 
   var realPageCount = 0;
@@ -231,7 +346,7 @@ function doScanInstances() {
   figma.ui.postMessage({ type: 'scan_progress', pageIndex: 1, totalPages: 1,
     pageName: page.name, foundSoFar: results.length, scanType: 'instances' });
 
-  figma.ui.postMessage({
+  var resultMsg = {
     type:            'scan_result',
     items:           results,
     hiddenCount:     scan.hiddenNodes.length,
@@ -239,7 +354,10 @@ function doScanInstances() {
     topFrames:       page.children.length,
     customFonts:     mem.customFonts,
     hasComponentSet: false   // banner removido por solicitação
-  });
+  };
+  figma.ui.postMessage(resultMsg);
+  // v2.5: persiste para reabertura instantânea no mesmo arquivo
+  saveScanCache(resultMsg);
 }
 
 // ── scan: hidden ──────────────────────────────────────────────────
@@ -1246,7 +1364,28 @@ figma.ui.onmessage = function(msg) {
   var t = msg.type;
 
   // ── scans sem guardrail ──
-  if (t === 'ui_ready' || t === 'scan')   { doScanInstances();  return; }
+  // v2.5: ui_ready primeiro envia cache persistido (se existir e dentro
+  // do TTL), depois roda scan novo em background para atualizar.
+  // v2.5.1: também emite 'history_restore' com entradas salvas.
+  if (t === 'ui_ready') {
+    // restaura histórico antes de qualquer outra coisa (independente do scan)
+    loadHistory(function(entries) {
+      if (entries && entries.length) {
+        figma.ui.postMessage({ type: 'history_restore', entries: entries });
+      }
+    });
+    loadScanCache(function(cached) {
+      if (cached) {
+        cached.fromCache = true; // marca para a UI distinguir
+        figma.ui.postMessage(cached);
+      }
+      doScanInstances();
+    });
+    return;
+  }
+  if (t === 'scan')   { doScanInstances();  return; }
+  // v2.5.1: UI grava entrada de histórico após cada addHistory
+  if (t === 'save_history') { saveHistory(msg.entries || []); return; }
   if (t === 'scan_hidden')                { doScanHidden();      return; }
   if (t === 'scan_images')                { waitForTask(doScanImages()); return; }
   if (t === 'scan_orphans')               { doScanOrphans();     return; }
@@ -1260,30 +1399,32 @@ figma.ui.onmessage = function(msg) {
   if (t === 'scan_deep_nodes')            { doScanDeepNodes();       return; }
   if (t === 'scan_covered')               { doScanCoveredLayers();   return; }
 
-  // ── ops diretas sem guardrail ──
-  if (t === 'set_dissolve_direct')        { waitForTask(doSetDissolve()); return; }
-  if (t === 'clean_overrides')            { doCleanOverrides();          return; }
-  if (t === 'fix_scroll')                 { doFixScroll(msg.ids);         return; }
-  if (t === 'remove_effects')             { doRemoveEffects(msg.ids);     return; }
-  if (t === 'flatten_vectors')            { doFlattenVectors(msg.ids);    return; }
-  if (t === 'remove_orphans')             { doRemoveOrphans(msg.ids);     return; }
-  if (t === 'flatten_single_groups')      { doFlattenSingleGroups(msg.ids); return; }
-  if (t === 'flatten_deep_nodes')         { doFlattenDeepNodes(msg.ids);  return; }
-  if (t === 'remove_covered')             { doRemoveCovered(msg.ids);     return; }
-  if (t === 'fix_triggers')               { waitForTask(doFixTriggers(msg.ids)); return; }
-
-  // ── páginas soltas ──
+  // ── páginas soltas (scan sem guardrail, remove com guardrail) ──
   if (t === 'scan_loose_pages')   { doScanLoosePages(); return; }
-  if (t === 'remove_loose_pages') { doRemoveLoosePages(msg.ids); return; }
 
   // ── ops com guardrail ──
+  // B-04 (v2.4): TODAS as operações mutativas passam pelo guardrail.
+  // Antes só detach/remove_hidden/outline/dissolve/compress eram protegidos —
+  // operações destrutivas como remove_orphans, remove_covered, flatten_*,
+  // remove_loose_pages podiam rodar em arquivos não elegíveis (DS, biblioteca).
   var guarded = {
-    'detach':          function() { doDetach(msg.ids); },
-    'detach_all':      doDetachAll,
-    'remove_hidden':   function() { doRemoveHidden(msg.ids); },
-    'outline_text':    function() { waitForTask(doOutlineText()); },
-    'set_dissolve':    doSetDissolve,
-    'compress_images': function() { waitForTask(doCompressImages(msg.ids, msg.quality || 0.72)); }
+    'detach':                function() { doDetach(msg.ids); },
+    'detach_all':            doDetachAll,
+    'remove_hidden':         function() { doRemoveHidden(msg.ids); },
+    'outline_text':          function() { waitForTask(doOutlineText()); },
+    'set_dissolve':          doSetDissolve,
+    'set_dissolve_direct':   function() { waitForTask(doSetDissolve()); },
+    'compress_images':       function() { waitForTask(doCompressImages(msg.ids, msg.quality || 0.72)); },
+    'clean_overrides':       doCleanOverrides,
+    'fix_scroll':            function() { doFixScroll(msg.ids); },
+    'remove_effects':        function() { doRemoveEffects(msg.ids); },
+    'flatten_vectors':       function() { doFlattenVectors(msg.ids); },
+    'remove_orphans':        function() { doRemoveOrphans(msg.ids); },
+    'flatten_single_groups': function() { doFlattenSingleGroups(msg.ids); },
+    'flatten_deep_nodes':    function() { doFlattenDeepNodes(msg.ids); },
+    'remove_covered':        function() { doRemoveCovered(msg.ids); },
+    'fix_triggers':          function() { waitForTask(doFixTriggers(msg.ids)); },
+    'remove_loose_pages':    function() { doRemoveLoosePages(msg.ids); }
   };
   if (guarded[t]) { guardAndRun(guarded[t]); }
 };

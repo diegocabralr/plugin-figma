@@ -6,5 +6,13 @@
   "ui": "ui.html",
   "editorType": [
     "figma"
-  ]
+  ],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "https://fonts.googleapis.com",
+      "https://fonts.gstatic.com"
+    ],
+    "reasoning": "Carregamento da fonte Inter via Google Fonts para a interface do plugin. Nenhum dado do arquivo é enviado para domínios externos."
+  }
 }

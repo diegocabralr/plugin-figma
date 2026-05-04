@@ -1,123 +1,116 @@
 # Optimize Toolkit
 
-Plugin para Figma que ajuda a limpar e enxugar arquivos antes de rodar testes de usabilidade e conceito, seja no Maze ou diretamente no figma app
+**Plugin Figma para preparar protótipos antes de testes de usabilidade no Maze, Lookback e similares.**
 
----
+Centraliza 17 otimizações cobrindo componentes vinculados, layers ocultas, imagens, interações de protótipo, renderização, estrutura de nós e gestão de páginas. Calcula um score de prontidão calibrado com a documentação oficial do Maze e protege o arquivo com guardrails antes de qualquer operação destrutiva.
 
-## O que é
+## Por que existe
 
-O Optimize Toolkit é um plugin que escaneia a página atual do Figma e identifica elementos que só pesam o arquivo sem agregar valor ao protótipo final, como instâncias de componentes ligadas a bibliotecas externas e layers ocultas.  
+Designers que preparam testes de usabilidade enfrentam um problema silencioso antes de cada sessão: arquivos Figma acumulam instâncias vinculadas a bibliotecas, layers ocultas, imagens não comprimidas e estruturas de nó excessivamente complexas. Isso causa protótipos lentos, crashes em iOS durante testes no Maze e dependências frágeis de bibliotecas externas.
 
-A ideia é reduzir o peso da página e remover dependências antes de compartilhar o arquivo com stakeholders, clientes ou participantes de pesquisa.
+A documentação oficial do Maze (jan 2026) confirma que imagens não comprimidas, fontes customizadas e instâncias vinculadas são as principais causas de falha em sessões de teste — especialmente em dispositivos iOS com limites rígidos de memória WebAssembly.
 
----
+## Funcionalidades principais
 
-## Para que serve
+- **Score de prontidão (0-100)** com 7 dimensões calibradas pela doc do Maze
+- **17 otimizações** acessíveis por menu de páginas dedicadas
+- **Histórico estilo extrato bancário** com impacto no score por ação
+- **Cache de resultados** com invalidação seletiva — sem re-scans desnecessários
+- **Tema dark/light** sincronizado com a preferência do sistema
+- **Guardrails** que bloqueiam o uso em arquivos de design system ou biblioteca
+- **Score por fluxo ativo** — calcula só os frames conectados ao starting point
 
-Quando você compartilha um protótipo Figma com alguém de fora do time, seja via Maze ou por link de apresentação, o arquivo leva junto:
+## Instalação local (desenvolvimento)
 
-- todas as instâncias conectadas a bibliotecas do time  
-- camadas ocultas acumuladas ao longo das iterações
+```
+1. git clone https://github.com/<seu-usuario>/optimize-toolkit
+2. Abra o Figma Desktop
+3. Plugins → Development → Import plugin from manifest...
+4. Selecione manifest.json na raiz do repo
+5. O plugin aparecerá em Plugins → Development → Optimize Toolkit
+```
 
-Na prática, isso costuma gerar três problemas:
+Não há build step — o plugin roda direto dos arquivos source (`code.js` + `ui.html`).
 
-**Lentidão no carregamento**  
-Protótipos com muitas instâncias vinculadas a bibliotecas externas demoram mais para carregar, principalmente em dispositivos mais simples usados em testes.
+## Instalação via Figma Community
 
-**Dependências frágeis**  
-Se a biblioteca for atualizada, renomeada ou ficar temporariamente indisponível, existe risco de o protótipo quebrar bem na hora da sessão de teste ou da apresentação.
+*Em breve.* Aguardando review da Figma. Veja [CHANGELOG.md](CHANGELOG.md) para acompanhar versões.
 
-**Arquivo mais pesado do que precisa**  
-Layers ocultas deixadas por versões anteriores continuam ocupando memória, embora não contribuam em nada para a experiência final.
+## Como usar
 
-O Optimize Toolkit ajuda a reduzir esses riscos antes de você compartilhar o protótipo.
+1. Abra o arquivo Figma que será usado no teste de usabilidade
+2. Navegue até a página de protótipo (deve estar nomeada com "Protótipo" ou "Prototype")
+3. Plugins → Optimize Toolkit
+4. O scan inicial mapeia o arquivo e calcula o score
+5. Use o menu para acessar cada categoria de otimização
+6. O score sobe imediatamente após cada ação executada
+7. Histórico (ícone ↺ no header) mostra o extrato de tudo que foi feito
 
----
+**Pré-requisitos do arquivo:**
+- Máximo 2 páginas reais (separadores ignorados)
+- Página atual nomeada com "Protótipo" ou "Prototype"
 
-## Como funciona
+Esses guardrails impedem uso acidental em arquivos de biblioteca ou design system.
 
-O plugin atua apenas na página atual e é dividido em dois módulos independentes:
+## Score de prontidão
 
-### 1. Componentes
+| Faixa | Status | Significado |
+|---|---|---|
+| 80-100 | 🟢 Pronto | Bom para testes no Maze |
+| 60-79 | 🟡 Revisar | Ajustes pontuais recomendados |
+| 35-59 | 🟠 Pesado | Risco de lentidão em mobile |
+| 0-34 | 🔴 Crítico | Provável crash em iOS |
 
-- Escaneia todos os nós do tipo `INSTANCE` na página.  
-- Lista cada instância com nome, componente pai, tamanho estimado e número de nós filhos.  
-- Você escolhe o que quer desvincular, item a item ou tudo de uma vez.  
-- O detach é feito em ordem segura, do nó mais profundo para o mais raso, o que evita problemas em componentes aninhados.
+7 dimensões avaliadas: instâncias vinculadas (-35), layers ocultas (-20), imagens (-25), nós totais (-18), fontes customizadas (-12), páginas (-20), interações do protótipo (-10).
 
-### 2. Layers ocultas
+## Estrutura do projeto
 
-- Identifica todos os elementos com `visible: false` na página.  
-- Exibe uma lista com o mesmo padrão de informações.  
-- Permite remover layers seletivamente ou em massa.  
-- Depois de cada operação de detach, um botão rápido aparece caso novas layers ocultas tenham surgido e também possam ser removidas.
+```
+optimize-toolkit/
+├── manifest.json          Configuração do plugin (Figma API 1.0.0)
+├── code.js                Plugin sandbox (lógica + acesso à Figma API)
+├── ui.html                Interface (HTML + CSS + JS inline em iframe)
+├── README.md              Este arquivo
+├── CHANGELOG.md           Histórico de versões
+├── LICENSE                MIT
+├── .gitignore             Node, OS, IDE
+├── EVOLUTION_REPORT.md    Diagnóstico de bugs e roadmap (interno)
+└── optimize-toolkit-prd.md  PRD completo do produto (referência)
+```
 
----
+## Arquitetura técnica
 
-## Benefícios para prototipação com stakeholders e clientes
+- **Sandbox sem build** — `code.js` puro JavaScript ES5 compatível com QuickJS do Figma
+- **UI em iframe isolado** — `ui.html` com tudo inline (CSS + JS), sem dependências externas exceto Inter via Google Fonts
+- **Comunicação por mensagens** — `figma.ui.postMessage` ↔ `parent.postMessage`
+- **Router único** — `figma.ui.onmessage` consolidado, sem encadeamento de handlers
+- **Performance** — uma única `findAll()` por scan, IPC a cada 50 ops, mainComponent lazy
 
-**Testes mais confiáveis no Maze**  
-Ao desvincular as instâncias antes de exportar o protótipo, você remove a dependência de bibliotecas externas. O protótipo fica autossuficiente, ou seja, não depende de atualizações futuras do design system para funcionar corretamente.
+## Compatibilidade
 
-**Carregamento mais rápido**  
-Menos nós e menos dependências externas significam um arquivo mais leve.  
-Participantes de pesquisa tendem a ter uma experiência mais fluida, com menos travamentos e atrasos que podem interferir nos resultados.
+| Plataforma | Status |
+|---|---|
+| Figma Desktop (macOS) | ✓ |
+| Figma Desktop (Windows) | ✓ |
+| Figma Web | ✓ |
+| Figma Mobile | — (plugins não disponíveis) |
+| FigJam | — (escopo restrito a `editorType: figma`) |
 
-**Apresentações sem surpresas**  
-Apresentações para clientes e stakeholders acontecem em contextos pouco controlados: redes lentas, dispositivos variados, horários de pico.  
-Um protótipo otimizado tem menos pontos de falha nesses cenários.
+Requer Figma com suporte a `documentAccess: "dynamic-page"` (versão 116+).
 
-**Histórico das otimizações**  
-O plugin mantém um histórico local da sessão:  
-quantas instâncias foram desvinculadas, quantas layers foram removidas, quanto espaço foi liberado e o tamanho da página antes e depois de cada ação.
+## Contribuir
 
-**Fluxo não destrutivo**  
-Todas as ações são feitas apenas na página atual ou em cópias.  
-O plugin não altera outras páginas ou arquivos.  
-Mesmo assim, a recomendação é sempre duplicar o arquivo antes de otimizar. Esse aviso aparece de forma clara antes de qualquer operação.
+Bug reports e PRs são bem-vindos. Antes de enviar:
 
----
+1. Rode o checklist manual em [EVOLUTION_REPORT.md seção 6](EVOLUTION_REPORT.md)
+2. Teste em pelo menos 2 arquivos: um pequeno (<500 nós) e um grande (>5.000 nós)
+3. Verifique guardrails em arquivo com mais de 2 páginas
+4. Confirme que tema dark/light alterna sem flicker
 
-## Métricas exibidas
+## Licença
 
-| Métrica                | Descrição                                                       |
-|------------------------|-----------------------------------------------------------------|
-| Instâncias encontradas | Total de componentes vinculados na página atual                |
-| Tamanho estimado       | Estimativa em KB baseada na contagem de nós por tipo          |
-| Memória da página      | Estimativa do peso da página (nós × peso médio por tipo)      |
-| Memória do arquivo     | Estimativa agregada de todas as páginas do arquivo            |
-| Espaço liberado        | Diferença de tamanho antes e depois de cada operação          |
+MIT — veja [LICENSE](LICENSE).
 
-> **Sobre a estimativa de memória**  
-> A Figma Plugin API não expõe diretamente os mesmos dados do painel “Manage Memory”.  
-> As métricas exibidas são estimativas calculadas a partir da contagem e do tipo de nós (FRAME, INSTANCE, VECTOR, TEXT, IMAGE).  
-> Elas servem para acompanhar a variação entre operações e não como medição absoluta e precisa do arquivo.
+## Autor
 
----
-
-## Instalação
-
-1. Baixe o arquivo `.zip` e extraia a pasta.  
-2. No Figma, acesse `Plugins → Development → Import plugin from manifest…`.  
-3. Selecione o arquivo `manifest.json` dentro da pasta extraída.  
-4. O plugin aparecerá em `Plugins → Development → Optimize Toolkit`.
-
----
-
-## Uso recomendado
-
-1. Duplique o arquivo Figma que será usado no teste ou na apresentação.  
-2. Vá para a página do protótipo que será compartilhado.  
-3. Abra o Optimize Toolkit e clique em **Escanear página**.  
-4. Selecione as instâncias que deseja desvincular (na maioria dos casos, faz sentido selecionar tudo).  
-5. Execute o detach.  
-6. Se o módulo de layers ocultas for habilitado, remova as layers que fizerem sentido.  
-7. Compartilhe o link do protótipo ou exporte para o Maze.
-
----
-
-## Tecnologia
-
-O Optimize Toolkit é desenvolvido com a Figma Plugin API.  
-Ele roda inteiramente no cliente, sem comunicação com servidores externos.  
-Nenhum dado do arquivo é enviado para fora do Figma.
+Diflavio · Product Design — para uso interno e da comunidade.

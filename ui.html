@@ -63,6 +63,22 @@
   --rad:    9999px;
   --rad-card: 12px;
   --rad-lg:   20px;
+
+  /* ── motion tokens (interaction-design.md) ─────────────────
+     Hierarquia de curvas por intenção de movimento:
+     ease-out  → elementos entrando (aceleração inicial percebida)
+     ease-in   → elementos saindo permanentemente
+     ease-in-out → elementos já visíveis que reposicionam
+     spring    → ações playful com ligeiro overshoot
+  ──────────────────────────────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --spring:      cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* durações base */
+  --dur-micro:  120ms;
+  --dur-small:  220ms;
+  --dur-medium: 320ms;
 }
 
 /* ── DARK theme ──────────────────────────────────────────────
@@ -99,6 +115,15 @@ html.dark {
   --error:       var(--rev-danger);
 }
 
+/* ── acessibilidade: respeita preferência de movimento reduzido ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:       0.01ms !important;
+    animation-iteration-count:1      !important;
+    transition-duration:      0.01ms !important;
+  }
+}
+
 /* ── transição suave de tema em todas as props de cor ──
    200ms ease — snap percebido, sem brutalidade.
    Spring não faz sentido para cores (sem overshooot visual).
@@ -131,24 +156,42 @@ body{
 }
 
 /* ── keyframes ──────────────────────────────────────────── */
+
+/* entrada de items de lista — leve lift com ease-out */
 @keyframes fadeUp{
-  from{opacity:0;transform:translateY(6px)}
-  to{opacity:1;transform:translateY(0)}
-}
-@keyframes shimPulse{0%,100%{opacity:1}50%{opacity:.4}}
-@keyframes stepIn{
-  from{opacity:0;transform:translateX(-6px)}
-  to{opacity:1;transform:translateX(0)}
-}
-@keyframes dotPulse{0%,80%,100%{opacity:.15}40%{opacity:1}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{
   from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:translateY(0)}
+  to  {opacity:1;transform:translateY(0)}
 }
-@keyframes barPulse{
-  0%,100%{opacity:.7} 50%{opacity:1}
+/* entrada lateral — steps do loader */
+@keyframes stepIn{
+  from{opacity:0;transform:translateX(-8px)}
+  to  {opacity:1;transform:translateX(0)}
 }
+/* backdrop fade */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* bottom-sheet / modal — sobe com mais presença */
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(20px)}
+  to  {opacity:1;transform:translateY(0)}
+}
+/* navegação entre páginas — entra pela direita com leve fade */
+@keyframes pageEnter{
+  from{opacity:0;transform:translateX(14px)}
+  to  {opacity:1;transform:translateX(0)}
+}
+/* volta de página — entra pela esquerda */
+@keyframes pageBack{
+  from{opacity:0;transform:translateX(-14px)}
+  to  {opacity:1;transform:translateX(0)}
+}
+
+/* loaders e feedback */
+@keyframes shimPulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes dotPulse{0%,80%,100%{opacity:.15}40%{opacity:1}}
+@keyframes barPulse{0%,100%{opacity:.7}50%{opacity:1}}
+
+/* indeterminate — linear obrigatório (tempo constante percebido) */
 @keyframes indeterminate{
   0%  {transform:translateX(-100%)}
   100%{transform:translateX(400%)}
@@ -230,9 +273,10 @@ body{
   border:none;border-radius:var(--rad);   /* 9999px pill */
   font-family:var(--sans);font-size:14px;font-weight:600;
   letter-spacing:.02em;cursor:pointer;
-  transition:opacity .15s;
+  transition:opacity var(--dur-micro) ease, transform var(--dur-micro) var(--ease-out);
 }
 .btn-scan:hover{opacity:.85}
+.btn-scan:active{transform:scale(0.97)}
 .btn-scan:focus-visible{outline:2px solid var(--rev-dark);outline-offset:3px}
 
 /* ── splash ─────────────────────────────────────────────── */
@@ -241,7 +285,7 @@ body{
 .splash-bar-wrap{width:100%;display:flex;flex-direction:column;gap:6px}
 .splash-bar-lbl{font-size:12px;color:var(--rev-muted)}
 .splash-track{height:2px;background:var(--rev-surface);overflow:hidden;border-radius:9999px}
-.splash-fill{height:100%;background:var(--rev-dark);width:0%;transition:width .3s ease}
+.splash-fill{height:100%;background:var(--rev-dark);width:0%;transition:width .3s var(--ease-out)}
 
 
 /* ── advanced page ── */
@@ -332,6 +376,17 @@ body{
 }
 html.dark .theme-indicator{ opacity:1; }
 
+/* ── botão histórico header — badge de novas entradas ── */
+.btn-history-hdr{position:relative}
+.hist-hdr-badge{
+  position:absolute;top:4px;right:4px;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--rev-teal);
+  border:1.5px solid var(--rev-white);
+  pointer-events:none;
+}
+html.dark .hist-hdr-badge{border-color:var(--rev-white)}
+
 /* ── page history ── */
 #page-history{display:none;flex-direction:column;flex:1}
 
@@ -386,7 +441,7 @@ html.dark .theme-indicator{ opacity:1; }
 .ld-phase-txt{
   display:block;font-size:13px;font-weight:500;
   color:var(--rev-dark);
-  animation:fadeUp .3s cubic-bezier(.22,1,.36,1) forwards;
+  animation:fadeUp var(--dur-small) var(--ease-out) forwards;
 }
 
 /* contador */
@@ -412,13 +467,14 @@ html.dark .theme-indicator{ opacity:1; }
 .ld-bar-fill{
   position:absolute;top:0;left:0;height:100%;
   background:var(--rev-dark);border-radius:9999px;
-  width:0%;transition:width .6s ease;
+  width:0%;transition:width .6s var(--ease-out);
 }
 .ld-bar-pulse{
   position:absolute;top:0;left:0;height:100%;width:35%;
   background:linear-gradient(90deg,transparent,rgba(0,0,0,.25),transparent);
   border-radius:9999px;
-  animation:indeterminate 1.2s ease-in-out infinite;
+  /* linear: tempo indeterminado deve ter velocidade constante percebida */
+  animation:indeterminate 1.2s linear infinite;
 }
 .ld-bar-pulse.done{display:none}
 
@@ -429,7 +485,7 @@ html.dark .theme-indicator{ opacity:1; }
 }
 .ld-step{
   display:flex;align-items:center;gap:8px;
-  animation:stepIn .22s ease forwards;opacity:0;
+  animation:stepIn var(--dur-small) var(--ease-out) forwards;opacity:0;
 }
 .ld-step-dot{
   width:4px;height:4px;border-radius:50%;
@@ -471,13 +527,13 @@ html.dark .theme-indicator{ opacity:1; }
   position:absolute;top:0;left:0;
   height:100%;background:var(--rev-dark);
   border-radius:9999px;width:0%;
-  transition:width .25s ease;
+  transition:width .25s var(--ease-out);
 }
 .prog-bar-pulse{
   position:absolute;top:0;left:0;height:100%;width:30%;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);
   border-radius:9999px;
-  animation:indeterminate 1.2s ease-in-out infinite;
+  animation:indeterminate 1.2s linear infinite;
 }
 .prog-bar-pulse.done{display:none}
 /* compat — ids antigos usados no JS */
@@ -542,7 +598,7 @@ html.dark .theme-indicator{ opacity:1; }
 .ci-meta{text-align:right;flex-shrink:0}
 .ci-kb{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--rev-dark)}
 .ci-nodes{font-family:var(--mono);font-size:10px;color:var(--rev-muted)}
-.ci-bar{height:2px;border-radius:9999px;margin-top:4px;transition:width .3s ease}
+.ci-bar{height:2px;border-radius:9999px;margin-top:4px;transition:width .3s var(--ease-out)}
 
 /* ── footer ─────────────────────────────────────────────── */
 .footer{
@@ -632,7 +688,7 @@ html.dark .theme-indicator{ opacity:1; }
 .ii-kb{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--rev-dark)}
 .ii-kb.heavy{color:var(--rev-danger)}
 .ii-dim{font-family:var(--mono);font-size:10px;color:var(--rev-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:68px}
-.ii-weight{height:2px;border-radius:9999px;margin-top:2px;transition:width .3s ease}
+.ii-weight{height:2px;border-radius:9999px;margin-top:2px;transition:width .3s var(--ease-out)}
 .ii-compressed{display:none;align-items:center;gap:4px;margin-top:3px}
 .ii-compressed.visible{display:flex}
 .ii-compressed-dot{width:4px;height:4px;border-radius:50%;background:var(--rev-teal);flex-shrink:0}
@@ -643,46 +699,50 @@ html.dark .theme-indicator{ opacity:1; }
   font-size:11px;color:var(--rev-muted);
 }
 
-/* ── guardrail modal ────────────────────────────────────── */
+/* ── guardrail modal — bottom sheet (padrão hist-clear-modal) ── */
 #guardrail-overlay{
   position:fixed;inset:0;
-  background:rgba(25,28,31,.5);
-  z-index:100;display:none;
-  align-items:center;justify-content:center;padding:24px;
-  animation:fadeIn .15s ease;
+  background:rgba(0,0,0,.32);
+  backdrop-filter:blur(2px);
+  z-index:9999;display:none;
+  align-items:flex-end;
+  animation:fadeIn var(--dur-micro) ease;
 }
 #guardrail-overlay.visible{display:flex}
 .guard-card{
+  position:relative;
   background:var(--rev-white);
-  border-radius:var(--rad-lg);
-  padding:24px;width:100%;max-width:280px;
-  /* Revolut usa ZERO sombras — profundidade por contraste */
-  border:1px solid var(--rev-surface);
-  animation:slideUp .2s ease;
+  border-radius:20px 20px 0 0;
+  padding:24px 20px 28px;
+  width:100%;
+  animation:slideUp var(--dur-medium) var(--ease-out);
 }
+html.dark .guard-card{ background:var(--rev-surface); }
 .guard-icon{
-  width:36px;height:36px;border-radius:var(--rad-card);
+  width:44px;height:44px;border-radius:50%;
   background:var(--error-bg);
   display:flex;align-items:center;justify-content:center;margin-bottom:14px;
 }
 .guard-title{
   font-family:var(--display);
-  font-size:16px;font-weight:500;letter-spacing:-.02em;
-  color:var(--rev-dark);margin-bottom:8px;
+  font-size:17px;font-weight:500;letter-spacing:-.02em;
+  color:var(--rev-dark);margin-bottom:6px;
 }
 .guard-msg{
-  font-size:13px;color:var(--rev-mid);
-  line-height:1.5;margin-bottom:20px;white-space:pre-wrap;
+  font-size:13px;color:var(--rev-muted);
+  line-height:1.5;margin-bottom:22px;white-space:pre-wrap;
 }
 .guard-btn{
-  width:100%;padding:14px 32px;
+  width:100%;padding:14px;
   background:var(--rev-dark);color:var(--rev-white);
   border:none;border-radius:var(--rad);
   font-family:var(--sans);font-size:14px;font-weight:600;
   cursor:pointer;transition:opacity .15s;
-  text-transform:uppercase;letter-spacing:.04em;
 }
+html.dark .guard-btn{ background:var(--rev-dark);color:var(--rev-white); }
+.guard-btn{transition:opacity var(--dur-micro) ease, transform var(--dur-micro) var(--ease-out)}
 .guard-btn:hover{opacity:.85}
+.guard-btn:active{transform:scale(0.97)}
 
 /* ── banner COMPONENT_SET ───────────────────────────────── */
 #comp-set-banner{
@@ -712,7 +772,7 @@ html.dark .theme-indicator{ opacity:1; }
   flex:1;height:2px;
   background:var(--rev-surface);border-radius:9999px;overflow:hidden;
 }
-.stb-fill{height:100%;border-radius:9999px;transition:width .5s ease,background .3s ease}
+.stb-fill{height:100%;border-radius:9999px;transition:width .5s var(--ease-out),background .25s var(--ease-out)}
 .stb-num{
   font-family:var(--display);font-size:14px;font-weight:500;
   color:var(--rev-dark);white-space:nowrap;
@@ -726,9 +786,21 @@ html.dark .theme-indicator{ opacity:1; }
 .stb-badge.warn {background:#fef9c3;color:#a16207}
 .stb-badge.heavy{background:#ffedd5;color:#c2410c}
 .stb-badge.crit {background:var(--error-bg);color:var(--rev-danger)}
+/* scanning — indeterminate: badge pulsa + track shimmer */
+.stb-badge.scanning{
+  background:rgba(73,79,223,.10);color:var(--rev-blue);
+  animation:shimPulse 1.6s ease-in-out infinite;
+}
+html.dark .stb-badge.scanning{background:rgba(73,79,223,.22);color:#9198f9}
+.stb-scan-pulse{
+  position:absolute;top:0;left:0;height:100%;width:30%;
+  background:linear-gradient(90deg,transparent,rgba(73,79,223,.65),transparent);
+  border-radius:9999px;
+  animation:indeterminate 1.2s linear infinite;
+}
 
 /* histórico */
-.stb-hist{overflow:hidden;max-height:0;transition:max-height .25s ease}
+.stb-hist{overflow:hidden;max-height:0;transition:max-height var(--dur-small) var(--ease-in-out)}
 .stb-hist.open{max-height:200px}
 .stb-hist-inner{padding:8px 0 4px;display:flex;flex-direction:column;gap:5px}
 .stb-hist-row{display:flex;align-items:center;gap:8px;padding:2px 0}
@@ -741,7 +813,7 @@ html.dark .theme-indicator{ opacity:1; }
 /* breakdown */
 .score-breakdown-panel{
   overflow:hidden;max-height:0;
-  transition:max-height .25s ease;
+  transition:max-height var(--dur-small) var(--ease-in-out);
   border-bottom:1px solid var(--rev-surface);
 }
 .score-breakdown-panel.open{max-height:260px}
@@ -779,6 +851,7 @@ html.dark .theme-indicator{ opacity:1; }
   cursor:pointer;transition:opacity .15s;
 }
 .btn-novo-scan:hover{opacity:.75}
+.btn-novo-scan:active{transform:scale(0.97)}
 .btn-novo-scan:focus-visible{outline:2px solid var(--rev-dark);outline-offset:3px}
 
 /* ── result ─────────────────────────────────────────────── */
@@ -815,8 +888,8 @@ html.dark .theme-indicator{ opacity:1; }
   height:4px;background:var(--rev-surface);border-radius:9999px;
   overflow:hidden;margin-bottom:8px;display:flex;
 }
-.mem-seg-orig{height:100%;background:var(--rev-dark);border-radius:9999px 0 0 9999px;transition:width .5s ease;min-width:0}
-.mem-seg-saved{height:100%;background:var(--rev-teal);transition:width .5s ease;min-width:0}
+.mem-seg-orig{height:100%;background:var(--rev-dark);border-radius:9999px 0 0 9999px;transition:width .5s var(--ease-out);min-width:0}
+.mem-seg-saved{height:100%;background:var(--rev-teal);transition:width .5s var(--ease-out);min-width:0}
 .mem-legend{display:flex;align-items:center;gap:14px;margin-bottom:2px}
 .mem-leg-item{display:flex;align-items:center;gap:5px}
 .mem-leg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
@@ -849,7 +922,7 @@ html.dark .theme-indicator{ opacity:1; }
   display:flex;align-items:center;gap:14px;
   padding:12px 16px;
   border-bottom:1px solid var(--rev-surface);
-  animation:fadeUp .22s cubic-bezier(.22,1,.36,1);
+  animation:fadeUp var(--dur-small) var(--ease-out);
   cursor:default;
   transition:background .1s;
 }
@@ -865,24 +938,39 @@ html.dark .theme-indicator{ opacity:1; }
   background:var(--rev-surface);       /* fallback — adapta ao tema */
   color:var(--rev-dark);
 }
-/* light: tints coloridos suaves */
-.hist-icon.detach  {background:#f1f5f9;color:#334155}
-.hist-icon.hidden  {background:#f3f4f6;color:#374151}
-.hist-icon.img     {background:#eff6ff;color:#1d4ed8}
-.hist-icon.dissolve{background:#f0fdf4;color:#166534}
-.hist-icon.orphans {background:#fefce8;color:#854d0e}
-.hist-icon.effects {background:#fff1f2;color:#9f1239}
-.hist-icon.overrides{background:#faf5ff;color:#6b21a8}
+/* light: tints coloridos suaves — alinhado ao Revolut UI palette */
+.hist-icon.detach       {background:#f1f5f9;color:#334155}
+.hist-icon.hidden       {background:#f3f4f6;color:#374151}
+.hist-icon.img          {background:#eff6ff;color:#1d4ed8}
+.hist-icon.dissolve     {background:#f0fdf4;color:#166534}
+.hist-icon.orphans      {background:#fefce8;color:#854d0e}
+.hist-icon.effects      {background:#fff1f2;color:#9f1239}
+.hist-icon.overrides    {background:#faf5ff;color:#6b21a8}
+/* v2.5.2: 7 categorias novas */
+.hist-icon.triggers     {background:#ecfeff;color:#155e75}  /* cyan — interação */
+.hist-icon.scroll       {background:#f5f3ff;color:#5b21b6}  /* violet — movimento */
+.hist-icon.vectors      {background:#fff7ed;color:#9a3412}  /* amber — geometria */
+.hist-icon.singleGroups {background:#f0f9ff;color:#0c4a6e}  /* sky — estrutura */
+.hist-icon.deepNodes    {background:#fdf4ff;color:#86198f}  /* fuchsia — hierarquia */
+.hist-icon.covered      {background:#f7fee7;color:#3f6212}  /* lime — sobreposição */
+.hist-icon.loosePages   {background:#f8fafc;color:#475569}  /* slate — documentos */
 
-/* dark: usar surface sem cor — ícone SVG herda stroke de currentColor */
-html.dark .hist-icon         {background:var(--rev-surface);color:var(--rev-muted)}
-html.dark .hist-icon.detach  {background:#1e293b;color:#94a3b8}
-html.dark .hist-icon.hidden  {background:#1f2937;color:#9ca3af}
-html.dark .hist-icon.img     {background:#1e3a5f;color:#60a5fa}
-html.dark .hist-icon.dissolve{background:#064e3b;color:#34d399}
-html.dark .hist-icon.orphans {background:#3b2a00;color:#fbbf24}
-html.dark .hist-icon.effects {background:#3b0d12;color:#f87171}
-html.dark .hist-icon.overrides{background:#2e1b4e;color:#a78bfa}
+/* dark: surface tints com estados saturados */
+html.dark .hist-icon              {background:var(--rev-surface);color:var(--rev-muted)}
+html.dark .hist-icon.detach       {background:#1e293b;color:#94a3b8}
+html.dark .hist-icon.hidden       {background:#1f2937;color:#9ca3af}
+html.dark .hist-icon.img          {background:#1e3a5f;color:#60a5fa}
+html.dark .hist-icon.dissolve     {background:#064e3b;color:#34d399}
+html.dark .hist-icon.orphans      {background:#3b2a00;color:#fbbf24}
+html.dark .hist-icon.effects      {background:#3b0d12;color:#f87171}
+html.dark .hist-icon.overrides    {background:#2e1b4e;color:#a78bfa}
+html.dark .hist-icon.triggers     {background:#083344;color:#67e8f9}
+html.dark .hist-icon.scroll       {background:#2e1065;color:#c4b5fd}
+html.dark .hist-icon.vectors      {background:#431407;color:#fdba74}
+html.dark .hist-icon.singleGroups {background:#0c2942;color:#7dd3fc}
+html.dark .hist-icon.deepNodes    {background:#3b0764;color:#f0abfc}
+html.dark .hist-icon.covered      {background:#1a2e05;color:#bef264}
+html.dark .hist-icon.loosePages   {background:#1e293b;color:#cbd5e1}
 
 /* info central */
 .hist-info{flex:1;min-width:0}
@@ -918,14 +1006,204 @@ html.dark .hist-icon.overrides{background:#2e1b4e;color:#a78bfa}
   white-space:nowrap;
 }
 .hist-chip.positive{background:#dcfce7;color:#15803d}
+html.dark .hist-chip.positive{background:#064e3b;color:#34d399}
 
-/* estado vazio */
+/* v2.7: timestamp no topo-esquerdo + chips */
+.hist-ts-lg{ display:none } /* legado — substituído por hist-ts-header */
+
+.hist-ts-header{
+  font-family:var(--mono);
+  font-size:11px;font-weight:700;letter-spacing:.06em;
+  color:var(--rev-muted);
+  margin-bottom:9px;
+  text-align:left;
+  align-self:flex-start;
+}
+
+/* entrada reestruturada: coluna (ts-header acima, corpo abaixo) */
+.hist-entry{
+  display:flex;flex-direction:column;
+  padding:12px 16px;
+  border-bottom:1px solid var(--rev-surface);
+  animation:fadeUp var(--dur-small) var(--ease-out);
+  cursor:default;
+  transition:background .1s;
+}
+.hist-entry:last-child{border-bottom:none}
+.hist-entry:active{background:var(--rev-surface)}
+
+/* linha interna: ícone + info + valor */
+.hist-entry-body{
+  display:flex;align-items:flex-start;gap:12px;
+}
+
+.hist-chips-row{
+  display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;
+}
+
+/* ── v2.7: modal de confirmação de limpeza ────────────────── */
+.hist-clear-modal{
+  position:fixed;inset:0;
+  z-index:9999;
+  display:none;align-items:flex-end;
+}
+.hist-clear-modal.open{ display:flex; }
+.hist-modal-backdrop{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.32);
+  backdrop-filter:blur(2px);
+  animation:fadeIn var(--dur-micro) ease;
+}
+.hist-modal-card{
+  position:relative;z-index:1;
+  width:100%;
+  background:var(--rev-white);
+  border-radius:20px 20px 0 0;
+  padding:24px 20px 28px;
+  animation:slideUp var(--dur-medium) var(--ease-out);
+}
+html.dark .hist-modal-card{ background:var(--rev-surface); }
+.hist-modal-icon{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--error-bg);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;
+}
+.hist-modal-title{
+  font-family:var(--display);
+  font-size:17px;font-weight:500;letter-spacing:-.02em;
+  color:var(--rev-dark);margin-bottom:6px;
+}
+.hist-modal-sub{
+  font-size:13px;color:var(--rev-muted);
+  line-height:1.5;margin-bottom:22px;
+}
+.hist-modal-btns{display:flex;flex-direction:column;gap:10px}
+.hist-modal-btn-danger{
+  width:100%;padding:14px;
+  background:var(--rev-danger);color:#fff;
+  border:none;border-radius:var(--rad);
+  font-family:var(--sans);font-size:14px;font-weight:600;
+  cursor:pointer;transition:opacity .15s;
+}
+.hist-modal-btn-danger:hover{opacity:.88}
+.hist-modal-btn-danger:active{transform:scale(0.97)}
+.hist-modal-btn-cancel{
+  width:100%;padding:14px;
+  background:var(--rev-surface);color:var(--rev-dark);
+  border:none;border-radius:var(--rad);
+  font-family:var(--sans);font-size:14px;font-weight:600;
+  cursor:pointer;transition:opacity .15s;
+}
+.hist-modal-btn-cancel:hover{opacity:.75}
+.hist-modal-btn-cancel:active{transform:scale(0.97)}
+html.dark .hist-modal-btn-cancel{ background:var(--gray-05); }
+
+/* v2.5.3: badge de contagem dentro do adv-item (ex: "3 encontradas") */
+.adv-item-count{
+  display:inline-block;
+  margin-left:6px;
+  padding:1px 7px;
+  background:var(--rev-dark);
+  color:var(--rev-white);
+  border-radius:9999px;
+  font-family:var(--mono);
+  font-size:10px;font-weight:600;
+  vertical-align:middle;
+  line-height:1.5;
+}
+.adv-item-count.zero{background:var(--rev-surface);color:var(--rev-muted)}
+
+/* v2.5.2: summary card no topo do extrato — Aeonik para os números */
+.hist-summary{
+  margin:16px 16px 8px;
+  padding:18px 20px;
+  background:var(--rev-surface);
+  border-radius:var(--rad-lg);
+  display:flex;flex-direction:column;gap:14px;
+  animation:fadeUp var(--dur-small) var(--ease-out);
+}
+/* linha superior: mensagem parabenizando */
+.hist-summary-praise{
+  font-family:var(--display);
+  font-size:15px;font-weight:500;letter-spacing:-.01em;
+  color:var(--rev-dark);line-height:1.3;
+}
+.hist-summary-praise em{
+  font-style:normal;color:var(--rev-teal);
+}
+/* linha inferior: número à esquerda, meta à direita */
+.hist-summary-row{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+}
+.hist-summary-num{
+  font-family:var(--display);
+  font-size:32px;font-weight:500;
+  line-height:1;letter-spacing:-.03em;
+  color:var(--rev-dark);
+}
+.hist-summary-lbl{
+  font-size:11px;color:var(--rev-muted);
+  letter-spacing:.04em;text-transform:uppercase;
+  margin-top:4px;
+}
+.hist-summary-meta{
+  display:flex;flex-direction:column;align-items:flex-end;gap:3px;
+}
+.hist-summary-saved{
+  font-family:var(--display);
+  font-size:18px;font-weight:500;letter-spacing:-.01em;
+  color:var(--rev-teal);line-height:1;
+}
+.hist-summary-score{
+  font-size:11px;color:var(--rev-muted);
+  letter-spacing:.02em;
+}
+.hist-summary-score.up{color:var(--rev-teal);font-weight:600}
+/* seta do score de→para */
+.hist-summary-arrow{opacity:.55;margin:0 3px}
+
+/* v2.5.2: botão "Limpar" no topbar do histórico */
+.page-topbar-action{
+  margin-left:auto;
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px;
+  background:transparent;border:1px solid var(--rev-border);
+  border-radius:9999px;
+  font-family:var(--sans);font-size:11px;font-weight:500;
+  letter-spacing:.02em;color:var(--rev-muted);
+  cursor:pointer;transition:all .15s;
+}
+.page-topbar-action:hover{
+  border-color:var(--rev-mid);color:var(--rev-dark);
+  background:var(--rev-surface);
+}
+.page-topbar-action.confirm{
+  background:var(--rev-danger);color:#fff;border-color:var(--rev-danger);
+}
+.page-topbar-action svg{display:block}
+
+/* estado vazio v2.5.2 — alinhado com Revolut: ícone grande, headline display, body Inter */
 .hist-empty{
-  padding:32px 16px;text-align:center;
-  font-size:13px;color:var(--rev-muted);line-height:1.6;
+  padding:48px 24px 32px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
 }
 .hist-empty-icon{
-  font-size:28px;margin-bottom:8px;opacity:.4;
+  width:56px;height:56px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--rev-surface);
+  border-radius:50%;
+  color:var(--rev-muted);
+  margin-bottom:8px;
+}
+.hist-empty-title{
+  font-family:var(--display);
+  font-size:17px;font-weight:500;letter-spacing:-.01em;
+  color:var(--rev-dark);
+}
+.hist-empty-sub{
+  font-size:12px;color:var(--rev-muted);line-height:1.55;
+  max-width:240px;
 }
 
 
@@ -1041,13 +1319,34 @@ html.dark .hist-icon.overrides{background:#2e1b4e;color:#a78bfa}
   display:none;flex-direction:column;
   flex:1;
 }
-.page-view.active{display:flex}
+.page-view.active{
+  display:flex;
+  animation:pageEnter var(--dur-small) var(--ease-out) both;
+}
+.page-view.active.back-enter{
+  animation:pageBack var(--dur-small) var(--ease-out) both;
+}
+/* home retornando — entra pela esquerda */
+#view-home._nav-back{
+  animation:pageBack var(--dur-small) var(--ease-out) both;
+}
 
-/* top bar da page */
+/* top bar da page — sticky dentro do flex column da page-view */
 .page-topbar{
   display:flex;align-items:center;gap:10px;
-  padding:12px 16px;border-bottom:1px solid var(--rev-surface);
+  padding:12px 16px;
   background:var(--rev-white);flex-shrink:0;
+  position:sticky;top:0;z-index:5;
+  border-bottom:1px solid transparent;
+  transition:border-color var(--dur-micro) ease, box-shadow var(--dur-micro) ease;
+}
+/* sombra sutil quando o conteúdo passa por baixo */
+.page-topbar.is-scrolled{
+  border-bottom-color:var(--rev-border);
+  box-shadow:0 1px 8px rgba(0,0,0,.06);
+}
+html.dark .page-topbar.is-scrolled{
+  box-shadow:0 1px 8px rgba(0,0,0,.28);
 }
 .page-back{
   width:32px;height:32px;border-radius:9999px;
@@ -1165,9 +1464,48 @@ html.dark{
   font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   color:var(--rev-muted);margin-bottom:12px;
 }
-.info-dim{
-  padding:12px 0;border-bottom:1px solid var(--rev-surface);
+
+/* ── FAQ accordion — "Como funciona" v2.6 ── */
+.info-faq-item{
+  display:block;width:100%;background:transparent;border:none;
+  padding:13px 0;border-bottom:1px solid var(--rev-surface);
+  text-align:left;cursor:pointer;
 }
+.info-faq-item:last-child{border-bottom:none}
+.info-faq-header{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.info-faq-name{
+  font-size:13px;font-weight:600;color:var(--rev-dark);
+  flex:1;text-align:left;
+  transition:color .15s;
+}
+.info-faq-item:hover .info-faq-name{color:var(--rev-blue)}
+.info-faq-meta{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.info-faq-weight{
+  font-family:var(--mono);font-size:11px;
+  color:var(--rev-muted);white-space:nowrap;
+}
+.info-faq-chevron{
+  color:var(--rev-muted);flex-shrink:0;
+  transition:transform 220ms cubic-bezier(.4,0,.2,1),color .15s;
+}
+.info-faq-item:hover .info-faq-chevron{color:var(--rev-dark)}
+.info-faq-item.open .info-faq-chevron{transform:rotate(180deg)}
+.info-faq-body{
+  font-size:12px;color:var(--rev-muted);line-height:1.58;
+  max-height:0;overflow:hidden;
+  transition:max-height 300ms cubic-bezier(.4,0,.2,1),
+             padding-top 300ms cubic-bezier(.4,0,.2,1);
+  padding-top:0;
+}
+.info-faq-item.open .info-faq-body{
+  max-height:280px;
+  padding-top:9px;
+}
+
+/* legacy — mantido para compatibilidade com qualquer ref antiga */
+.info-dim{padding:12px 0;border-bottom:1px solid var(--rev-surface)}
 .info-dim:last-child{border-bottom:none}
 .info-dim-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .info-dim-name{font-size:13px;font-weight:600;color:var(--rev-dark)}
@@ -1225,11 +1563,15 @@ html.dark{
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
       </button>
-      <!-- botão histórico -->
-      <button class="btn-icon" onclick="navTo('history')" title="Histórico" type="button">
+      <!-- botão histórico — v2.6: ícone relógio limpo (clock face) sem confusão com refresh -->
+      <button class="btn-icon btn-history-hdr" id="btn-history-hdr" onclick="navTo('history')" title="Histórico de otimizações" type="button" aria-label="Histórico">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+          <circle cx="12" cy="12" r="9"/>
+          <polyline points="12 6.5 12 12 15.5 14.5"/>
+          <line x1="5.2" y1="5.2" x2="7" y2="7" stroke-width="1.5" stroke-opacity=".4"/>
         </svg>
+        <!-- badge de novas entradas -->
+        <span class="hist-hdr-badge" id="hist-hdr-badge" style="display:none"></span>
       </button>
     </div>
   </div>
@@ -1258,14 +1600,7 @@ html.dark{
 <!-- ════ CONTEÚDO SCROLLÁVEL ════ -->
 <div id="app-content">
 
-  <!-- splash (hidden) -->
-  <div id="view-splash" style="display:none">
-    <span class="splash-name">Optimize Toolkit</span>
-    <div class="splash-bar-wrap">
-      <span class="splash-bar-lbl" id="splash-lbl">Iniciando…</span>
-      <div class="splash-track"><div class="splash-fill" id="splash-fill"></div></div>
-    </div>
-  </div>
+  <!-- B-13 (v2.4): view-splash removido — nunca foi exibido (showSplash chamava callback imediato) -->
 
   <!-- idle -->
   <div id="view-idle" style="display:none">
@@ -1360,27 +1695,7 @@ html.dark{
       </div>
     </div>
 
-    <!-- Páginas soltas -->
-    <div class="menu-item" onclick="navTo('loose-pages')" role="button">
-      <div class="mi-left">
-        <div class="mi-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="9" y1="15" x2="15" y2="15"/>
-            <line x1="12" y1="12" x2="12" y2="18"/>
-          </svg>
-        </div>
-        <div class="mi-info">
-          <span class="mi-title">Páginas soltas</span>
-          <span class="mi-sub">Páginas sem frames de interface ou contexto</span>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="mi-badge" id="badge-loose-pages">—</span>
-        <svg class="mi-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-    </div>
+    <!-- v2.5.3: "Páginas soltas" movido para dentro de Protótipo (seção Estrutura do arquivo) -->
 
     <!-- Protótipo -->
     <div class="menu-item" onclick="navTo('proto')" role="button">
@@ -1487,10 +1802,10 @@ html.dark{
     </div>
   </div>
 
-  <!-- ── PAGE: Páginas soltas ── -->
+  <!-- ── PAGE: Páginas soltas ── v2.5.3: voltar para Protótipo (origem) -->
   <div class="page-view" id="page-loose-pages">
     <div class="page-topbar">
-      <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
+      <button class="page-back" onclick="navTo('proto')" type="button" aria-label="Voltar">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <span class="page-title">Páginas soltas</span>
@@ -1540,6 +1855,19 @@ html.dark{
     <!-- adv-sections incorporadas do Avançado -->
     <div id="adv-scroll-in-proto" style="overflow-y:auto">
 
+      <!-- v2.5.3: nova seção que agrupa gestão do arquivo (antes era top-level no home) -->
+      <div class="adv-section">
+        <div class="adv-section-title">Estrutura do arquivo</div>
+        <div class="adv-item">
+          <div class="adv-item-info">
+            <span class="adv-item-name">Páginas soltas <span class="adv-item-count" id="adv-loose-count" style="display:none"></span></span>
+            <span class="adv-item-desc">Páginas sem frames de interface ou contexto que poluem o arquivo</span>
+            <div class="adv-result" id="res-loose-link"></div>
+          </div>
+          <button class="adv-run" onclick="navTo('loose-pages')" type="button">Abrir</button>
+        </div>
+      </div>
+
       <div class="adv-section">
         <div class="adv-section-title">Estrutura do fluxo</div>
         <div class="adv-item"><div class="adv-item-info"><span class="adv-item-name">Score do fluxo ativo</span><span class="adv-item-desc">Score só dos frames conectados ao starting point</span><div class="adv-result" id="res-flow-score"></div></div><button class="adv-run" onclick="runAdvanced('score_flow','res-flow-score')" type="button">Calcular</button></div>
@@ -1567,143 +1895,10 @@ html.dark{
     </div>
   </div>
 
-  <!-- ── PAGE: Avançado (incorporado em Protótipo) ── -->
-  <div class="page-view" id="page-advanced">
-    <div class="page-topbar">
-      <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <span class="page-title">Avançado</span>
-    </div>
-    <div class="page-scroll">
-
-      <!-- Estrutura do fluxo -->
-      <div class="adv-section">
-        <div class="adv-section-title">Estrutura do fluxo</div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Score do fluxo ativo</span>
-            <span class="adv-item-desc">Score só dos frames conectados ao starting point</span>
-            <div class="adv-result" id="res-flow-score"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('score_flow','res-flow-score')" type="button">Calcular</button>
-        </div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Frames órfãos</span>
-            <span class="adv-item-desc">Frames sem conexão no prototype — pesam o arquivo</span>
-            <div class="adv-result" id="res-orphans"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('scan_orphans','res-orphans')" type="button">Escanear</button>
-        </div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Loops de navegação</span>
-            <span class="adv-item-desc">Ciclos A→B→A que confundem participantes</span>
-            <div class="adv-result" id="res-loops"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('scan_loops','res-loops')" type="button">Escanear</button>
-        </div>
-      </div>
-
-      <!-- Interações -->
-      <div class="adv-section">
-        <div class="adv-section-title">Interações</div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Triggers não-click</span>
-            <span class="adv-item-desc">Hover/drag quebram em mobile e no Maze</span>
-            <div class="adv-result" id="res-triggers"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('scan_triggers','res-triggers')" type="button">Escanear</button>
-        </div>
-      </div>
-
-      <!-- Componentes -->
-      <div class="adv-section">
-        <div class="adv-section-title">Componentes</div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Limpar overrides</span>
-            <span class="adv-item-desc">Remove overrides idênticos ao componente original</span>
-            <div class="adv-result" id="res-overrides"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('clean_overrides','res-overrides')" type="button">Executar</button>
-        </div>
-      </div>
-
-      <!-- Renderização -->
-      <div class="adv-section">
-        <div class="adv-section-title">Renderização</div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Scroll desnecessário</span>
-            <span class="adv-item-desc">Frames com scroll ativo mas conteúdo que cabe na tela</span>
-            <div class="adv-result" id="res-scroll"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('scan_scroll','res-scroll')" type="button">Escanear</button>
-        </div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Efeitos pesados</span>
-            <span class="adv-item-desc">Blur e sombras aumentam custo de composição</span>
-            <div class="adv-result" id="res-effects"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('scan_effects','res-effects')" type="button">Escanear</button>
-        </div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Vetores complexos</span>
-            <span class="adv-item-desc">Vetores com 80+ pontos — flatten reduz o processamento</span>
-            <div class="adv-result" id="res-vectors"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('scan_vectors','res-vectors')" type="button">Escanear</button>
-        </div>
-      </div>
-
-      <!-- ── Nova seção: Estrutura de nós ── -->
-      <div class="adv-section">
-        <div class="adv-section-title">Estrutura de nós</div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Grupos com filho único</span>
-            <span class="adv-item-desc">Grupos inúteis para organização — dissolve sem impacto visual</span>
-            <div class="adv-result" id="res-single-groups"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('scan_single_groups','res-single-groups')" type="button">Escanear</button>
-        </div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Nós com aninhamento excessivo</span>
-            <span class="adv-item-desc">Elementos com mais de 6 níveis — aumentam o custo de renderização</span>
-            <div class="adv-result" id="res-deep-nodes"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('scan_deep_nodes','res-deep-nodes')" type="button">Escanear</button>
-        </div>
-
-        <div class="adv-item">
-          <div class="adv-item-info">
-            <span class="adv-item-name">Layers completamente cobertas</span>
-            <span class="adv-item-desc">Retângulos e elipses invisíveis por estarem atrás de outros elementos</span>
-            <div class="adv-result" id="res-covered"></div>
-          </div>
-          <button class="adv-run" onclick="runAdvanced('scan_covered','res-covered')" type="button">Escanear</button>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
+  <!-- ── B-01 (v2.4): page-advanced removido por completo.
+       Todo o conteúdo já está em page-proto (linhas 1540-1567).
+       Manter o markup duplicado quebrava getElementById dos scans avançados.
+  -->
 
   <!-- ── PAGE: Info do Score ── -->
   <div class="page-view" id="page-info">
@@ -1714,101 +1909,156 @@ html.dark{
       <span class="page-title">Como funciona o score</span>
     </div>
     <div class="page-scroll">
+      <!-- intro card -->
       <div class="info-section">
         <p style="font-size:13px;color:var(--rev-muted);line-height:1.6;margin-bottom:0">
-          O score vai de <b style="color:var(--rev-dark)">0 a 100</b> e mede o quanto um arquivo está pronto para ser usado em testes de usabilidade no Maze. Cada dimensão penaliza o score com base na severidade do problema encontrado.
+          O score vai de <b style="color:var(--rev-dark)">0 a 100</b> e mede o quanto um arquivo está pronto para ser usado em testes de usabilidade no Maze. Cada dimensão penaliza o score com base na severidade do problema encontrado. <span style="opacity:.65">Toque em cada item para ver os detalhes.</span>
         </p>
       </div>
-      <div class="info-section">
-        <div class="info-section-title">Dimensões avaliadas</div>
-        <div class="info-dim">
-          <div class="info-dim-row">
-            <span class="info-dim-name">Instâncias vinculadas</span>
-            <span class="info-dim-weight">até −35 pts</span>
-          </div>
-          <div class="info-dim-desc">Componentes vinculados a bibliotecas externas precisam ser resolvidos pelo Figma ao carregar o protótipo. Quanto mais instâncias, mais lento o carregamento.</div>
-        </div>
-        <div class="info-dim">
-          <div class="info-dim-row">
-            <span class="info-dim-name">Layers ocultas</span>
-            <span class="info-dim-weight">até −20 pts</span>
-          </div>
-          <div class="info-dim-desc">Nós invisíveis ainda são processados pelo motor de renderização. Eles aumentam o peso do arquivo e o tempo de carregamento sem contribuir para o teste.</div>
-        </div>
-        <div class="info-dim">
-          <div class="info-dim-row">
-            <span class="info-dim-name">Imagens pesadas</span>
-            <span class="info-dim-weight">até −25 pts</span>
-          </div>
-          <div class="info-dim-desc">A documentação do Maze aponta imagens como principal causa de crash em iOS. O Figma não comprime imagens automaticamente. O score avalia o peso total e a maior imagem individualmente — imagens acima de 800 KB representam risco real de crash em dispositivos móveis.</div>
-        </div>
-        <div class="info-dim">
-          <div class="info-dim-row">
-            <span class="info-dim-name">Frames e nós</span>
-            <span class="info-dim-weight">até −18 pts</span>
-          </div>
-          <div class="info-dim-desc">O Figma usa memória WebAssembly (WASM) para renderizar nós. Acima de 8000 nós o protótipo fica lento; acima de 15000 pode travar em iOS. Frames individuais não penalizam muito — o problema é a densidade de nós por frame. Use as ferramentas de "Estrutura de nós" na aba Protótipo para reduzir essa contagem.</div>
-        </div>
-        <div class="info-dim">
-          <div class="info-dim-row">
-            <span class="info-dim-name">Fontes customizadas</span>
-            <span class="info-dim-weight">até −12 pts</span>
-          </div>
-          <div class="info-dim-desc">A documentação do Maze alerta: "fontes customizadas grandes podem impedir o carregamento em mobile". Cada fonte é baixada pelo dispositivo do participante antes de qualquer frame renderizar — 2 fontes já representa risco real. Fontes do sistema (Inter, SF Pro, Roboto) não têm custo de download.</div>
-        </div>
-        <div class="info-dim">
-          <div class="info-dim-row">
-            <span class="info-dim-name">Páginas no arquivo</span>
-            <span class="info-dim-weight">até −30 pts</span>
-          </div>
-          <div class="info-dim-desc">Arquivos de teste devem ter no máximo 2 páginas — uma de capa e uma de protótipo. Arquivos com mais páginas são tipicamente arquivos de trabalho sendo usados indevidamente para teste.</div>
-        <div class="info-dim">
-          <div class="info-dim-row">
-            <span class="info-dim-name">Interações</span>
-            <span class="info-dim-weight">até −10 pts</span>
-          </div>
-          <div class="info-dim-desc">Protótipos com transições não padronizadas ou triggers de hover/drag perdem pontos — esses comportamentos quebram em mobile e distraem participantes durante testes. Use "Padronizar para Dissolve" e "Triggers não-click" na aba Protótipo para resolver.</div>
-        </div>
-      </div>
-      <div class="info-section">
+
+      <!-- faixas de pontuação — compacto no topo -->
+      <div class="info-section" style="padding-bottom:12px">
         <div class="info-section-title">Faixas de pontuação</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;flex-direction:column;gap:7px">
           <div style="display:flex;align-items:center;gap:10px">
-            <div style="width:8px;height:8px;border-radius:50%;background:#16a34a;flex-shrink:0"></div>
-            <span style="font-size:13px;color:var(--rev-dark)"><b>85–100</b> · Pronto para teste</span>
+            <div style="width:7px;height:7px;border-radius:50%;background:#16a34a;flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--rev-dark)"><b>80–100</b> · Pronto para teste</span>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
-            <div style="width:8px;height:8px;border-radius:50%;background:#ca8a04;flex-shrink:0"></div>
-            <span style="font-size:13px;color:var(--rev-dark)"><b>65–84</b> · Falta otimizar</span>
+            <div style="width:7px;height:7px;border-radius:50%;background:#ca8a04;flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--rev-dark)"><b>60–79</b> · Revisar</span>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
-            <div style="width:8px;height:8px;border-radius:50%;background:#ea580c;flex-shrink:0"></div>
-            <span style="font-size:13px;color:var(--rev-dark)"><b>40–64</b> · Arquivo pesado</span>
+            <div style="width:7px;height:7px;border-radius:50%;background:#ea580c;flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--rev-dark)"><b>35–59</b> · Pesado</span>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
-            <div style="width:8px;height:8px;border-radius:50%;background:#dc2626;flex-shrink:0"></div>
-            <span style="font-size:13px;color:var(--rev-dark)"><b>0–39</b> · Crítico</span>
+            <div style="width:7px;height:7px;border-radius:50%;background:#dc2626;flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--rev-dark)"><b>0–34</b> · Crítico</span>
           </div>
         </div>
       </div>
+
+      <!-- FAQ accordion — dimensões avaliadas -->
+      <div class="info-section" style="padding-bottom:4px">
+        <div class="info-section-title">Dimensões avaliadas</div>
+
+        <!-- 1. Instâncias vinculadas -->
+        <button class="info-faq-item" onclick="toggleFaq(this)" type="button">
+          <div class="info-faq-header">
+            <span class="info-faq-name">Instâncias vinculadas</span>
+            <div class="info-faq-meta">
+              <span class="info-faq-weight">até −35 pts</span>
+              <svg class="info-faq-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="info-faq-body">Componentes vinculados a bibliotecas externas precisam ser resolvidos pelo Figma ao carregar o protótipo. Quanto mais instâncias, mais lento o carregamento — e maior o risco de travamento em dispositivos de teste.</div>
+        </button>
+
+        <!-- 2. Layers ocultas -->
+        <button class="info-faq-item" onclick="toggleFaq(this)" type="button">
+          <div class="info-faq-header">
+            <span class="info-faq-name">Layers ocultas</span>
+            <div class="info-faq-meta">
+              <span class="info-faq-weight">até −20 pts</span>
+              <svg class="info-faq-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="info-faq-body">Nós invisíveis ainda são processados pelo motor de renderização. Eles aumentam o peso do arquivo e o tempo de carregamento sem contribuir nada para o teste.</div>
+        </button>
+
+        <!-- 3. Imagens pesadas -->
+        <button class="info-faq-item" onclick="toggleFaq(this)" type="button">
+          <div class="info-faq-header">
+            <span class="info-faq-name">Imagens pesadas</span>
+            <div class="info-faq-meta">
+              <span class="info-faq-weight">até −25 pts</span>
+              <svg class="info-faq-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="info-faq-body">O Maze aponta imagens como principal causa de crash em iOS. O Figma não comprime automaticamente — o score avalia o peso total e a maior imagem individualmente. Imagens acima de 800 KB representam risco real em mobile.</div>
+        </button>
+
+        <!-- 4. Frames e nós -->
+        <button class="info-faq-item" onclick="toggleFaq(this)" type="button">
+          <div class="info-faq-header">
+            <span class="info-faq-name">Frames e nós</span>
+            <div class="info-faq-meta">
+              <span class="info-faq-weight">até −18 pts</span>
+              <svg class="info-faq-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="info-faq-body">O Figma usa memória WASM para renderizar nós. Acima de 8.000 nós o protótipo fica lento; acima de 15.000 pode travar em iOS. Use "Estrutura de nós" na aba Protótipo para reduzir a densidade.</div>
+        </button>
+
+        <!-- 5. Fontes customizadas -->
+        <button class="info-faq-item" onclick="toggleFaq(this)" type="button">
+          <div class="info-faq-header">
+            <span class="info-faq-name">Fontes customizadas</span>
+            <div class="info-faq-meta">
+              <span class="info-faq-weight">até −12 pts</span>
+              <svg class="info-faq-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="info-faq-body">Cada fonte customizada é baixada pelo dispositivo do participante antes de qualquer frame renderizar. 2 fontes já é risco real. Fontes do sistema (Inter, SF Pro, Roboto) não têm custo de download.</div>
+        </button>
+
+        <!-- 6. Páginas no arquivo -->
+        <button class="info-faq-item" onclick="toggleFaq(this)" type="button">
+          <div class="info-faq-header">
+            <span class="info-faq-name">Páginas no arquivo</span>
+            <div class="info-faq-meta">
+              <span class="info-faq-weight">até −30 pts</span>
+              <svg class="info-faq-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="info-faq-body">Arquivos de teste devem ter no máximo 2 páginas — uma de capa e uma de protótipo. Mais páginas indica um arquivo de trabalho sendo usado indevidamente para teste.</div>
+        </button>
+
+        <!-- 7. Interações -->
+        <button class="info-faq-item" onclick="toggleFaq(this)" type="button">
+          <div class="info-faq-header">
+            <span class="info-faq-name">Interações</span>
+            <div class="info-faq-meta">
+              <span class="info-faq-weight">até −10 pts</span>
+              <svg class="info-faq-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="info-faq-body">Transições não padronizadas ou triggers hover/drag quebram em mobile e distraem participantes. Use "Padronizar para Dissolve" e "Triggers não-click" na aba Protótipo para corrigir.</div>
+        </button>
+
+      </div><!-- /info-section accordion -->
     </div>
   </div>
 
-  <!-- ── PAGE: Histórico ── -->
+  <!-- ── PAGE: Histórico ── v2.5.2: summary + clear button + polished empty state -->
   <div class="page-view" id="page-history">
     <div class="page-topbar">
       <button class="page-back" onclick="navBack()" type="button" aria-label="Voltar">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <span class="page-title">Histórico</span>
+      <button class="page-topbar-action" id="btn-clear-history" onclick="clearHistoryRequest()" type="button" style="display:none" aria-label="Limpar histórico">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        <span>Limpar</span>
+      </button>
     </div>
     <div class="page-scroll" style="flex:1">
+      <!-- v2.5.2: summary card — só renderiza quando há entradas -->
+      <div id="hist-summary-card" style="display:none"></div>
       <div class="hist" style="border-top:none">
         <div class="hist-timeline" id="hist-list-page">
           <div class="hist-empty">
-        <div class="hist-empty-icon">📋</div>
-        Nenhuma modificação ainda.<br>Execute uma ação para ver o extrato.
-      </div>
+            <div class="hist-empty-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+                <path d="M12 7v5l4 2"/>
+              </svg>
+            </div>
+            <div class="hist-empty-title">Sem otimizações ainda</div>
+            <div class="hist-empty-sub">Execute uma ação no plugin (detach, remoção, dissolve...) e ela aparecerá aqui como extrato.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1862,7 +2112,7 @@ html.dark{
     <button class="btn-hidden-quick visible" id="btn-hidden-quick" onclick="runHiddenQuick()" type="button" style="display:none">Remover layers ocultas</button>
     <button class="btn-primary btn-action-danger" id="btn-loose-action" onclick="runRemoveLoosePages()" type="button" disabled style="display:none">Remover páginas</button>
     <!-- novo scan sempre disponível -->
-    <button class="btn-novo-scan" onclick="goScan()" type="button">↺ Novo scan</button>
+    <button class="btn-primary" onclick="goScan()" type="button">↺ Novo scan</button>
   </div>
   <!-- mem bar e histórico -->
   <div class="mem-bar">
@@ -1887,7 +2137,72 @@ html.dark{
 </div>
 <!-- ════ FIM STICKY ACTIONS ════ -->
 
+<!-- ── v2.7: modal de confirmação de limpeza — filho direto do body para escapar de overflow/stacking contexts ── -->
+<div class="hist-clear-modal" id="hist-clear-modal">
+  <div class="hist-modal-backdrop" onclick="closeClearModal()"></div>
+  <div class="hist-modal-card">
+    <div class="hist-modal-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--rev-danger)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6"/><path d="M14 11v6"/>
+      </svg>
+    </div>
+    <div class="hist-modal-title">Limpar histórico?</div>
+    <div class="hist-modal-sub">Todas as entradas serão removidas permanentemente. Esta ação não pode ser desfeita.</div>
+    <div class="hist-modal-btns">
+      <button class="hist-modal-btn-danger" onclick="closeClearModal();_clearHistoryNow()">Limpar tudo</button>
+      <button class="hist-modal-btn-cancel" onclick="closeClearModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <script>
+/* ════════════════════════════════════════════════════════════════
+   Optimize Toolkit — ui.html v2.5.3
+   Mudanças v2.5.3 (reagrupamento de IA — Páginas soltas dentro de Protótipo):
+   - G-01: removido item "Páginas soltas" do menu home (era top-level)
+   - G-02: nova seção "Estrutura do arquivo" em page-proto com Páginas
+     soltas como adv-item de navegação (botão "Abrir" → page-loose-pages)
+   - G-03: navBack de page-loose-pages volta para Protótipo (não home)
+   - G-04: badge de contagem aparece na adv-item quando há cache
+   Mudanças v2.5.2 (polimento da página de Histórico):
+   - H-02: 7 ícones SVG faltantes adicionados (triggers, scroll, vectors,
+     singleGroups, deepNodes, covered, loosePages). Antes caíam em texto.
+   - H-03: tints semânticos de cor para todas as 14 categorias em
+     light + dark theme.
+   - H-04: summary card no topo da página de Histórico com agregados
+     em Aeonik Pro (total de operações, KB liberados, score acumulado).
+   - H-05: botão "Limpar histórico" no topbar (com confirmação inline).
+   - H-06: empty state polido — ícone SVG grande, headline em Aeonik,
+     copy em Inter — segue padrão Revolut.
+   Mudanças v2.5.1:
+   - H-01: histórico persistido entre sessões via figma.clientStorage
+     (UI envia 'save_history' a cada entrada; recebe 'history_restore'
+     no ui_ready). Antes só vivia em RAM da UI.
+   - addHistory ganhou parâmetro _restoreTimestamp opcional para
+     reconstruir entradas com data/hora originais
+   - _restoreHistory(entries) limpa o painel e re-renderiza tudo
+   - Ícone do botão Histórico trocado de "rotate-ccw" para "history"
+     (relógio com seta — semântica de tempo + reversão clara)
+   Mudanças v2.5 (performance percebida):
+   - F-01: detach_done/remove_done filtram cache localmente em vez de
+     re-escanear (corta ~50% do tempo percebido por ação)
+   - F-02: init() mostra view-home imediatamente; scan roda em background
+   - F-03 (suporte): handler de scan_result distingue fromCache e pula
+     atualização de baseline para evitar "saved" enganoso
+   - remove_loose_pages_done filtra cache local em vez de re-escanear
+   Mudanças v2.4:
+   - B-01: removido bloco duplicado page-advanced (IDs duplicados)
+   - B-03/B-11: scoreStatus alinhado com a PRD (80/60/35)
+   - B-05: HIST_CFG ganhou entries para effects/orphans/overrides/
+           singleGroups/deepNodes/covered/loosePages
+   - B-06: removido setMode legado (referenciava IDs inexistentes)
+   - B-07: removido updateCompSetBanner (dead code)
+   - B-09: removido figma.currentPage.name na inicialização
+   - B-10: _cache['loose-pages'] declarado explicitamente
+   - B-12: runHiddenQuick reutiliza cache se válido
+   ════════════════════════════════════════════════════════════════ */
 var mode = 'comp';
 var allItems = [], selectedIds = {}, maxKb = 1;
 var _ldPrev = -1;
@@ -1896,9 +2211,17 @@ var _memCurrent  = 0;
 var _totalSaved  = 0;
 var _hiddenCount = 0;
 var _scoreData   = null; // dados para o score
-var VIEWS = ['view-splash','view-idle','view-loading','view-skeleton','view-home','view-progress','view-result'];
+var VIEWS = ['view-loading','view-skeleton','view-home','view-progress','view-result','view-idle'];
 var PAGES = ['page-comp','page-hidden','page-img','page-proto','page-history','page-info','page-loose-pages'];
-var _cache = { comp: null, hidden: null, img: null };
+var _cache = { comp: null, hidden: null, img: null, 'loose-pages': null }; // B-10
+// v2.5 perf: rastreia se a última ação foi 'all' (batch) ou 'selective'
+// para decidir como atualizar o cache local após detach_done/remove_done
+// sem precisar de re-scan. Setado em runAction/runDetachAll/runHiddenQuick.
+var _lastActionMode = null;
+var _lastLooseRemovedIds = []; // preserva IDs para filtragem em remove_loose_pages_done
+// v2.5.1: snapshot serializável das entradas de histórico para persistência
+// via figma.clientStorage. Ordem: mais recente primeiro. Limite 50 entradas.
+var _history = [];
 
 
 /* ── utilitários globais ── */
@@ -1977,8 +2300,9 @@ function calcScore(d) {
 
   // 6. Páginas — critério de arquivo dedicado ao teste
   // ≤2 páginas = ok (Cover + Protótipo). Doc Maze recomenda arquivo dedicado.
+  // B-11 (v2.4): alinhado com a PRD seção 5.1 — penalidade máxima 20, threshold > 3.
   var pages = d.pageCount || 1;
-  var pPages = pages > 5 ? 20 : pages > 3 ? 10 : pages > 2 ? 5 : 0;
+  var pPages = pages > 3 ? 20 : pages > 2 ? 10 : 0;
   score -= pPages;
   breakdown.push({ lbl:'Páginas no arquivo', val: pages, pen: pPages,
     hint: pPages === 0 ? 'ok' : pPages >= 10 ? 'bad' : 'mid' });
@@ -2001,9 +2325,11 @@ function calcScore(d) {
 }
 
 function scoreStatus(s) {
-  if (s >= 85) return { cls:'ready', lbl:'Pronto', color:'#16a34a' };
-  if (s >= 65) return { cls:'warn',  lbl:'Otimizar', color:'#ca8a04' };
-  if (s >= 40) return { cls:'heavy', lbl:'Pesado',   color:'#ea580c' };
+  // B-03 (v2.4): thresholds alinhados com a PRD seção 5.2.
+  // Antes: 85/65/40. PRD documenta meta de "≥ 80" para faixa Pronto.
+  if (s >= 80) return { cls:'ready', lbl:'Pronto',   color:'#16a34a' };
+  if (s >= 60) return { cls:'warn',  lbl:'Revisar',  color:'#ca8a04' };
+  if (s >= 35) return { cls:'heavy', lbl:'Pesado',   color:'#ea580c' };
   return             { cls:'crit',  lbl:'Crítico',  color:'#dc2626' };
 }
 
@@ -2011,6 +2337,9 @@ var _scoreHistory = []; // histórico de scores — persiste entre trocas de aba
 var _lastScore = null;  // último score calculado
 
 function renderScore(data) {
+  // remove shimmer indeterminado do scan
+  var sp = document.querySelector('.stb-scan-pulse');
+  if(sp) sp.remove();
   _scoreData = data;
   var result = calcScore(data);
   var s = result.score;
@@ -2068,6 +2397,33 @@ function renderScoreHistory() {
   });
 }
 
+/* ── v2.7: sticky topbar — shadow ao scrollar ────────────────
+   Cada .page-scroll tem um .page-topbar como irmão anterior.
+   Quando o conteúdo rola, adiciona .is-scrolled no topbar.
+──────────────────────────────────────────────────────────── */
+function _initPageScrollListeners(){
+  var scrollers = document.querySelectorAll('.page-scroll');
+  for(var i = 0; i < scrollers.length; i++){
+    (function(scroller){
+      var topbar = scroller.parentElement && scroller.parentElement.querySelector('.page-topbar');
+      if(!topbar) return;
+      scroller.addEventListener('scroll', function(){
+        if(scroller.scrollTop > 2){
+          topbar.classList.add('is-scrolled');
+        } else {
+          topbar.classList.remove('is-scrolled');
+        }
+      }, { passive: true });
+    })(scrollers[i]);
+  }
+}
+/* dispara após o DOM estar pronto */
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', _initPageScrollListeners);
+} else {
+  _initPageScrollListeners();
+}
+
 function toggleScoreBreakdown() {
   var chev = $('stb-chevron');
   if(chev) chev.classList.toggle('open');
@@ -2091,8 +2447,14 @@ function toggleScoreHistory() {
 function quickScoreEstimate(pageCount) {
   // Não zera _lastScore nem _scoreData para manter histórico entre scans
   var badge = $('score-status');
-  if (badge) { badge.textContent = 'escaneando'; badge.className = 'stb-badge'; }
-  // mantém barra no último valor conhecido durante o scan
+  if (badge) { badge.textContent = 'escaneando'; badge.className = 'stb-badge scanning'; }
+  // injeta shimmer indeterminado na barra durante o scan
+  var track = document.querySelector('.stb-track');
+  if(track && !track.querySelector('.stb-scan-pulse')){
+    var sp = document.createElement('div');
+    sp.className = 'stb-scan-pulse';
+    track.appendChild(sp);
+  }
 }
 
 function $(id){ return document.getElementById(id); }
@@ -2143,9 +2505,32 @@ function _updateActionBtns(id){
   // page-history, page-proto, page-info, views: nenhum botão de ação
 }
 
+/* ── v2.6: FAQ accordion — "Como funciona" ─────────────────
+   Clica no item: se já aberto, fecha. Senão, fecha todos e abre.
+   Acessível via teclado (button nativo).
+──────────────────────────────────────────────────────────── */
+function toggleFaq(el){
+  var section = el.parentElement;
+  var items = section.querySelectorAll('.info-faq-item');
+  var wasOpen = el.classList.contains('open');
+  for(var i=0;i<items.length;i++){ items[i].classList.remove('open'); }
+  if(!wasOpen) el.classList.add('open');
+}
+
+/* ── v2.6: badge do botão histórico no header ─────────────
+   Acende o ponto verde quando há entradas no histórico.
+──────────────────────────────────────────────────────────── */
+function _updateHistBadge(){
+  var badge = document.getElementById('hist-hdr-badge');
+  if(!badge) return;
+  badge.style.display = (_history && _history.length > 0) ? 'block' : 'none';
+}
+
 function navTo(m){
   _prevMode = mode;
   mode = m;
+  // garante que nenhuma page carrega com animação de "voltar"
+  PAGES.forEach(function(p){ var el=$(p); if(el) el.classList.remove('back-enter'); });
   if(m==='history'){ showOnly('page-history'); return; }
   if(m==='info')   { showOnly('page-info');    return; }
   if(m==='proto')        { showOnly('page-proto');       return; }
@@ -2198,6 +2583,13 @@ function navBack(){
   _ldClearAll();
   _ldDone = true;
   showOnly('view-home');
+  // anima o home entrando pela esquerda (semântica de "voltar")
+  var home = $('view-home');
+  if(home){
+    home.classList.remove('_nav-back'); void home.offsetWidth; // reflow para re-disparar
+    home.classList.add('_nav-back');
+    setTimeout(function(){ if(home) home.classList.remove('_nav-back'); }, 350);
+  }
 }
 
 /* invalidar cache de uma seção específica após operação */
@@ -2208,12 +2600,7 @@ function _invalidateCache(section){
   if(section === 'loose-pages'  || section === 'all') _cache['loose-pages']    = null;
 }
 function setMode(m){ navTo(m); }
-var _origSetMode = setMode;
-/* splash removido — vai direto para loading para eliminar latência
-   O loading progressivo já dá feedback contextual adequado        */
-function showSplash(onReady){
-  onReady(); // chama imediatamente, sem animação
-}
+/* B-13 (v2.4): showSplash removido — substituído por chamada direta no init() */
 function showList(){
   VIEWS.forEach(function(v){ $(v).style.display='none'; });
   $('view-list').style.display = 'block';
@@ -2278,12 +2665,26 @@ function updateMem(mem){
   }
 }
 
-/* ── configuração do histórico ── */
+/* ── configuração do histórico ──
+   B-05 (v2.4): adicionadas entries para cada operação avançada para que o
+   ícone e o label do extrato bancário reflitam a ação real (antes tudo
+   caía em 'detach' ou 'hidden' e o histórico ficava ilegível).
+*/
 var HIST_CFG = {
-  detach:   { label:'Detach de componentes', icon:'⛓',  unitFn:function(n){ return n+' instância'+(n!==1?'s':'')+' desvinculada'+(n!==1?'s':''); } },
-  hidden:   { label:'Layers ocultas',        icon:'◉',  unitFn:function(n){ return n+' layer'+(n!==1?'s':'')+' removida'+(n!==1?'s':''); } },
-  img:      { label:'Compressão de imagens', icon:'⊡',  unitFn:function(n){ return n+' imagem'+(n!==1?'ns':'')+' comprimida'+(n!==1?'s':''); } },
-  dissolve: { label:'Dissolve aplicado',     icon:'◎',  unitFn:function(n){ return n+' transição'+(n!==1?'ões':'')+'  padronizada'+(n!==1?'s':''); } },
+  detach:        { label:'Detach de componentes',     icon:'⛓',  unitFn:function(n){ return n+' instância'+(n!==1?'s':'')+' desvinculada'+(n!==1?'s':''); } },
+  hidden:        { label:'Layers ocultas removidas',  icon:'◉',  unitFn:function(n){ return n+' layer'+(n!==1?'s':'')+' removida'+(n!==1?'s':''); } },
+  img:           { label:'Compressão de imagens',     icon:'⊡',  unitFn:function(n){ return n+' imagem'+(n!==1?'ns':'')+' comprimida'+(n!==1?'s':''); } },
+  dissolve:      { label:'Dissolve aplicado',         icon:'◎',  unitFn:function(n){ return n+' transição'+(n!==1?'ões':'')+' padronizada'+(n!==1?'s':''); } },
+  effects:       { label:'Efeitos pesados removidos', icon:'✦',  unitFn:function(n){ return n+' efeito'+(n!==1?'s':'')+' removido'+(n!==1?'s':''); } },
+  orphans:       { label:'Frames órfãos removidos',   icon:'⊠',  unitFn:function(n){ return n+' frame'+(n!==1?'s':'')+' removido'+(n!==1?'s':''); } },
+  overrides:     { label:'Overrides limpos',          icon:'✎',  unitFn:function(n){ return n+' instância'+(n!==1?'s':'')+' com overrides limpos'; } },
+  triggers:      { label:'Triggers convertidos',      icon:'↻',  unitFn:function(n){ return n+' interaç'+(n!==1?'ões':'ão')+' convertida'+(n!==1?'s':''); } },
+  scroll:        { label:'Scroll desnecessário',      icon:'↕',  unitFn:function(n){ return n+' frame'+(n!==1?'s':'')+' com scroll removido'; } },
+  vectors:       { label:'Vetores simplificados',     icon:'△',  unitFn:function(n){ return n+' vetor'+(n!==1?'es':'')+' simplificado'+(n!==1?'s':''); } },
+  singleGroups:  { label:'Grupos dissolvidos',        icon:'⊟',  unitFn:function(n){ return n+' grupo'+(n!==1?'s':'')+' dissolvido'+(n!==1?'s':''); } },
+  deepNodes:     { label:'Nós achatados',             icon:'≡',  unitFn:function(n){ return n+' nó'+(n!==1?'s':'')+' achatado'+(n!==1?'s':''); } },
+  covered:       { label:'Layers cobertas removidas', icon:'⬚',  unitFn:function(n){ return n+' layer'+(n!==1?'s':'')+' coberta'+(n!==1?'s':'')+' removida'+(n!==1?'s':''); } },
+  loosePages:    { label:'Páginas soltas removidas',  icon:'▣',  unitFn:function(n){ return n+' página'+(n!==1?'s':'')+' removida'+(n!==1?'s':''); } }
 };
 // aliases para compatibilidade
 var HIST_LABELS = {};
@@ -2310,12 +2711,45 @@ var HIST_ICONS = {
   orphans:   '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="17.5" y1="17.5" x2="17.5" y2="17.5" stroke-width="3"/></svg>',
   effects:   '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
   overrides: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  // v2.5.2: 7 ícones que faltavam — agora todas as 14 categorias têm SVG.
+  triggers:     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 9 5 12 1.8-5.2L21 14Z"/><path d="M7.2 2.2 8 5.1"/><path d="m5.1 8-2.9-.8"/><path d="M14 4.1 12 6"/><path d="m6 12-1.9 2"/></svg>',
+  scroll:       '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/><path d="m5 12 7-7 7 7"/></svg>',
+  vectors:      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 22 2 22"/></svg>',
+  singleGroups: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="12" cy="12" r="3"/></svg>',
+  deepNodes:    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>',
+  covered:      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><rect x="7" y="7" width="14" height="14" rx="2" opacity=".4"/></svg>',
+  loosePages:   '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>'
 };
 
-function addHistory(action, done, hiddenDone, memAfter, memBefore, extraData){
+// v2.5.1: limpa o painel e re-renderiza todas as entradas salvas em ordem
+// cronológica (mais antiga primeiro → grupos por data se montam corretamente).
+function _restoreHistory(entries) {
+  if (!entries || !entries.length) return;
+  _history = entries.slice(0, 50); // hard-cap defensivo
+  var list = $('hist-list-page');
+  if (list) list.innerHTML = ''; // remove placeholder vazio
+  // re-renderiza do mais antigo para o mais novo (cada chamada faz unshift no DOM)
+  for (var i = _history.length - 1; i >= 0; i--) {
+    var e = _history[i];
+    // chamamos addHistory com isRestore=true (timestamp original) — não persiste
+    // de novo nem altera _history (ele já está populado acima).
+    var preserved = _history.slice();
+    addHistory(e.action, e.done, e.hiddenDone, e.memAfter, e.memBefore, e.extraData, e.timestamp);
+    _history = preserved; // restaura — addHistory faz unshift no isRestore=false
+  }
+  // v2.5.2: garante que summary aparece mesmo quando addHistory é chamado em restore
+  _renderHistorySummary();
+  // v2.6: acende badge no botão do header
+  _updateHistBadge();
+}
+
+function addHistory(action, done, hiddenDone, memAfter, memBefore, extraData, _restoreTimestamp){
   if(!done && !hiddenDone) return;
-  var now  = new Date();
-  var time = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  // v2.5.1: _restoreTimestamp permite reconstruir entradas salvas com
+  // data/hora originais (sem persistir de novo).
+  var isRestore = !!_restoreTimestamp;
+  var now  = isRestore ? new Date(_restoreTimestamp) : new Date();
+  var time = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
   var dateLabel = _histDateLabel(now);
 
   var saved    = (memBefore>0 && memAfter) ? Math.max(0, memBefore - memAfter.pageKb) : 0;
@@ -2368,6 +2802,31 @@ function addHistory(action, done, hiddenDone, memAfter, memBefore, extraData){
     chipHtml += '<span class="hist-chip">Score: '+sA+'</span>';
   }
 
+  // v2.5.1: persiste a entrada para sobreviver ao fechamento do plugin.
+  // Inclui scoreBefore/After já computados para que o chip seja idêntico
+  // após restore (não recalcula com _scoreData stale).
+  if (!isRestore) {
+    var persistedExtra = {};
+    if (extraData) {
+      for (var k in extraData) if (extraData.hasOwnProperty(k)) persistedExtra[k] = extraData[k];
+    }
+    if (typeof sB === 'number') persistedExtra.scoreBefore = sB;
+    if (typeof sA === 'number') persistedExtra.scoreAfter  = sA;
+    _history.unshift({
+      action:     action,
+      done:       done,
+      hiddenDone: hiddenDone || 0,
+      memAfter:   memAfter || null,
+      memBefore:  memBefore || 0,
+      extraData:  persistedExtra,
+      timestamp:  now.getTime()
+    });
+    if (_history.length > 50) _history.pop();
+    try {
+      parent.postMessage({ pluginMessage: { type: 'save_history', entries: _history } }, '*');
+    } catch (_) {}
+  }
+
   var list = $('hist-list-page');
   if(!list) return;
 
@@ -2391,19 +2850,41 @@ function addHistory(action, done, hiddenDone, memAfter, memBefore, extraData){
     list.insertBefore(existingGroup, list.firstChild);
   }
 
-  /* cria a entrada */
+  /* v2.6: score impact — chip sempre visível quando há dados */
+  var scoreChipHtml = '';
+  if(typeof sB==='number' && typeof sA==='number'){
+    if(sA > sB){
+      scoreChipHtml = '<span class="hist-chip positive">↑ Score '+sB+' → '+sA+' <b style="font-weight:700">+' + (sA-sB) + ' pts</b></span>';
+    } else if(sA === sB){
+      scoreChipHtml = '<span class="hist-chip">Score mantido · '+sA+'</span>';
+    }
+  }
+  // chips combinados: tamanho + score
+  var allChips = chipHtml + scoreChipHtml;
+
+  /* v2.7: lado direito — valor principal (sem timestamp redundante) */
+  var rightHtml =
+    '<div class="hist-right">'+
+      (amountCls==='saved'
+        ? '<div class="hist-amount saved">'+amountStr+'</div>'
+        : (amountCls==='neutral' && done > 0
+          ? '<div class="hist-amount neutral">'+done+' itens</div>'
+          : ''))+
+    '</div>';
+
+  /* cria a entrada — v2.7: timestamp monospace no topo-esquerdo */
   var entry = document.createElement('div');
   entry.className = 'hist-entry';
   entry.innerHTML =
-    '<div class="hist-icon '+action+'">'+iconSvg+'</div>'+
-    '<div class="hist-info">'+
-      '<div class="hist-action">'+cfg.label+'</div>'+
-      '<div class="hist-meta">'+metaStr+'</div>'+
-      (chipHtml ? '<div style="margin-top:5px">'+chipHtml+'</div>' : '')+
-    '</div>'+
-    '<div class="hist-right">'+
-      (amountCls==='saved' ? '<div class="hist-amount saved">'+amountStr+'</div>' : '')+
-      '<span class="hist-ts">'+time+'</span>'+
+    '<div class="hist-ts-header">'+time+'</div>'+
+    '<div class="hist-entry-body">'+
+      '<div class="hist-icon '+action+'">'+iconSvg+'</div>'+
+      '<div class="hist-info">'+
+        '<div class="hist-action">'+cfg.label+'</div>'+
+        '<div class="hist-meta">'+metaStr+'</div>'+
+        (allChips ? '<div class="hist-chips-row">'+allChips+'</div>' : '')+
+      '</div>'+
+      rightHtml+
     '</div>';
 
   /* insere no início do grupo (mais recente no topo) */
@@ -2413,6 +2894,131 @@ function addHistory(action, done, hiddenDone, memAfter, memBefore, extraData){
   /* limita total */
   var allEntries = list.querySelectorAll('.hist-entry');
   if(allEntries.length > 20) allEntries[allEntries.length-1].remove();
+
+  /* v2.5.2: atualiza summary card e botão Limpar */
+  _renderHistorySummary();
+  /* v2.6: acende badge no botão do header */
+  _updateHistBadge();
+}
+
+/* v2.5.2: agrega totais do _history e renderiza o card de resumo no topo.
+   Aeonik Pro para o número grande (operações), teal para KB liberados,
+   chip discreto para o ganho de score acumulado. */
+function _renderHistorySummary(){
+  var card = $('hist-summary-card');
+  var btnClear = $('btn-clear-history');
+  if(!card) return;
+
+  if(!_history || !_history.length){
+    card.style.display = 'none';
+    if(btnClear) btnClear.style.display = 'none';
+    return;
+  }
+
+  var totalOps = _history.length;
+  var totalSavedKb = 0;
+  var scoreDelta = 0;
+  for(var i = 0; i < _history.length; i++){
+    var e = _history[i];
+    if(e.memBefore && e.memAfter && typeof e.memAfter.pageKb === 'number'){
+      totalSavedKb += Math.max(0, e.memBefore - e.memAfter.pageKb);
+    }
+    if(e.extraData && typeof e.extraData.scoreBefore === 'number' && typeof e.extraData.scoreAfter === 'number'){
+      var d = e.extraData.scoreAfter - e.extraData.scoreBefore;
+      if(d > 0) scoreDelta += d;
+    }
+  }
+
+  /* score de → para: oldest.scoreBefore → newest.scoreAfter */
+  var oldest = _history[_history.length - 1];
+  var newest = _history[0];
+  var scoreFrom = (oldest && oldest.extraData && typeof oldest.extraData.scoreBefore === 'number')
+    ? oldest.extraData.scoreBefore : null;
+  var scoreTo   = (newest && newest.extraData && typeof newest.extraData.scoreAfter  === 'number')
+    ? newest.extraData.scoreAfter  : null;
+
+  /* mensagem conversacional baseada na evolução */
+  var praise;
+  if(scoreFrom !== null && scoreTo !== null && scoreTo > scoreFrom){
+    var gain = scoreTo - scoreFrom;
+    if(gain >= 40)      praise = 'Uau, que evolução! Arquivo <em>muito mais limpo.</em>';
+    else if(gain >= 20) praise = 'Ótimo trabalho! O arquivo <em>melhorou muito.</em>';
+    else if(gain >= 10) praise = 'Bom progresso! Cada otimização <em>conta.</em>';
+    else                praise = 'Arquivo melhorado! <em>Continue assim.</em>';
+  } else if(totalSavedKb > 0){
+    praise = 'Arquivo mais leve! <em>' + fmtSize(totalSavedKb) + ' liberados.</em>';
+  } else {
+    praise = 'Otimizações registradas. <em>Bom trabalho!</em>';
+  }
+
+  /* linha de score: mostra de→para quando possível */
+  var scoreStr, scoreCls;
+  if(scoreFrom !== null && scoreTo !== null){
+    scoreStr = 'Score ' + scoreFrom + ' <span class="hist-summary-arrow">→</span> ' + scoreTo;
+    scoreCls = scoreTo > scoreFrom ? 'hist-summary-score up' : 'hist-summary-score';
+  } else if(scoreDelta > 0){
+    scoreStr = '+' + scoreDelta + ' pts de score';
+    scoreCls = 'hist-summary-score up';
+  } else {
+    scoreStr = 'Score sem alteração';
+    scoreCls = 'hist-summary-score';
+  }
+
+  var savedStr = totalSavedKb > 0 ? '−' + fmtSize(totalSavedKb) : '—';
+
+  card.className = 'hist-summary';
+  card.style.display = 'flex';
+  card.innerHTML =
+    '<div class="hist-summary-praise">' + praise + '</div>' +
+    '<div class="hist-summary-row">' +
+      '<div>' +
+        '<div class="hist-summary-num">' + totalOps + '</div>' +
+        '<div class="hist-summary-lbl">' + (totalOps === 1 ? 'otimização' : 'otimizações') + '</div>' +
+      '</div>' +
+      '<div class="hist-summary-meta">' +
+        '<span class="hist-summary-saved">' + savedStr + '</span>' +
+        '<span class="' + scoreCls + '">' + scoreStr + '</span>' +
+      '</div>' +
+    '</div>';
+
+  if(btnClear) btnClear.style.display = 'flex';
+}
+
+/* v2.7: abre modal bottom-sheet de confirmação */
+function clearHistoryRequest(){
+  showClearModal();
+}
+function showClearModal(){
+  var modal = $('hist-clear-modal');
+  if(modal) modal.classList.add('open');
+}
+function closeClearModal(){
+  var modal = $('hist-clear-modal');
+  if(modal) modal.classList.remove('open');
+}
+
+function _clearHistoryNow(){
+  _history = [];
+  // persiste o estado vazio
+  try { parent.postMessage({ pluginMessage: { type: 'save_history', entries: [] } }, '*'); } catch(_) {}
+  // limpa o DOM e re-renderiza empty state
+  var list = $('hist-list-page');
+  if(list){
+    list.innerHTML =
+      '<div class="hist-empty">' +
+        '<div class="hist-empty-icon">' +
+          '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>' +
+            '<path d="M3 3v5h5"/>' +
+            '<path d="M12 7v5l4 2"/>' +
+          '</svg>' +
+        '</div>' +
+        '<div class="hist-empty-title">Sem otimizações ainda</div>' +
+        '<div class="hist-empty-sub">Execute uma ação no plugin (detach, remoção, dissolve...) e ela aparecerá aqui como extrato.</div>' +
+      '</div>';
+  }
+  _renderHistorySummary(); // esconde o card + o botão
+  _updateHistBadge();      // apaga o badge do header
 }
 
 /* ── hidden quick ── */
@@ -2428,7 +3034,16 @@ function updateHiddenBtn(count){
 }
 
 function runHiddenQuick(){
-  // scan rápido das ocultas e remove tudo
+  _lastActionMode = 'all'; // v2.5
+  // B-12 (v2.4): reutiliza cache se válido — evita re-scan de página inteira.
+  if(_cache.hidden && _cache.hidden.items && _cache.hidden.items.length){
+    var ids = _cache.hidden.items.map(function(i){ return i.id; });
+    showOnly('view-progress');
+    _resetProgress('layers removidas', ids.length);
+    parent.postMessage({ pluginMessage:{ type:'remove_hidden', ids:ids, scope:'page' } }, '*');
+    return;
+  }
+  // sem cache — escaneia primeiro e marca para remover tudo no callback
   parent.postMessage({ pluginMessage: { type: 'scan_hidden', scope: 'page' } }, '*');
   _quickRemoveAll = true;
 }
@@ -2721,6 +3336,7 @@ function updateSel(){
 
 /* ── run action ── */
 function runAction(){
+  _lastActionMode = 'selective'; // v2.5: para o handler atualizar cache local
   var ids=Object.keys(selectedIds); if(!ids.length) return;
   var isHid=mode==='hidden';
   showOnly('view-progress');
@@ -3009,15 +3625,35 @@ function _updateLooseSel(){
 
 function runRemoveLoosePages(){
   var ids=Object.keys(_looseSelected); if(!ids.length) return;
-  showOnly('view-loading');
-  startLoadingSequence('comp');
-  _invalidateCache('loose-pages');
+  // v2.5: preserva IDs para o handler filtrar cache local sem re-scan
+  _lastLooseRemovedIds = ids;
+  _lastActionMode = 'selective';
+  showOnly('view-progress');
+  _resetProgress('páginas removidas', ids.length);
   _looseSelected={};
   parent.postMessage({ pluginMessage:{ type:'remove_loose_pages', ids:ids } }, '*');
 }
 
 /* ── home helpers ── */
 function _updateHomeBadge(section, count){
+  // v2.5.3: badge-loose-pages não existe mais no home — alimenta adv-item em Protótipo.
+  if (section === 'loose-pages') {
+    var advCount = $('adv-loose-count');
+    if (advCount) {
+      if (typeof count === 'number' && count > 0) {
+        advCount.textContent = count;
+        advCount.className = 'adv-item-count';
+        advCount.style.display = 'inline-block';
+      } else if (count === 0) {
+        advCount.textContent = '0';
+        advCount.className = 'adv-item-count zero';
+        advCount.style.display = 'inline-block';
+      } else {
+        advCount.style.display = 'none';
+      }
+    }
+    return; // sem badge no home para essa seção
+  }
   var el = $('badge-'+section);
   if(!el) return;
   if(count === 0){
@@ -3034,7 +3670,6 @@ function _updateHomeBadge(section, count){
 function showHome(){
   showOnly('view-home');
 }
-function updateCompSetBanner(){ /* removido conforme solicitado */ }
 
 /* ── guardrail UI ── */
 var _prevMode = 'comp'; // aba antes do guardrail disparar
@@ -3054,46 +3689,10 @@ function showGuardrail(reason){
   if(el && msg){ msg.textContent = reason; el.classList.add('visible'); }
 }
 
-/* ── banner COMPONENT_SET ── */
-function updateCompSetBanner(hasCS){
-  var b = $('comp-set-banner');
-  if(b) b.className = hasCS ? 'visible' : '';
-}
-
-/* ── setMode expandido (typo + proto) ── */
-var _origSetMode = setMode;
-function setMode(m){
-  // salva aba anterior para restaurar se guardrail bloquear
-  _prevMode = mode;
-
-  // tabs
-  ['comp','hidden','img','proto'].forEach(function(k){
-    var t = $('tab-'+k); if(t) t.className = 'tab' + (m===k?' on':'');
-  });
-  $('tabs').style.display = 'flex';
-  mode = m;
-
-  // typo removida da v1.2
-  if(m === 'proto'){
-    VIEWS.forEach(function(v){ $(v).style.display='none'; });
-    $('view-proto').style.display = 'block';
-    var bb2 = $('bottom-bar'); if(bb2) bb2.className = 'visible';
-    return;
-  }
-  if(m === 'img'){
-    if(_cache.img){ _renderImgPage(_cache.img.items); return; }
-    showOnly('view-loading');
-    startLoadingSequence('images');
-    imgSelectedIds={};
-    parent.postMessage({ pluginMessage:{ type:'scan_images', scope:'page' } }, '*');
-    return;
-  }
-  if(_cache[m]){ _renderListPage(m, _cache[m].items); return; }
-  showOnly('view-loading');
-  startLoadingSequence(m === 'hidden' ? 'hidden' : 'comp');
-  selectedIds={}; _ldPrev=-1;
-  parent.postMessage({ pluginMessage:{ type: m==='comp'?'scan':'scan_hidden', scope:'page' } }, '*');
-}
+/* B-06/B-07 (v2.4): removidos setMode legado e updateCompSetBanner.
+   - setMode antigo referenciava IDs inexistentes (tab-comp, view-proto, etc.)
+   - updateCompSetBanner era dead code (banner COMPONENT_SET removido na v1.x)
+   A navegação agora é exclusivamente via navTo() definida no início do script. */
 
 /* ── outline text ── */
 function runOutlineText(){
@@ -3112,6 +3711,7 @@ parent.postMessage({ pluginMessage:{ type:'set_dissolve_direct' } }, '*');
 
 /* ── detach em lote ── */
 function runDetachAll(){
+  _lastActionMode = 'all'; // v2.5
   showOnly('view-progress');
   _resetProgress('instâncias desvinculadas', null);
   parent.postMessage({ pluginMessage:{ type:'detach_all' } }, '*');
@@ -3261,6 +3861,12 @@ window.onmessage=function(e){
     return;
   }
 
+  // v2.5.1: restaura histórico salvo entre sessões
+  if(msg.type==='history_restore'){
+    _restoreHistory(msg.entries || []);
+    return;
+  }
+
   if(msg.type==='outline_done'){
     if(msg.mem) updateMem(msg.mem);
     return;
@@ -3338,18 +3944,23 @@ window.onmessage=function(e){
     if(_scoreData && msg.mem){ var _sd2=Object.assign({},_scoreData); _sd2.totalNodes=msg.mem.pageNodes||_sd2.totalNodes; _sA=calcScore(_sd2).score; }
     addHistory('img', msg.done, 0, msg.mem, memBefore2, { savedKb:msg.savedKb||0, fromKb:_fromKb, toKb:_toKb, scoreBefore:_sB, scoreAfter:_sA });
     if(msg.compressedMap) markCompressedItems(msg.compressedMap);
+    // marca badge-img como concluído se houve compressão real
+    if((msg.savedKb||0) > 0 || msg.done > 0) _updateHomeBadge('img', 0);
     _invalidateCache('img');
-    // vai direto ao home — sem re-scan de imagens (getBytesAsync em 53 imgs é lento)
-    // o badge será atualizado na próxima entrada na seção
     showOnly('view-home');
     return;
   }
 
   if(msg.type==='scan_result'){
-    stopLoadingSequence((msg.items||[]).length);
-    if(msg.mem) updateMem(msg.mem);
-    if(_memBaseline===0 && msg.mem) _memBaseline=msg.mem.pageKb;
-    updateHiddenBtn(msg.hiddenCount||0);
+    // v2.5 (F-03): se for cache, mostrar info imediato mas pular updateMem
+    // (baseline ficaria errado e o "saved" mentiria por 1s até fresh chegar)
+    var fromCache = !!msg.fromCache;
+    if(!fromCache){
+      stopLoadingSequence((msg.items||[]).length);
+      if(msg.mem) updateMem(msg.mem);
+      if(_memBaseline===0 && msg.mem) _memBaseline=msg.mem.pageKb;
+      updateHiddenBtn(msg.hiddenCount||0);
+    }
     _cache.comp = { items: msg.items||[], ts: Date.now() };
     if(!_scoreData) _scoreData = { instances:0, hidden:0, images:[], topFrames:0, totalNodes:0, customFonts:0, pageCount:1, dissolveOk:false, badTriggers:0 };
     _scoreData.instances  = (msg.items||[]).length;
@@ -3359,12 +3970,12 @@ window.onmessage=function(e){
     _scoreData.pageCount  = msg.mem ? msg.mem.pageCount : _scoreData.pageCount;
     _scoreData.customFonts= msg.customFonts || 0;
     renderScore(_scoreData);
-    // pré-carrega cache para badges
     _updateHomeBadge('comp', (msg.items||[]).length);
     _updateHomeBadge('hidden', msg.hiddenCount||0);
-    // se veio de navTo('comp') vai para page-comp; do scan inicial vai pro home
+    // v2.5: cache não muda a navegação — UI continua onde está
+    if(fromCache){ return; }
+    // fresh scan: roteamento normal
     if(mode === 'comp' && _prevMode !== 'comp'){
-      // scan inicial — vai para home com badges
       showOnly('view-home');
     } else if(mode === 'comp'){
       _renderListPage('comp', msg.items||[]);
@@ -3418,14 +4029,14 @@ window.onmessage=function(e){
   if(msg.type==='orphans_done'){
     if(msg.mem) updateMem(msg.mem);
     var r=$('res-orphans'); if(r) r.innerHTML='<b>'+msg.done+' frame(s) removido(s)</b>';
-    addHistory('detach', msg.done, 0, msg.mem, _memCurrent);
+    addHistory('orphans', msg.done, 0, msg.mem, _memCurrent); // B-05
     return;
   }
   if(msg.type==='clean_overrides'||msg.type==='overrides_done'){
     if(msg.type==='overrides_done'){
       if(msg.mem) updateMem(msg.mem);
       var r2=$('res-overrides'); if(r2) r2.innerHTML='<b>'+msg.done+' instância(s) limpas</b>';
-      addHistory('detach', msg.done, 0, msg.mem, _memCurrent);
+      addHistory('overrides', msg.done, 0, msg.mem, _memCurrent); // B-05
     }
     return;
   }
@@ -3441,6 +4052,7 @@ window.onmessage=function(e){
   if(msg.type==='triggers_done'){
     if(msg.mem) updateMem(msg.mem);
     var r3=$('res-triggers'); if(r3) r3.innerHTML='<b>'+msg.done+' interação(ões) corrigidas</b>';
+    addHistory('triggers', msg.done, 0, msg.mem, _memCurrent); // B-05
     return;
   }
   if(msg.type==='scan_loops_result'){
@@ -3461,6 +4073,7 @@ window.onmessage=function(e){
   if(msg.type==='scroll_done'){
     if(msg.mem) updateMem(msg.mem);
     var r4=$('res-scroll'); if(r4) r4.innerHTML='<b>'+msg.done+' frame(s) corrigidos</b>';
+    addHistory('scroll', msg.done, 0, msg.mem, _memCurrent); // B-05
     return;
   }
   if(msg.type==='scan_effects_result'){
@@ -3475,7 +4088,7 @@ window.onmessage=function(e){
   if(msg.type==='effects_done'){
     if(msg.mem) updateMem(msg.mem);
     var r5=$('res-effects'); if(r5) r5.innerHTML='<b>'+msg.done+' nó(s) com efeitos removidos</b>';
-    addHistory('dissolve', msg.done, 0, msg.mem, _memCurrent);
+    addHistory('effects', msg.done, 0, msg.mem, _memCurrent); // B-05
     return;
   }
   if(msg.type==='scan_vectors_result'){
@@ -3490,6 +4103,7 @@ window.onmessage=function(e){
   if(msg.type==='vectors_done'){
     if(msg.mem) updateMem(msg.mem);
     var r6=$('res-vectors'); if(r6) r6.innerHTML='<b>'+msg.done+' vetor(es) simplificados</b>';
+    addHistory('vectors', msg.done, 0, msg.mem, _memCurrent); // B-05
     return;
   }
   if(msg.type==='flow_score_result'){
@@ -3534,7 +4148,7 @@ window.onmessage=function(e){
   if(msg.type==='single_groups_done'){
     if(msg.mem) updateMem(msg.mem);
     var rsg=$('res-single-groups'); if(rsg) rsg.innerHTML='<b>'+msg.done+' grupo(s) dissolvido(s)</b>';
-    addHistory('detach', msg.done, 0, msg.mem, _memCurrent);
+    addHistory('singleGroups', msg.done, 0, msg.mem, _memCurrent); // B-05
     return;
   }
 
@@ -3556,7 +4170,7 @@ window.onmessage=function(e){
   if(msg.type==='deep_nodes_done'){
     if(msg.mem) updateMem(msg.mem);
     var rdn=$('res-deep-nodes'); if(rdn) rdn.innerHTML='<b>'+msg.done+' nó(s) achatado(s)</b>';
-    addHistory('detach', msg.done, 0, msg.mem, _memCurrent);
+    addHistory('deepNodes', msg.done, 0, msg.mem, _memCurrent); // B-05
     return;
   }
 
@@ -3572,7 +4186,7 @@ window.onmessage=function(e){
   if(msg.type==='covered_done'){
     if(msg.mem) updateMem(msg.mem);
     var rcov=$('res-covered'); if(rcov) rcov.innerHTML='<b>'+msg.done+' layer(s) removida(s)</b>';
-    addHistory('hidden', msg.done, 0, msg.mem, _memCurrent);
+    addHistory('covered', msg.done, 0, msg.mem, _memCurrent); // B-05
     return;
   }
 
@@ -3587,13 +4201,22 @@ window.onmessage=function(e){
 
   if(msg.type==='remove_loose_pages_done'){
     if(msg.mem) updateMem(msg.mem);
-    addHistory('hidden', msg.done, 0, msg.mem, _memCurrent);
-    _invalidateCache('all'); // páginas removidas afetam o score de páginas
+    addHistory('loosePages', msg.done, 0, msg.mem, _memCurrent); // B-05
     if(_scoreData){ _scoreData.pageCount = Math.max(1,(_scoreData.pageCount||1)-msg.done); renderScore(_scoreData); }
-    // re-scan das páginas soltas
-    showOnly('view-loading');
-    startLoadingSequence('comp');
-    parent.postMessage({ pluginMessage:{ type:'scan_loose_pages' } }, '*');
+
+    // v2.5 (F-01): filtra cache local em vez de re-scan
+    var cachedLP = _cache['loose-pages'];
+    var remainingLP = [];
+    if(cachedLP && cachedLP.items){
+      var removedSet = {};
+      _lastLooseRemovedIds.forEach(function(id){ removedSet[id] = true; });
+      remainingLP = cachedLP.items.filter(function(it){ return !removedSet[it.id]; });
+      _cache['loose-pages'] = { items: remainingLP, ts: Date.now() };
+    }
+    _lastLooseRemovedIds = [];
+    _updateHomeBadge('loose-pages', remainingLP.length);
+    _renderLoosePagesPage(remainingLP);
+    showOnly('page-loose-pages');
     return;
   }
 
@@ -3632,51 +4255,65 @@ window.onmessage=function(e){
   }
 
   if(msg.type==='detach_done'||msg.type==='remove_done'){
+    // v2.5 (F-01): NÃO re-escanear — atualiza cache localmente.
+    // Corta ~50% do tempo percebido por operação.
     var memBefore = _memCurrent;
     if(msg.mem) updateMem(msg.mem);
-    if(_scoreData){
-      if(mode==='hidden') _scoreData.hidden = 0;
-      else _scoreData.instances = 0;
-      renderScore(_scoreData);
-    }
     var action = mode==='hidden' ? 'hidden' : 'detach';
     addHistory(action, msg.done, 0, msg.mem, memBefore);
     if(msg.hiddenCount && msg.hiddenCount > 0) updateHiddenBtn(msg.hiddenCount);
-    // guarda stats da operação para o empty state
+
+    var returnMode = mode;
+    var cached = _cache[returnMode];
+    var remaining = [];
+    if(cached && cached.items){
+      if(_lastActionMode === 'all'){
+        remaining = []; // batch: removeu tudo
+      } else {
+        // selective: filtra os que estavam selecionados
+        remaining = cached.items.filter(function(it){ return !selectedIds[it.id]; });
+      }
+      _cache[returnMode] = { items: remaining, ts: Date.now() };
+    }
+
+    // atualiza score com a nova contagem real
+    if(_scoreData){
+      if(returnMode==='hidden') _scoreData.hidden = remaining.length;
+      else _scoreData.instances = remaining.length;
+      renderScore(_scoreData);
+    }
+    _updateHomeBadge(returnMode, remaining.length);
+
     _lastOpStats = {
       done: msg.done,
-      action: mode,
+      action: returnMode,
       memBefore: memBefore,
       memAfter: msg.mem,
       saved: memBefore > 0 && msg.mem ? Math.max(0, memBefore - msg.mem.pageKb) : 0,
     };
-    // invalida só o cache da seção atual e re-escaneia
-    var returnMode = mode;
-    _invalidateCache(returnMode);
-    showOnly('view-loading');
-    startLoadingSequence(returnMode === 'hidden' ? 'hidden' : 'comp');
-    selectedIds = {}; _ldPrev = -1;
-    var msgType = returnMode === 'hidden' ? 'scan_hidden' : 'scan';
-    parent.postMessage({ pluginMessage:{ type: msgType, scope:'page' } }, '*');
+
+    // re-renderiza a página com a lista filtrada (mostra empty state se vazio)
+    _renderListPage(returnMode, remaining);
+    selectedIds = {};
+    _lastActionMode = null;
+    showOnly(returnMode === 'hidden' ? 'page-hidden' : 'page-comp');
     return;
   }
 };
 
-// init — splash → loading → scan
-try{ $('hdr-pg').textContent = figma.currentPage.name; }catch(e){}
-showSplash(function(){
-  // DOM pronto: prepara loading e avisa o code.js para iniciar o scan
-  _ldPrev=-1;
-  mode='comp';
-  var tc=$('tab-comp');   if(tc) tc.className='tab on';
-  var th=$('tab-hidden'); if(th) th.className='tab';
-  var ti=$('tab-img');    if(ti) ti.className='tab';
-  showOnly('view-loading');
-  startLoadingSequence('comp');
+// init — v2.5 (F-02): mostra view-home imediatamente. Antes ia para
+// view-loading e bloqueava ~1-3s até o scan completar. Agora a estrutura
+// da home aparece em < 50ms; badges começam como "—" e ganham valores
+// quando scan_result chega (cache instantâneo via F-03 ou fresh em ~1s).
+(function init(){
+  _ldPrev = -1;
+  mode = 'comp';
+  showOnly('view-home');
+  // marca o badge do score como "Escaneando" enquanto aguarda resultado
   quickScoreEstimate(1);
   // sinaliza ao code.js que a UI está pronta para receber resultados
   parent.postMessage({ pluginMessage: { type: 'ui_ready' } }, '*');
-});
+})();
 </script>
 </body>
-</html>
+</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
